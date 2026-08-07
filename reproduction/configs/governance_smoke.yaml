@@ -27,12 +27,19 @@ protocols:
     test_generators: [rounded]
 
 prevalence_rates: [0.0, 0.05, 0.10, 0.25, 0.50]
+contamination_modes: [replace]
 bags_per_rate: 1
 utility_bags_per_rate: 1
 bag_size: 120
 detectors: [char3gram, c2st_lr]
 quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
 primary_quantifier: pacc
+valuation:
+  enabled: false
+  methods: []
+  bags_per_rate: 0
+  sample_limit: 80
+  oob_estimators: 20
 
 data:
   mode: synthetic_fixture

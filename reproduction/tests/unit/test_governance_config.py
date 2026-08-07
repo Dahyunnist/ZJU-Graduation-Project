@@ -27,12 +27,14 @@ def valid_governance_config() -> dict:
             },
         },
         "prevalence_rates": [0, .05, .10, .5],
+        "contamination_modes": ["replace"],
         "bags_per_rate": 1,
         "utility_bags_per_rate": 1,
         "bag_size": 80,
         "detectors": ["char3gram"],
         "quantifiers": ["pacc"],
         "primary_quantifier": "pacc",
+        "valuation": {"enabled": False, "methods": [], "bags_per_rate": 0, "sample_limit": 80, "oob_estimators": 20},
         "data": {"mode": "synthetic_fixture", "rows_per_table": 500},
         "thresholds": {
             "detector_fpr_target": .05, "artifact_auc_gate": .65,
@@ -78,3 +80,34 @@ def test_pilot_and_formal_freeze_the_same_protocol_matrix() -> None:
     assert pilot.detectors == formal.detectors
     assert pilot.quantifiers == formal.quantifiers
     assert pilot.seeds == (2026,)
+
+
+def test_formal_contract_rejects_legacy_approximation() -> None:
+    raw = valid_governance_config()
+    formal = load_governance_config(Path("configs/governance_formal.yaml"))
+    raw.update({
+        "run_type": "formal", "seeds": list(formal.seeds), "protocols": formal.protocols,
+        "contamination_modes": ["replace", "append"], "bags_per_rate": 100,
+        "utility_bags_per_rate": 5,
+        "detectors": ["char3gram", "flat_transformer", "table_transformer", "datum_transformer", "datum_ta"],
+        "valuation": {"enabled": True, "methods": ["knn_shapley", "data_oob"], "bags_per_rate": 1,
+                      "sample_limit": 1000, "oob_estimators": 80},
+        "resources": {"device": "cuda", "max_cpu_threads": 2},
+    })
+    with pytest.raises(GovernanceConfigError, match="legacy approximation"):
+        validate_governance_config(raw)
+
+
+def test_formal_contract_requires_both_contamination_modes() -> None:
+    raw = valid_governance_config()
+    formal = load_governance_config(Path("configs/governance_formal.yaml"))
+    raw.update({
+        "run_type": "formal", "seeds": list(formal.seeds), "protocols": formal.protocols,
+        "bags_per_rate": 100, "utility_bags_per_rate": 5,
+        "detectors": ["char3gram", "flat_transformer", "datum_transformer", "datum_ta"],
+        "valuation": {"enabled": True, "methods": ["knn_shapley", "data_oob"], "bags_per_rate": 1,
+                      "sample_limit": 1000, "oob_estimators": 80},
+        "resources": {"device": "cuda", "max_cpu_threads": 2},
+    })
+    with pytest.raises(GovernanceConfigError, match="replace and append"):
+        validate_governance_config(raw)

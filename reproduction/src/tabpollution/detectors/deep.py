@@ -1,8 +1,11 @@
-"""Tiny, paper-aligned character Transformer runthrough implementations.
+"""Paper-aligned character Transformer detectors for schema-variable tables.
 
-These are deliberately CPU-sized engineering runthroughs, not reported-paper
-hyperparameter reproductions.  The datum-wise mode preserves column-permutation
-invariance by omitting row-level positional encodings.
+The formal modes implement the published Flat Text and Datum-wise design
+principles: explicit CLS pooling, character-level encoding, local positional
+encoding inside each datum, no row-level positional encoding for Datum-wise,
+and adversarial table-identity regularization for Datum-wise + TA.  Small
+dimensions are retained only when a smoke configuration explicitly requests
+them and are marked as non-formal in provenance.
 """
 
 from __future__ import annotations
@@ -20,14 +23,17 @@ from torch.utils.data import DataLoader, TensorDataset
 from .base import Detector, feature_frame, normalize_scalar, record_feature_items, serialize_record
 
 
-CHARS = ["<PAD>", "<UNK>"] + list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:|<>_-. ?/+=,%")
+CHARS = ["<PAD>", "<UNK>"] + list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:|<>_-. ?/+=,%") + ["<CLS>"]
 CHAR_TO_ID = {c: i for i, c in enumerate(CHARS)}
+CLS_ID = CHAR_TO_ID["<CLS>"]
 
 
-def _encode(text: str, length: int) -> tuple[list[int], bool]:
+def _encode(text: str, length: int, *, add_cls: bool = True) -> tuple[list[int], bool]:
     ids = [CHAR_TO_ID.get(c, 1) for c in text]
-    truncated = len(ids) > length
-    return (ids[:length] + [0] * length)[:length], truncated
+    content_length = length - int(add_cls)
+    truncated = len(ids) > content_length
+    encoded = ([CLS_ID] if add_cls else []) + ids[:content_length]
+    return (encoded + [0] * length)[:length], truncated
 
 
 class GradReverse(torch.autograd.Function):
@@ -54,8 +60,7 @@ class FlatNet(nn.Module):
         x = self.emb(ids) + self.pos[:, :ids.shape[1]]
         mask = ids.eq(0)
         h = self.encoder(x, src_key_padding_mask=mask)
-        denom = (~mask).sum(1).clamp_min(1).unsqueeze(1)
-        pooled = (h * (~mask).unsqueeze(2)).sum(1) / denom
+        pooled = h[:, 0]
         return self.head(pooled).squeeze(1), pooled
 
 
@@ -79,18 +84,25 @@ class DatumNet(nn.Module):
 
     def forward(self, ids: torch.Tensor, grl_weight: float = 0.) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         b, c, l = ids.shape
-        x = self.emb(ids) + self.local_pos[:, :, :l]
+        present = ids.ne(0).any(dim=2)
+        safe_ids = ids.clone()
+        missing_batch, missing_column = (~present).nonzero(as_tuple=True)
+        safe_ids[missing_batch, missing_column, 0] = CLS_ID
+        x = self.emb(safe_ids) + self.local_pos[:, :, :l]
         x = x.reshape(b * c, l, -1)
-        mask = ids.reshape(b * c, l).eq(0)
+        mask = safe_ids.reshape(b * c, l).eq(0)
         h = self.datum_encoder(x, src_key_padding_mask=mask)
-        denom = (~mask).sum(1).clamp_min(1).unsqueeze(1)
-        datum = (h * (~mask).unsqueeze(2)).sum(1) / denom
+        datum = h[:, 0]
         datum = datum.reshape(b, c, -1)
         target = self.cls_target.expand(b, -1, -1)
         row = torch.cat([target, datum], dim=1)
         if self.column_pos is not None:
             row = row + self.column_pos[:, :row.shape[1]]
-        out = self.row_encoder(row)
+        row_mask = torch.cat([
+            torch.zeros((b, 1), dtype=torch.bool, device=ids.device),
+            ~present,
+        ], dim=1)
+        out = self.row_encoder(row, src_key_padding_mask=row_mask)
         pooled = out[:, 0]
         detection = self.detect_head(pooled).squeeze(1)
         table = self.table_head(GradReverse.apply(pooled, grl_weight))
@@ -168,7 +180,7 @@ class DeepTextDetector(Detector):
                     logits, table_logits, _ = self.model(xb, float(weight))
                 det_loss = bce(logits, yb)
                 table_loss = ce(table_logits, tb) if self.mode == "datum_ta" else torch.tensor(0., device=self.device)
-                loss = det_loss + (float(weight) * table_loss if self.mode == "datum_ta" else 0.)
+                loss = det_loss + (table_loss if self.mode == "datum_ta" else 0.)
                 loss.backward(); optimizer.step(); step += 1
                 det_sum += float(det_loss.detach()); tab_sum += float(table_loss.detach())
             self.loss_history.append({"epoch": epoch + 1, "detection_loss": det_sum / len(loader),
@@ -202,7 +214,12 @@ class DeepTextDetector(Detector):
         return obj
 
     def get_provenance(self) -> dict[str, Any]:
+        formal_architecture = (
+            self.config["dim"] == 192 and self.config["heads"] == 6
+            and self.config["layers"] == 6 and self.config["epochs"] >= 20
+        )
         return {"implementation": "paper_aligned_self_implementation", "mode": self.mode,
+                "formal_architecture": formal_architecture,
                 "paper_performance_reproduction": False,
                 "device": str(self.device),
                 "cpu_tiny_runthrough": self.config["dim"] <= 24 and self.config["epochs"] <= 2,

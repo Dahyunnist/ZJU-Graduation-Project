@@ -105,7 +105,7 @@ class Char3GramDetector(Detector):
         return self
 
     def predict_score(self, records: pd.DataFrame, **context: Any) -> np.ndarray:
-        shuffle = bool(context.get("shuffle", False))
+        shuffle = bool(context.get("shuffle", True))
         return self.model.predict_proba(self.vectorizer.transform(self.texts(records, shuffle, self.seed + 10000)))[:, 1]
 
     def save(self, path: str | Path) -> None:

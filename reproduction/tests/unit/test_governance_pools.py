@@ -68,10 +68,15 @@ def test_pool_builder_writes_atomic_registry_and_binary_target(tmp_path: Path, m
         "tabpollution.governance.pools.create_generator",
         lambda name, params: FakeGenerator(name, params),
     )
+    monkeypatch.setattr(
+        "tabpollution.governance.pools.sdmetrics_quality",
+        lambda real, synthetic: {"overall": 0.75, "properties": {}},
+    )
     result = build_governance_pools(config)
     assert result["status"] == "complete"
     registry_path = tmp_path / "data" / "pool_registry.csv"
     assert registry_path.is_file()
+    assert pd.read_csv(registry_path)["quality_score"].iloc[0] == 0.75
     loaded = RegistrySource(registry_path).table("abalone")
     assert loaded.target_column == "rings_high"
     assert set(loaded.real["rings_high"].unique()) == {0, 1}

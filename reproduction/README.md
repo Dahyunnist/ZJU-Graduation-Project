@@ -170,3 +170,11 @@ python -m pytest -q --junitxml=reports/pytest_algorithm_runthrough_final.xml
 ```
 
 实际完成矩阵包括D-LR、D-XGB、D-3G、D-FT、D-TT、D-DW、D-DWTA，八个经典比例估计器，LR/XGBoost效用曲线、KNN-Shapley和Data-OOB。三表mini跨表轨道使用Adult、Credit和官方UCI Abalone；深度模型是CPU tiny论文对齐自实现，不是论文性能复现。完成报告见`reports/algorithm_runthrough_completion_report.md`。
+
+## 统一污染治理基准（正式研究入口）
+
+当前正式研究不再按三个互不关联的任务推进，而以“记录级检测误差如何传导为语料污染率误差，并进一步改变下游治理决策”为唯一主线。`configs/governance_smoke.yaml`只验证工程闭环；`configs/governance_pilot.yaml`和`configs/governance_formal.yaml`共享冻结的P1–P4协议，正式配置额外硬性要求五个种子、每个污染率100个bag、replace/append两种机制、KNN-Shapley/Data-OOB估值和CUDA设备。
+
+正式方法真实性边界见`configs/formal_method_registry.yaml`。旧`table_transformer`只是历史runthrough近似，不能进入formal；论文对齐的Flat Text、Datum-wise与Datum-wise+TA采用正式尺寸，`column_positional_ablation`只作为局部消融，不冒充IDA的Column Encoding基线。导师要求与实现产物的完整对应关系见`docs/导师建议覆盖与正式实现审计.md`。
+
+统一运行输出包括：逐bag证据、P1–P4清单、格式伪影审计、低污染率比例误差、replace/append效用曲线、检测—损害四象限、生成质量—可检测性—效用张力、逐记录数据价值、95%置信区间及Holm校正的同bag配对比较。正式数据缺失时preflight会明确失败，禁止把fixture、pilot或历史runthrough混入论文结果。

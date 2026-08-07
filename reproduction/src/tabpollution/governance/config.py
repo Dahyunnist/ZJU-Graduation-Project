@@ -12,9 +12,11 @@ import yaml
 PROTOCOLS = ("P1", "P2", "P3", "P4")
 DETECTORS = (
     "char3gram", "c2st_lr", "c2st_xgb", "flat_transformer",
-    "table_transformer", "datum_transformer", "datum_ta",
+    "table_transformer", "column_positional_ablation", "datum_transformer", "datum_ta",
 )
 QUANTIFIERS = ("cc", "pcc", "acc", "pacc", "emq", "hdy", "dys", "median_sweep", "kdey")
+CONTAMINATION_MODES = ("replace", "append")
+VALUATION_METHODS = ("knn_shapley", "data_oob")
 DATA_MODES = ("synthetic_fixture", "registry")
 
 
@@ -37,12 +39,18 @@ class GovernanceConfig:
     seeds: tuple[int, ...]
     protocols: dict[str, ProtocolSpec]
     prevalence_rates: tuple[float, ...]
+    contamination_modes: tuple[str, ...]
     bags_per_rate: int
     utility_bags_per_rate: int
     bag_size: int
     detectors: tuple[str, ...]
     quantifiers: tuple[str, ...]
     primary_quantifier: str
+    valuation_enabled: bool
+    valuation_methods: tuple[str, ...]
+    valuation_bags_per_rate: int
+    valuation_sample_limit: int
+    valuation_oob_estimators: int
     data_mode: str
     registry_path: Path | None
     fixture_rows_per_table: int
@@ -110,9 +118,9 @@ def _protocol_specs(raw: Any) -> dict[str, ProtocolSpec]:
 
 def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) -> GovernanceConfig:
     required = {
-        "experiment_id", "run_type", "seeds", "protocols", "prevalence_rates",
+        "experiment_id", "run_type", "seeds", "protocols", "prevalence_rates", "contamination_modes",
         "bags_per_rate", "utility_bags_per_rate", "bag_size", "detectors", "quantifiers", "primary_quantifier",
-        "data", "thresholds", "output_dir", "resources",
+        "valuation", "data", "thresholds", "output_dir", "resources",
     }
     missing = sorted(required - set(raw))
     if missing:
@@ -127,6 +135,9 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     for mandatory in (0.05, 0.10):
         if mandatory not in rates:
             raise GovernanceConfigError("prevalence_rates must include 0.05 and 0.10")
+    contamination_modes = _unique_tuple(raw["contamination_modes"], "contamination_modes", str)
+    if set(contamination_modes) - set(CONTAMINATION_MODES):
+        raise GovernanceConfigError(f"contamination_modes must be drawn from {CONTAMINATION_MODES}")
     detectors = _unique_tuple(raw["detectors"], "detectors", str)
     unknown_detectors = sorted(set(detectors) - set(DETECTORS))
     if unknown_detectors:
@@ -138,6 +149,23 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     primary = str(raw["primary_quantifier"])
     if primary not in quantifiers:
         raise GovernanceConfigError("primary_quantifier must be listed in quantifiers")
+
+    valuation = raw["valuation"]
+    valuation_fields = {"enabled", "methods", "bags_per_rate", "sample_limit", "oob_estimators"}
+    if not isinstance(valuation, dict) or set(valuation) != valuation_fields:
+        raise GovernanceConfigError(f"valuation must contain exactly {sorted(valuation_fields)}")
+    valuation_enabled = bool(valuation["enabled"])
+    methods_raw = valuation["methods"]
+    if not isinstance(methods_raw, list) or not all(isinstance(x, str) for x in methods_raw):
+        raise GovernanceConfigError("valuation.methods must be a list of strings")
+    valuation_methods = tuple(methods_raw)
+    if len(valuation_methods) != len(set(valuation_methods)) or set(valuation_methods) - set(VALUATION_METHODS):
+        raise GovernanceConfigError(f"valuation.methods must be unique and drawn from {VALUATION_METHODS}")
+    if valuation_enabled and not valuation_methods:
+        raise GovernanceConfigError("enabled valuation requires at least one method")
+    valuation_bags = int(valuation["bags_per_rate"])
+    valuation_sample_limit = int(valuation["sample_limit"])
+    valuation_oob_estimators = int(valuation["oob_estimators"])
 
     data = raw["data"]
     if not isinstance(data, dict) or "mode" not in data:
@@ -180,13 +208,39 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
         raise GovernanceConfigError("bags_per_rate must be positive and bag_size at least 40")
     if utility_bags < 1 or utility_bags > bags:
         raise GovernanceConfigError("utility_bags_per_rate must be in [1, bags_per_rate]")
+    if valuation_bags < 0 or valuation_bags > utility_bags:
+        raise GovernanceConfigError("valuation.bags_per_rate must be in [0, utility_bags_per_rate]")
+    if valuation_sample_limit < 40 or valuation_oob_estimators < 10:
+        raise GovernanceConfigError("valuation sample_limit must be >=40 and oob_estimators >=10")
+    if run_type == "formal":
+        if set(raw["protocols"]) != set(PROTOCOLS):
+            raise GovernanceConfigError("formal runs must include P1-P4")
+        if len(seeds) < 5 or bags < 100:
+            raise GovernanceConfigError("formal runs require at least five seeds and 100 bags per rate")
+        if set(contamination_modes) != set(CONTAMINATION_MODES):
+            raise GovernanceConfigError("formal runs require replace and append contamination")
+        if not valuation_enabled or set(valuation_methods) != set(VALUATION_METHODS):
+            raise GovernanceConfigError("formal runs require KNN-Shapley and Data-OOB valuation")
+        required_detectors = {"char3gram", "flat_transformer", "datum_transformer", "datum_ta"}
+        if not required_detectors.issubset(detectors):
+            raise GovernanceConfigError("formal runs are missing required direct detection baselines")
+        if "table_transformer" in detectors:
+            raise GovernanceConfigError(
+                "table_transformer is a legacy approximation; use column_positional_ablation in formal runs"
+            )
+        if device != "cuda":
+            raise GovernanceConfigError("formal deep-detector runs require resources.device=cuda")
 
     return GovernanceConfig(
         experiment_id=str(raw["experiment_id"]), run_type=run_type, seeds=seeds,
         protocols=_protocol_specs(raw["protocols"]), prevalence_rates=rates,
+        contamination_modes=contamination_modes,
         bags_per_rate=bags, utility_bags_per_rate=utility_bags,
         bag_size=bag_size, detectors=detectors,
-        quantifiers=quantifiers, primary_quantifier=primary, data_mode=mode,
+        quantifiers=quantifiers, primary_quantifier=primary,
+        valuation_enabled=valuation_enabled, valuation_methods=valuation_methods,
+        valuation_bags_per_rate=valuation_bags, valuation_sample_limit=valuation_sample_limit,
+        valuation_oob_estimators=valuation_oob_estimators, data_mode=mode,
         registry_path=registry, fixture_rows_per_table=fixture_rows,
         detector_fpr_target=_bounded_number(thresholds["detector_fpr_target"], "detector_fpr_target", 0, 1),
         artifact_auc_gate=_bounded_number(thresholds["artifact_auc_gate"], "artifact_auc_gate", 0.5, 1),

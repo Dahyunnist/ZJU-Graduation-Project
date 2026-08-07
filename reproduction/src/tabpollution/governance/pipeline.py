@@ -10,15 +10,18 @@ import os
 from pathlib import Path
 import time
 from typing import Any
+from itertools import combinations
 
 import numpy as np
 import pandas as pd
+import yaml
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from scipy.stats import t as student_t, ttest_rel
 
 from tabpollution.detectors.classical import C2STDetector, Char3GramDetector
 from tabpollution.detectors.deep import DeepTextDetector
@@ -42,10 +45,38 @@ from tabpollution.governance.metrics import (
 from tabpollution.mixing.protocols import validate_protocol
 from tabpollution.quantification.methods import ScoreQuantifier
 from tabpollution.utils import write_json
+from tabpollution.valuation.methods import data_oob, knn_shapley
+
+
+METHOD_REGISTRY_PATH = Path(__file__).resolve().parents[3] / "configs" / "formal_method_registry.yaml"
 
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _method_registry(config: GovernanceConfig) -> tuple[dict[str, Any], dict[str, Any]]:
+    try:
+        registry = yaml.safe_load(METHOD_REGISTRY_PATH.read_text(encoding="utf-8"))
+        registered = registry["detectors"]
+        missing = sorted(set(config.detectors) - set(registered))
+        nonformal = sorted(
+            name for name in config.detectors
+            if config.run_type == "formal" and not bool(registered.get(name, {}).get("formal_ready"))
+        )
+        passed = not missing and not nonformal
+        return registry, {
+            "dependency": "formal_method_registry", "passed": passed,
+            "registry_path": str(METHOD_REGISTRY_PATH),
+            "missing_methods": missing, "nonformal_methods": nonformal,
+            "reason": None if passed else "method_registry_contract_failed",
+        }
+    except (OSError, TypeError, KeyError, yaml.YAMLError) as exc:
+        return {}, {
+            "dependency": "formal_method_registry", "passed": False,
+            "registry_path": str(METHOD_REGISTRY_PATH),
+            "reason": f"method_registry_unreadable:{type(exc).__name__}",
+        }
 
 
 def _configure_resources(config: GovernanceConfig) -> None:
@@ -120,6 +151,7 @@ def _detector(name: str, seed: int, config: GovernanceConfig):
     modes = {
         "flat_transformer": "flat",
         "table_transformer": "table",
+        "column_positional_ablation": "table",
         "datum_transformer": "datum",
         "datum_ta": "datum_ta",
     }
@@ -127,13 +159,13 @@ def _detector(name: str, seed: int, config: GovernanceConfig):
         formal = config.run_type in {"pilot", "formal"}
         return DeepTextDetector(
             mode=modes[name], seed=seed,
-            dim=64 if formal else 24,
-            heads=4, layers=2 if formal else 1,
-            max_len=512 if formal else 192,
-            max_datum=64 if formal else 32,
+            dim=192 if formal else 24,
+            heads=6 if formal else 4, layers=6 if formal else 1,
+            max_len=1024 if formal else 192,
+            max_datum=96 if formal else 32,
             max_columns=64 if formal else 24,
             epochs=20 if formal else 2,
-            batch_size=128 if formal else 32,
+            batch_size=16 if formal else 32,
             device=config.device,
             table_classes=32,
         )
@@ -169,7 +201,7 @@ def _target_xy(frame: pd.DataFrame, target: str) -> tuple[pd.DataFrame, np.ndarr
     return features, (labels == classes[-1]).astype(int).to_numpy()
 
 
-def _target_model(features: pd.DataFrame, seed: int, threads: int) -> Pipeline:
+def _target_preprocessor(features: pd.DataFrame) -> ColumnTransformer:
     numeric = features.select_dtypes(include=["number", "bool"]).columns.tolist()
     categorical = [c for c in features.columns if c not in numeric]
     transformers = []
@@ -183,8 +215,12 @@ def _target_model(features: pd.DataFrame, seed: int, threads: int) -> Pipeline:
             ("impute", SimpleImputer(strategy="most_frequent")),
             ("encode", OneHotEncoder(handle_unknown="ignore")),
         ]), categorical))
+    return ColumnTransformer(transformers)
+
+
+def _target_model(features: pd.DataFrame, seed: int, threads: int) -> Pipeline:
     return Pipeline([
-        ("preprocess", ColumnTransformer(transformers)),
+        ("preprocess", _target_preprocessor(features)),
         ("classifier", LogisticRegression(max_iter=500, random_state=seed)),
     ])
 
@@ -201,6 +237,54 @@ def _utility(train: pd.DataFrame, test: pd.DataFrame, target: str, seed: int, th
     if hasattr(model[-1], "predict_proba"):
         return float(roc_auc_score(y_test, model.predict_proba(x_test)[:, 1]))
     return float(accuracy_score(y_test, model.predict(x_test)))
+
+
+def _valuation_rows(
+    bag: pd.DataFrame,
+    pure_test: pd.DataFrame,
+    target: str,
+    methods: tuple[str, ...],
+    sample_limit: int,
+    oob_estimators: int,
+    seed: int,
+    metadata: dict[str, Any],
+) -> list[dict[str, Any]]:
+    train = bag.sample(n=min(len(bag), sample_limit), random_state=seed, replace=False).reset_index(drop=True)
+    test = pure_test.sample(
+        n=min(len(pure_test), max(40, sample_limit // 2)), random_state=seed + 1, replace=False
+    ).reset_index(drop=True)
+    x_train_frame, y_train = _target_xy(train, target)
+    x_test_frame, y_test = _target_xy(test, target)
+    if len(np.unique(y_train)) < 2 or len(np.unique(y_test)) < 2:
+        return []
+    preprocessor = _target_preprocessor(x_train_frame)
+    x_train = preprocessor.fit_transform(x_train_frame)
+    x_test = preprocessor.transform(x_test_frame)
+    if hasattr(x_train, "toarray"):
+        x_train = x_train.toarray()
+        x_test = x_test.toarray()
+    values_by_method: dict[str, tuple[np.ndarray, np.ndarray | None]] = {}
+    if "knn_shapley" in methods:
+        values_by_method["knn_shapley"] = (
+            knn_shapley(np.asarray(x_train), y_train, np.asarray(x_test), y_test, k=5), None
+        )
+    if "data_oob" in methods:
+        values_by_method["data_oob"] = data_oob(
+            np.asarray(x_train), y_train, n_estimators=oob_estimators, seed=seed
+        )
+    rows: list[dict[str, Any]] = []
+    for method, (values, coverage) in values_by_method.items():
+        for index, value in enumerate(values):
+            rows.append({
+                **metadata,
+                "valuation_method": method,
+                "valuation_row_index": index,
+                "record_id": str(train.iloc[index].get("record_id", index)),
+                "source_label": int(train.iloc[index]["source_label"]),
+                "task_value": float(value) if np.isfinite(value) else float("nan"),
+                "oob_coverage": int(coverage[index]) if coverage is not None else float("nan"),
+            })
+    return rows
 
 
 def _safe_max(*values: float) -> float:
@@ -224,8 +308,13 @@ def _quadrant(auroc: float, utility_delta: float, harm_tolerance: float) -> str:
     return f"{'high' if detectable else 'low'}_detectability__{'high' if harmful else 'low'}_harm"
 
 
-def _write_findings(rows: pd.DataFrame, artifact_rows: pd.DataFrame, output: Path,
-                    primary_quantifier: str) -> None:
+def _write_findings(
+    rows: pd.DataFrame,
+    artifact_rows: pd.DataFrame,
+    valuation_rows: pd.DataFrame,
+    output: Path,
+    primary_quantifier: str,
+) -> None:
     output.mkdir(parents=True, exist_ok=True)
     detection = rows.groupby(["protocol", "detector"], as_index=False).agg(
         auroc=("detection_auroc", "mean"),
@@ -236,19 +325,19 @@ def _write_findings(rows: pd.DataFrame, artifact_rows: pd.DataFrame, output: Pat
     detection.to_csv(output / "finding_1_transfer.csv", index=False)
     artifact_rows.to_csv(output / "finding_2_format_artifacts.csv", index=False)
     low = rows.loc[rows["true_prevalence"].isin([.05, .10])]
-    low.groupby(["protocol", "detector", "quantifier", "true_prevalence"], as_index=False).agg(
+    low.groupby(["protocol", "detector", "quantifier", "contamination_mode", "true_prevalence"], as_index=False).agg(
         mae=("prevalence_absolute_error", "mean"),
         bias=("prevalence_error", "mean"),
         decision_error_rate=("decision_error", "mean"),
         false_positive_share=("false_positive_share", "mean"),
     ).to_csv(output / "finding_3_low_prevalence.csv", index=False)
-    rows.groupby(["protocol", "quantifier"], as_index=False).agg(
+    rows.groupby(["protocol", "quantifier", "contamination_mode"], as_index=False).agg(
         mae=("prevalence_absolute_error", "mean"),
         bias=("prevalence_error", "mean"),
         decision_regret=("decision_regret", "mean"),
     ).to_csv(output / "finding_4_quantifier_shift.csv", index=False)
     primary = rows.loc[rows["quantifier"] == primary_quantifier]
-    primary.groupby(["protocol", "test_table", "test_generator", "true_prevalence"], as_index=False).agg(
+    primary.groupby(["protocol", "test_table", "test_generator", "contamination_mode", "true_prevalence"], as_index=False).agg(
         contaminated_delta=("contaminated_utility_delta", "mean"),
         detector_cleanup_delta=("detector_cleanup_delta", "mean"),
         oracle_cleanup_delta=("oracle_cleanup_delta", "mean"),
@@ -259,10 +348,104 @@ def _write_findings(rows: pd.DataFrame, artifact_rows: pd.DataFrame, output: Pat
         mean_utility_delta=("contaminated_utility_delta", "mean"),
         mean_regret=("decision_regret", "mean"),
     ).to_csv(output / "finding_6_detectability_vs_harm.csv", index=False)
+    primary.groupby([
+        "protocol", "test_table", "test_generator", "contamination_mode",
+    ], as_index=False).agg(
+        generator_quality=("generator_quality", "mean"),
+        detection_auroc=("detection_auroc", "mean"),
+        mean_utility_delta=("contaminated_utility_delta", "mean"),
+        worst_utility_delta=("contaminated_utility_delta", "min"),
+    ).to_csv(output / "finding_6_quality_detectability_utility.csv", index=False)
+    if not valuation_rows.empty:
+        valuation_summary = valuation_rows.groupby([
+            "protocol", "test_table", "test_generator", "contamination_mode",
+            "true_prevalence", "valuation_method",
+        ], as_index=False).agg(
+            real_mean_value=("task_value", lambda x: float(x[valuation_rows.loc[x.index, "source_label"] == 0].mean())),
+            synthetic_mean_value=("task_value", lambda x: float(x[valuation_rows.loc[x.index, "source_label"] == 1].mean())),
+            synthetic_negative_value_rate=("task_value", lambda x: float((x[valuation_rows.loc[x.index, "source_label"] == 1] < 0).mean())),
+            valued_records=("task_value", "count"),
+        )
+        valuation_summary["source_task_value_gap"] = (
+            valuation_summary["real_mean_value"] - valuation_summary["synthetic_mean_value"]
+        )
+        valuation_summary.to_csv(output / "finding_6_source_task_value.csv", index=False)
+
+
+def _write_statistical_inference(rows: pd.DataFrame, output: Path, primary_quantifier: str) -> None:
+    group_columns = [
+        "protocol", "detector", "quantifier", "contamination_mode", "true_prevalence",
+    ]
+    metrics = ["prevalence_absolute_error", "contaminated_utility_delta", "decision_regret"]
+    summaries: list[dict[str, Any]] = []
+    for keys, group in rows.groupby(group_columns, dropna=False):
+        base = dict(zip(group_columns, keys))
+        for metric in metrics:
+            values = pd.to_numeric(group[metric], errors="coerce").dropna().to_numpy(float)
+            n = len(values)
+            mean = float(values.mean()) if n else float("nan")
+            std = float(values.std(ddof=1)) if n > 1 else float("nan")
+            half_width = float(student_t.ppf(.975, n - 1) * std / np.sqrt(n)) if n > 1 else float("nan")
+            summaries.append({
+                **base, "metric": metric, "n": n, "mean": mean, "std": std,
+                "ci95_low": mean - half_width if np.isfinite(half_width) else float("nan"),
+                "ci95_high": mean + half_width if np.isfinite(half_width) else float("nan"),
+            })
+    pd.DataFrame(summaries).to_csv(output / "statistical_summary_ci95.csv", index=False)
+
+    primary = rows.loc[rows["quantifier"] == primary_quantifier]
+    index = [
+        "seed", "protocol", "test_table", "test_generator", "contamination_mode",
+        "true_prevalence", "bag_index",
+    ]
+    paired_rows: list[dict[str, Any]] = []
+    for (protocol, mode, prevalence), group in primary.groupby([
+        "protocol", "contamination_mode", "true_prevalence",
+    ]):
+        pivot = group.pivot_table(
+            index=index, columns="detector", values="prevalence_absolute_error", aggfunc="first"
+        )
+        for left, right in combinations(sorted(pivot.columns), 2):
+            paired = pivot[[left, right]].dropna()
+            if len(paired) < 2:
+                continue
+            test = ttest_rel(paired[left], paired[right])
+            paired_rows.append({
+                "protocol": protocol, "contamination_mode": mode,
+                "true_prevalence": prevalence, "metric": "prevalence_absolute_error",
+                "left_detector": left, "right_detector": right, "paired_n": len(paired),
+                "mean_left": float(paired[left].mean()), "mean_right": float(paired[right].mean()),
+                "mean_difference": float((paired[left] - paired[right]).mean()),
+                "t_statistic": float(test.statistic), "p_value": float(test.pvalue),
+            })
+    paired_columns = [
+        "protocol", "contamination_mode", "true_prevalence", "metric",
+        "left_detector", "right_detector", "paired_n", "mean_left", "mean_right",
+        "mean_difference", "t_statistic", "p_value",
+    ]
+    paired_frame = pd.DataFrame(paired_rows, columns=paired_columns)
+    if not paired_frame.empty:
+        order = np.argsort(paired_frame["p_value"].to_numpy())
+        adjusted = np.empty(len(paired_frame), dtype=float)
+        running = 0.0
+        for rank, position in enumerate(order):
+            candidate = min(1.0, (len(paired_frame) - rank) * paired_frame.iloc[position]["p_value"])
+            running = max(running, candidate)
+            adjusted[position] = running
+        paired_frame["p_value_holm"] = adjusted
+    paired_frame.to_csv(output / "paired_detector_tests.csv", index=False)
 
 
 def validate_governance_setup(config_or_path: GovernanceConfig | str | Path) -> dict[str, Any]:
     config = config_or_path if isinstance(config_or_path, GovernanceConfig) else load_governance_config(config_or_path)
+    _, registry_check = _method_registry(config)
+    if not registry_check["passed"]:
+        return {
+            "experiment_id": config.experiment_id, "passed": False,
+            "data_mode": config.data_mode, "reason": "method_registry_contract_failed",
+            "dependency_checks": [registry_check], "protocol_checks": [],
+            "output_dir": str(config.output_dir),
+        }
     if config.data_mode == "registry" and (config.registry_path is None or not config.registry_path.is_file()):
         return {
             "experiment_id": config.experiment_id,
@@ -270,12 +453,12 @@ def validate_governance_setup(config_or_path: GovernanceConfig | str | Path) -> 
             "data_mode": config.data_mode,
             "reason": "pool_registry_missing",
             "registry_path": str(config.registry_path),
-            "dependency_checks": [],
+            "dependency_checks": [registry_check],
             "protocol_checks": [],
             "output_dir": str(config.output_dir),
         }
     source = _source(config, config.seeds[0])
-    dependency_checks: list[dict[str, Any]] = []
+    dependency_checks: list[dict[str, Any]] = [registry_check]
     if "c2st_xgb" in config.detectors:
         xgboost_available = importlib.util.find_spec("xgboost") is not None
         dependency_checks.append({
@@ -326,11 +509,15 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
     output = config.output_dir
     output.mkdir(parents=True, exist_ok=True)
     write_json(preflight, output / "preflight.json")
+    registry, _ = _method_registry(config)
+    write_json(registry, output / "method_registry_snapshot.json")
     resolved = json.loads(json.dumps(asdict(config), default=str))
     write_json(resolved, output / "resolved_config.json")
     started = time.perf_counter()
     rows: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
+    valuation_records: list[dict[str, Any]] = []
+    valuation_seen: set[tuple[Any, ...]] = set()
     protocol_manifests: dict[str, Any] = {}
 
     for seed in config.seeds:
@@ -363,6 +550,10 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                 if detector_name.startswith("c2st") and protocol in {"P3", "P4"}:
                     # Schema-bound C2ST is not a valid cross-table contestant.
                     continue
+                if detector_name == "datum_ta" and len(spec.train_tables) < 2:
+                    # A table-adversarial head has no identifiable adaptation
+                    # objective when every training record carries one table ID.
+                    continue
                 detector = _detector(detector_name, seed, config)
                 table_names = sorted(detector_train["table_id"].astype(str).unique())
                 table_index = {name: index for index, name in enumerate(table_names)}
@@ -391,10 +582,40 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                         synth_split = _split(
                             table.synthetic[test_generator], seed + table_index * 113 + generator_index * 997 + 31
                         )["downstream_train"]
-                        for prevalence in config.prevalence_rates:
+                        for contamination_mode, prevalence in [
+                            (mode, rate)
+                            for mode in config.contamination_modes
+                            for rate in config.prevalence_rates
+                            if not (mode == "append" and rate >= 1)
+                        ]:
                             for bag_index in range(config.bags_per_rate):
                                 bag_seed = seed + table_index * 100003 + generator_index * 1009 + int(prevalence * 1000) * 17 + bag_index
-                                bag = exact_mixture(downstream_real, synth_split, config.bag_size, prevalence, bag_seed)
+                                bag = exact_mixture(
+                                    downstream_real, synth_split, config.bag_size, prevalence,
+                                    bag_seed, mode=contamination_mode,
+                                )
+                                valuation_key = (
+                                    seed, protocol, test_table, test_generator,
+                                    contamination_mode, prevalence, bag_index,
+                                )
+                                if (
+                                    config.valuation_enabled
+                                    and bag_index < config.valuation_bags_per_rate
+                                    and valuation_key not in valuation_seen
+                                ):
+                                    valuation_records.extend(_valuation_rows(
+                                        bag, pure_test, table.target_column,
+                                        config.valuation_methods, config.valuation_sample_limit,
+                                        config.valuation_oob_estimators, bag_seed,
+                                        {
+                                            "seed": seed, "protocol": protocol,
+                                            "test_table": test_table, "test_generator": test_generator,
+                                            "contamination_mode": contamination_mode,
+                                            "true_prevalence": float(bag["source_label"].mean()),
+                                            "bag_index": bag_index,
+                                        },
+                                    ))
+                                    valuation_seen.add(valuation_key)
                                 bag_scores = calibrator.predict(detector.predict_score(bag))
                                 actual_prevalence = float(bag["source_label"].mean())
                                 detector_clean = _detector_cleanup(bag, bag_scores, threshold)
@@ -452,9 +673,12 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                                         "quantifier_status": quantifier_status,
                                         "test_table": test_table,
                                         "test_generator": test_generator,
-                                        "bag_id": f"{seed}-{protocol}-{detector_name}-{test_table}-{test_generator}-{prevalence:.3f}-{bag_index}",
+                                        "generator_quality": table.synthetic_quality.get(test_generator, float("nan")),
+                                        "bag_id": f"{seed}-{protocol}-{detector_name}-{test_table}-{test_generator}-{contamination_mode}-{prevalence:.3f}-{bag_index}",
                                         "bag_index": bag_index,
                                         "bag_size": len(bag),
+                                        "contamination_mode": contamination_mode,
+                                        "nominal_prevalence": prevalence,
                                         "true_prevalence": actual_prevalence,
                                         "estimated_prevalence": estimate,
                                         **error,
@@ -490,9 +714,17 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
 
     evidence = pd.DataFrame(rows)
     artifact_frame = pd.DataFrame(artifacts)
+    valuation_columns = [
+        "seed", "protocol", "test_table", "test_generator", "contamination_mode",
+        "true_prevalence", "bag_index", "valuation_method", "valuation_row_index",
+        "record_id", "source_label", "task_value", "oob_coverage",
+    ]
+    valuation_frame = pd.DataFrame(valuation_records, columns=valuation_columns)
     evidence.to_csv(output / "governance_evidence.csv", index=False)
     artifact_frame.to_csv(output / "format_artifact_audit.csv", index=False)
-    _write_findings(evidence, artifact_frame, output, config.primary_quantifier)
+    valuation_frame.to_csv(output / "record_valuation.csv", index=False)
+    _write_findings(evidence, artifact_frame, valuation_frame, output, config.primary_quantifier)
+    _write_statistical_inference(evidence, output, config.primary_quantifier)
     write_json(protocol_manifests, output / "protocol_manifests.json")
     summary = {
         "experiment_id": config.experiment_id,
@@ -507,11 +739,16 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
         "quantifiers": sorted(evidence["quantifier"].unique().tolist()),
         "low_prevalence_rows": int(evidence["true_prevalence"].isin([.05, .10]).sum()),
         "artifact_gate_failures": int((~artifact_frame["artifact_gate_passed"]).sum()),
+        "valuation_rows": len(valuation_frame),
         "mean_prevalence_mae": finite_or_none(evidence["prevalence_absolute_error"].mean()),
         "mean_decision_regret": finite_or_none(evidence["decision_regret"].mean()),
         "outputs": {
             "evidence": str(output / "governance_evidence.csv"),
             "findings": [str(path) for path in sorted(output.glob("finding_*.csv"))],
+            "valuation": str(output / "record_valuation.csv"),
+            "statistical_summary": str(output / "statistical_summary_ci95.csv"),
+            "paired_tests": str(output / "paired_detector_tests.csv"),
+            "method_registry": str(output / "method_registry_snapshot.json"),
         },
     }
     write_json(summary, output / "summary.json")

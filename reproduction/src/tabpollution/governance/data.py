@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-META_COLUMNS = {"record_id", "table_id", "generator", "source_label", "source_type"}
+META_COLUMNS = {"record_id", "table_id", "generator", "source_label", "source_type", "schema_columns"}
 
 
 @dataclass(frozen=True)
@@ -20,6 +20,7 @@ class TableData:
     target_column: str
     real: pd.DataFrame
     synthetic: dict[str, pd.DataFrame]
+    synthetic_quality: dict[str, float]
 
 
 class GovernanceDataSource(Protocol):
@@ -120,7 +121,10 @@ class SyntheticFixtureSource:
                 )
                 for index, generator in enumerate(generators)
             }
-            self._tables[table_id] = TableData(table_id, domain, target, real, synthetic)
+            self._tables[table_id] = TableData(
+                table_id, domain, target, real, synthetic,
+                {generator: float("nan") for generator in generators},
+            )
 
     @property
     def table_ids(self) -> tuple[str, ...]:
@@ -166,6 +170,7 @@ class RegistrySource:
             if target not in real_raw:
                 raise ValueError(f"Target {target!r} absent from {real_path}")
             synthetic: dict[str, pd.DataFrame] = {}
+            synthetic_quality: dict[str, float] = {}
             for row in group.itertuples(index=False):
                 synth_path = (path.parent / str(row.synthetic_path)).resolve()
                 if not synth_path.is_file():
@@ -174,9 +179,10 @@ class RegistrySource:
                 if set(synth_raw.columns) != set(real_raw.columns):
                     raise ValueError(f"Schema mismatch: {synth_path}")
                 synthetic[str(row.generator)] = _labelled(synth_raw[real_raw.columns], str(table_id), "synthetic", str(row.generator))
+                synthetic_quality[str(row.generator)] = float(getattr(row, "quality_score", float("nan")))
             self._tables[str(table_id)] = TableData(
                 str(table_id), domains[0], target,
-                _labelled(real_raw, str(table_id), "real"), synthetic,
+                _labelled(real_raw, str(table_id), "real"), synthetic, synthetic_quality,
             )
 
     @property
@@ -198,9 +204,24 @@ def sample_rows(frame: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
     return frame.iloc[indices].reset_index(drop=True).copy()
 
 
-def exact_mixture(real: pd.DataFrame, synthetic: pd.DataFrame, size: int, prevalence: float, seed: int) -> pd.DataFrame:
-    synthetic_count = int(round(size * prevalence))
-    real_count = size - synthetic_count
+def exact_mixture(
+    real: pd.DataFrame,
+    synthetic: pd.DataFrame,
+    size: int,
+    prevalence: float,
+    seed: int,
+    mode: str = "replace",
+) -> pd.DataFrame:
+    if mode == "replace":
+        synthetic_count = int(round(size * prevalence))
+        real_count = size - synthetic_count
+    elif mode == "append":
+        if prevalence >= 1:
+            raise ValueError("append contamination is undefined at prevalence=1")
+        real_count = size
+        synthetic_count = int(round(size * prevalence / max(1e-12, 1 - prevalence)))
+    else:
+        raise ValueError(f"Unknown contamination mode: {mode}")
     result = pd.concat([
         sample_rows(real, real_count, seed + 17),
         sample_rows(synthetic, synthetic_count, seed + 29),

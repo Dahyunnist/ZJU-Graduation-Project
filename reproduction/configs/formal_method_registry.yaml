@@ -1,0 +1,61 @@
+registry_version: governance-methods-v1
+frozen_at: "2026-08-07"
+
+detectors:
+  char3gram:
+    role: direct_cross_table_baseline
+    source: Kindji et al., COLING GenAIDetect 2025 / IDA 2025
+    implementation: paper_aligned_self_implementation
+    formal_ready: true
+    fidelity: shuffled column:value linearization, character trigrams, logistic regression
+  c2st_lr:
+    role: classical_same_schema_baseline
+    source: classifier two-sample testing / pMSE
+    implementation: sklearn
+    formal_ready: true
+    protocols: [P1, P2]
+  c2st_xgb:
+    role: classical_same_schema_baseline
+    source: classifier two-sample testing
+    implementation: xgboost
+    formal_ready: true
+    protocols: [P1, P2]
+  flat_transformer:
+    role: direct_cross_table_baseline
+    source: Kindji et al., COLING GenAIDetect 2025 / IDA 2025
+    implementation: paper_aligned_self_implementation
+    formal_ready: true
+    fidelity: character tokens, CLS pooling, global positional encoding, 192 dimensions, 6 heads, 6 layers
+  column_positional_ablation:
+    role: architecture_ablation
+    source: local controlled ablation against Datum-wise permutation invariance
+    implementation: local
+    formal_ready: true
+    fidelity: datum encoding with row-level positional embeddings; not claimed as the IDA column preprocessing baseline
+  datum_transformer:
+    role: sota_direct_method
+    source: Kindji et al., AAAI 2026
+    implementation: paper_aligned_self_implementation
+    formal_ready: true
+    fidelity: character datums, CLS-Datum pooling, CLS-Target pooling, local-only positional encoding, row padding mask, 192 dimensions
+  datum_ta:
+    role: sota_direct_method
+    source: Kindji et al., AAAI 2026
+    implementation: paper_aligned_self_implementation
+    formal_ready: true
+    fidelity: Datum-wise backbone plus gradient-reversal table-identity head; only meaningful with at least two training tables
+  table_transformer:
+    role: legacy_runthrough_only
+    implementation: local_approximation
+    formal_ready: false
+    reason: does not reproduce the IDA numeric/categorical preprocessing exactly and is hard-blocked from formal configuration
+
+quantifiers:
+  methods: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
+  formal_ready: true
+  validation: elementary formulas cross-checked against QuaPy; distribution methods preserve diagnostics and failure states
+
+valuation:
+  methods: [knn_shapley, data_oob]
+  formal_ready: true
+  validation: KNN recurrence checked against exhaustive Shapley on small N; Data-OOB reports per-record coverage

@@ -25,14 +25,21 @@ protocols:
     test_generators: [TVAE]
 
 prevalence_rates: [0.0, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+contamination_modes: [replace, append]
 bags_per_rate: 10
 utility_bags_per_rate: 2
 bag_size: 1000
 detectors:
-  [char3gram, c2st_lr, c2st_xgb, flat_transformer, table_transformer,
+  [char3gram, c2st_lr, c2st_xgb, flat_transformer, column_positional_ablation,
    datum_transformer, datum_ta]
 quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
 primary_quantifier: pacc
+valuation:
+  enabled: true
+  methods: [knn_shapley, data_oob]
+  bags_per_rate: 1
+  sample_limit: 500
+  oob_estimators: 40
 
 data:
   mode: registry

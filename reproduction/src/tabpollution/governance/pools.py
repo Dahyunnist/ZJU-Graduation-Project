@@ -20,6 +20,7 @@ import yaml
 from sklearn.model_selection import train_test_split
 
 from tabpollution.generators.sdv_adapter import create_generator
+from tabpollution.generators.quality import sdmetrics_quality
 from tabpollution.pipeline import prepare_benchmark
 from tabpollution.utils import read_json, sha256_file, write_json
 
@@ -237,11 +238,17 @@ def preflight_pool_build(config_or_path: PoolBuildConfig | str | Path) -> dict[s
     except importlib_metadata.PackageNotFoundError:
         sdv_version = None
         passed = False
+    try:
+        sdmetrics_version = importlib_metadata.version("sdmetrics")
+    except importlib_metadata.PackageNotFoundError:
+        sdmetrics_version = None
+        passed = False
     return {
         "build_id": config.build_id,
         "source_train_fraction": config.source_train_fraction,
         "passed": passed,
         "sdv_version": sdv_version,
+        "sdmetrics_version": sdmetrics_version,
         "datasets": datasets,
         "generators": sorted(config.generators),
         "output_dir": str(config.output_dir),
@@ -317,6 +324,9 @@ def build_governance_pools(config_or_path: PoolBuildConfig | str | Path, *, resu
                 synthetic = pd.read_csv(synthetic_path)
                 provenance: dict[str, Any] = {"reused": True}
                 fit_seconds = 0.0
+                quality = previous_run.get("quality")
+                if not isinstance(quality, dict):
+                    quality = sdmetrics_quality(real, synthetic)
             else:
                 generator = create_generator(generator_name, generator_config)
                 metadata = generator.build_metadata(source_train)
@@ -343,12 +353,14 @@ def build_governance_pools(config_or_path: PoolBuildConfig | str | Path, *, resu
                         torch.cuda.empty_cache()
                 except ImportError:
                     pass
+                quality = sdmetrics_quality(real, synthetic)
                 status = "complete"
             registry_rows.append({
                 "table_id": spec.table_id, "domain": spec.domain,
                 "target_column": spec.target_column, "generator": generator_name,
                 "real_path": real_path.relative_to(config.output_dir).as_posix(),
                 "synthetic_path": synthetic_path.relative_to(config.output_dir).as_posix(),
+                "quality_score": float(quality["overall"]),
             })
             runs.append({
                 "table_id": spec.table_id, "generator": generator_name, "status": status,
@@ -361,6 +373,7 @@ def build_governance_pools(config_or_path: PoolBuildConfig | str | Path, *, resu
                 "synthetic_sha256": sha256_file(synthetic_path),
                 "model_path": str(model_path), "target_transform": transform,
                 "provenance": provenance,
+                "quality": quality,
             })
             write_json({"build_id": config.build_id, "status": "running", "runs": runs}, manifest_path)
     registry = pd.DataFrame(registry_rows).sort_values(["table_id", "generator"])
