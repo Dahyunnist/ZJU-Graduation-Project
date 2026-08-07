@@ -28,6 +28,11 @@ reproduction/.deps/
 reproduction/data/
 reproduction/runs/
 reproduction/outputs/
+reproduction/data
+reproduction/runs
+reproduction/outputs
+reproduction/checkpoints
+*.egg-info/
 *.pkl
 *.joblib
 *.pt
