@@ -1,0 +1,9 @@
+table_id,domain,target_column,generator,real_path,synthetic_path
+adult,social,income,CTGAN,../processed/adult/adult_clean.csv,synthetic/adult/CTGAN.csv
+adult,social,income,TVAE,../processed/adult/adult_clean.csv,synthetic/adult/TVAE.csv
+credit,finance,default_payment_next_month,CTGAN,../processed/credit/credit_clean.csv,synthetic/credit/CTGAN.csv
+credit,finance,default_payment_next_month,TVAE,../processed/credit/credit_clean.csv,synthetic/credit/TVAE.csv
+bank_marketing,finance,y,CTGAN,../processed/bank_marketing/bank_marketing_clean.csv,synthetic/bank_marketing/CTGAN.csv
+bank_marketing,finance,y,TVAE,../processed/bank_marketing/bank_marketing_clean.csv,synthetic/bank_marketing/TVAE.csv
+magic_gamma,scientific,class,CTGAN,../processed/magic_gamma/magic_gamma_clean.csv,synthetic/magic_gamma/CTGAN.csv
+magic_gamma,scientific,class,TVAE,../processed/magic_gamma/magic_gamma_clean.csv,synthetic/magic_gamma/TVAE.csv

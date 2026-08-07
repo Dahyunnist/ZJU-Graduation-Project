@@ -16,6 +16,7 @@ PROVENANCE_COLUMNS = {
     "generator_seed", "sample_seed", "dataset_id", "table_id", "source_label",
     "run_id", "condition", "proportion", "p", "mix_seed", "source_type",
     "source_synth_row_id",
+    "schema_columns",
 }
 
 
@@ -37,8 +38,23 @@ def normalize_scalar(value: Any) -> str:
     return str(value).strip()
 
 
+def record_feature_items(row: pd.Series) -> list[tuple[str, Any]]:
+    """Return only fields that belong to the record's native table schema.
+
+    Cross-table frames are represented as a union of columns. Without the
+    explicit schema marker, absent columns from other tables would be rendered
+    as artificial missing values and become a trivial table-identity trace.
+    """
+    marker = row.get("schema_columns")
+    if marker is not None and not pd.isna(marker) and str(marker):
+        columns = [column for column in str(marker).split("\x1f") if column in row.index]
+    else:
+        columns = [column for column in row.index if column not in PROVENANCE_COLUMNS]
+    return [(column, row[column]) for column in columns if column not in PROVENANCE_COLUMNS]
+
+
 def serialize_record(row: pd.Series, *, shuffle: bool = False, seed: int = 0) -> str:
-    parts = [f"{c}:{normalize_scalar(row[c])}" for c in row.index if c not in PROVENANCE_COLUMNS]
+    parts = [f"{column}:{normalize_scalar(value)}" for column, value in record_feature_items(row)]
     if shuffle:
         rng = np.random.default_rng(seed)
         rng.shuffle(parts)

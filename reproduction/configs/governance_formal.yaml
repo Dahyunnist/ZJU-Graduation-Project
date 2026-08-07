@@ -1,0 +1,52 @@
+experiment_id: governance-formal-v1
+run_type: formal
+seeds: [2026, 2027, 2028, 2029, 2030]
+
+# These folds are frozen before the formal run. The registry supplies one
+# real pool and one synthetic pool per table/generator pair.
+protocols:
+  P1:
+    train_tables: [adult]
+    test_tables: [adult]
+    train_generators: [CTGAN]
+    test_generators: [CTGAN]
+  P2:
+    train_tables: [adult]
+    test_tables: [adult]
+    train_generators: [CTGAN]
+    test_generators: [TVAE]
+  P3:
+    train_tables: [adult, bank_marketing, magic_gamma]
+    test_tables: [credit]
+    train_generators: [CTGAN]
+    test_generators: [CTGAN]
+  P4:
+    train_tables: [adult, bank_marketing, magic_gamma]
+    test_tables: [credit]
+    train_generators: [CTGAN]
+    test_generators: [TVAE]
+
+prevalence_rates: [0.0, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+bags_per_rate: 100
+utility_bags_per_rate: 5
+bag_size: 1000
+detectors:
+  [char3gram, c2st_lr, c2st_xgb, flat_transformer, table_transformer,
+   datum_transformer, datum_ta]
+quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
+primary_quantifier: pacc
+
+data:
+  mode: registry
+  registry_path: ../data/governance/pool_registry.csv
+
+thresholds:
+  detector_fpr_target: 0.05
+  artifact_auc_gate: 0.65
+  governance_prevalence: 0.10
+  harm_tolerance: 0.005
+
+output_dir: ../runs/governance-formal-v1
+resources:
+  device: cuda
+  max_cpu_threads: 4

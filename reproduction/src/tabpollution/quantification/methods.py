@@ -8,9 +8,10 @@ import json
 
 import numpy as np
 from scipy.optimize import minimize_scalar
+from scipy.stats import gaussian_kde
 
 
-METHODS = ("cc", "pcc", "acc", "pacc", "emq", "hdy", "dys", "median_sweep")
+METHODS = ("cc", "pcc", "acc", "pacc", "emq", "hdy", "dys", "median_sweep", "kdey")
 
 
 def available_quantifiers() -> tuple[str, ...]: return METHODS
@@ -104,6 +105,27 @@ class ScoreQuantifier:
         self.state["thresholds"] = thresholds.tolist(); self.state["valid_thresholds"] = len(vals)
         return float(np.median(vals))
 
+    def _kdey(self, test: np.ndarray) -> float:
+        """Continuous class-conditional KDE mixture prevalence estimate."""
+        pos = np.asarray(self.state["positive_scores"], float)
+        neg = np.asarray(self.state["negative_scores"], float)
+        if np.ptp(pos) < 1e-8 or np.ptp(neg) < 1e-8:
+            raise ValueError("kdey_requires_nonconstant_class_scores")
+        if not hasattr(self, "_kde_positive"):
+            self._kde_positive = gaussian_kde(pos)
+            self._kde_negative = gaussian_kde(neg)
+        positive_density = self._kde_positive(test)
+        negative_density = self._kde_negative(test)
+
+        def objective(prevalence: float) -> float:
+            mixture = prevalence * positive_density + (1 - prevalence) * negative_density
+            return float(-np.mean(np.log(np.clip(mixture, 1e-12, None))))
+
+        result = minimize_scalar(objective, bounds=(0, 1), method="bounded")
+        self.state["kdey_objective"] = float(result.fun)
+        self.state["kdey_converged"] = bool(result.success)
+        return float(result.x)
+
     def predict_prevalence(self, test_scores: np.ndarray, **context: Any) -> dict[str, Any]:
         s = np.asarray(test_scores, float)
         if self.method == "cc": raw = float((s >= self.state["threshold"]).mean())
@@ -113,7 +135,8 @@ class ScoreQuantifier:
         elif self.method == "emq": raw = self._emq(s)
         elif self.method == "hdy": raw = self._distribution_match(s, "hellinger")
         elif self.method == "dys": raw = self._distribution_match(s, "tops")
-        else: raw = self._median_sweep(s)
+        elif self.method == "median_sweep": raw = self._median_sweep(s)
+        else: raw = self._kdey(s)
         return {"raw": raw, "clipped": float(np.clip(raw, 0, 1)), "out_of_range": bool(raw < 0 or raw > 1),
                 "diagnostics": {k: v for k, v in self.state.items() if k not in {"positive_scores", "negative_scores"}}}
 

@@ -1,0 +1,50 @@
+experiment_id: governance-smoke-v1
+run_type: smoke
+seeds: [2026]
+
+# P1: same table/same generator; P2: held-out generator;
+# P3: held-out schema; P4: held-out schema and generator.
+protocols:
+  P1:
+    train_tables: [table_a]
+    test_tables: [table_a]
+    train_generators: [marginal]
+    test_generators: [marginal]
+  P2:
+    train_tables: [table_a]
+    test_tables: [table_a]
+    train_generators: [marginal]
+    test_generators: [noisy]
+  P3:
+    train_tables: [table_a, table_b]
+    test_tables: [table_c]
+    train_generators: [marginal]
+    test_generators: [marginal]
+  P4:
+    train_tables: [table_a, table_b]
+    test_tables: [table_c]
+    train_generators: [marginal]
+    test_generators: [rounded]
+
+prevalence_rates: [0.0, 0.05, 0.10, 0.25, 0.50]
+bags_per_rate: 1
+utility_bags_per_rate: 1
+bag_size: 120
+detectors: [char3gram, c2st_lr]
+quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
+primary_quantifier: pacc
+
+data:
+  mode: synthetic_fixture
+  rows_per_table: 700
+
+thresholds:
+  detector_fpr_target: 0.05
+  artifact_auc_gate: 0.65
+  governance_prevalence: 0.10
+  harm_tolerance: 0.005
+
+output_dir: ../runs/governance-smoke-v1
+resources:
+  device: cpu
+  max_cpu_threads: 2

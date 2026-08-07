@@ -17,7 +17,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from .base import Detector, feature_frame, normalize_scalar, serialize_record
+from .base import Detector, feature_frame, normalize_scalar, record_feature_items, serialize_record
 
 
 CHARS = ["<PAD>", "<UNK>"] + list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:|<>_-. ?/+=,%")
@@ -62,7 +62,7 @@ class FlatNet(nn.Module):
 class DatumNet(nn.Module):
     def __init__(self, dim: int, heads: int, layers: int, max_datum: int,
                  table_adaptation: bool = False, positional_columns: bool = False,
-                 max_columns: int = 24):
+                 max_columns: int = 24, table_classes: int = 8):
         super().__init__()
         self.table_adaptation = table_adaptation
         self.emb = nn.Embedding(len(CHARS), dim, padding_idx=0)
@@ -75,7 +75,7 @@ class DatumNet(nn.Module):
         self.datum_encoder = nn.TransformerEncoder(datum_layer, 1)
         self.row_encoder = nn.TransformerEncoder(row_layer, layers)
         self.detect_head = nn.Linear(dim, 1)
-        self.table_head = nn.Linear(dim, 8)
+        self.table_head = nn.Linear(dim, table_classes)
 
     def forward(self, ids: torch.Tensor, grl_weight: float = 0.) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         b, c, l = ids.shape
@@ -103,32 +103,38 @@ class DeepTextDetector(Detector):
     def __init__(self, mode: str = "flat", seed: int = 2026, dim: int = 24,
                  heads: int = 4, layers: int = 1, max_len: int = 192,
                  max_datum: int = 32, max_columns: int = 24, epochs: int = 2,
-                 batch_size: int = 32):
+                 batch_size: int = 32, device: str = "auto", table_classes: int = 8):
         if mode not in {"flat", "table", "datum", "datum_ta"}:
             raise ValueError(mode)
         self.mode, self.seed = mode, seed
+        if device not in {"auto", "cpu", "cuda"}:
+            raise ValueError("device must be auto, cpu or cuda")
+        if device == "cuda" and not torch.cuda.is_available():
+            raise RuntimeError("CUDA requested but unavailable")
+        self.device = torch.device("cuda" if (device == "cuda" or (device == "auto" and torch.cuda.is_available())) else "cpu")
         self.config = dict(dim=dim, heads=heads, layers=layers, max_len=max_len,
                            max_datum=max_datum, max_columns=max_columns, epochs=epochs,
-                           batch_size=batch_size)
+                           batch_size=batch_size, device=device, table_classes=table_classes)
         torch.manual_seed(seed); np.random.seed(seed)
         self.model = (FlatNet(dim, heads, layers, max_len) if mode == "flat" else
                       DatumNet(dim, heads, layers, max_datum,
                                table_adaptation=mode == "datum_ta",
-                               positional_columns=mode == "table", max_columns=max_columns))
+                               positional_columns=mode == "table", max_columns=max_columns,
+                               table_classes=table_classes)).to(self.device)
         self.loss_history: list[dict[str, float]] = []
         self.truncation_rate = 0.
         self.columns_seen: list[int] = []
 
     def _tensorize(self, records: pd.DataFrame) -> torch.Tensor:
-        frame = feature_frame(records)
         if self.mode == "flat":
             encoded, trunc = zip(*[_encode(serialize_record(row), self.config["max_len"])
-                                   for _, row in frame.iterrows()])
+                                   for _, row in records.iterrows()])
             self.truncation_rate = float(np.mean(trunc))
             return torch.tensor(encoded, dtype=torch.long)
         rows, truncs = [], []
-        for _, row in frame.iterrows():
-            cells = [f"{c}:{normalize_scalar(row[c])}" for c in row.index][:self.config["max_columns"]]
+        for _, row in records.iterrows():
+            cells = [f"{column}:{normalize_scalar(value)}" for column, value in record_feature_items(row)]
+            cells = cells[:self.config["max_columns"]]
             self.columns_seen.append(len(cells))
             enc = [_encode(cell, self.config["max_datum"]) for cell in cells]
             truncs.extend(v[1] for v in enc)
@@ -153,6 +159,7 @@ class DeepTextDetector(Detector):
         for epoch in range(self.config["epochs"]):
             det_sum = tab_sum = 0.
             for xb, yb, tb in loader:
+                xb, yb, tb = xb.to(self.device), yb.to(self.device), tb.to(self.device)
                 weight = .5 * (1 - np.cos(np.pi * step / total_steps)) if self.mode == "datum_ta" else 0.
                 optimizer.zero_grad()
                 if self.mode == "flat":
@@ -160,7 +167,7 @@ class DeepTextDetector(Detector):
                 else:
                     logits, table_logits, _ = self.model(xb, float(weight))
                 det_loss = bce(logits, yb)
-                table_loss = ce(table_logits, tb) if self.mode == "datum_ta" else torch.tensor(0.)
+                table_loss = ce(table_logits, tb) if self.mode == "datum_ta" else torch.tensor(0., device=self.device)
                 loss = det_loss + (float(weight) * table_loss if self.mode == "datum_ta" else 0.)
                 loss.backward(); optimizer.step(); step += 1
                 det_sum += float(det_loss.detach()); tab_sum += float(table_loss.detach())
@@ -173,6 +180,7 @@ class DeepTextDetector(Detector):
         x = self._tensorize(records); self.model.eval(); out = []
         with torch.no_grad():
             for (xb,) in DataLoader(TensorDataset(x), batch_size=self.config["batch_size"]):
+                xb = xb.to(self.device)
                 logits = self.model(xb)[0]
                 out.extend(torch.sigmoid(logits).cpu().numpy().tolist())
         return np.asarray(out)
@@ -186,6 +194,8 @@ class DeepTextDetector(Detector):
     @classmethod
     def load(cls, path: str | Path) -> "DeepTextDetector":
         state = torch.load(path, map_location="cpu", weights_only=False)
+        if state["config"].get("device") == "cuda" and not torch.cuda.is_available():
+            state["config"]["device"] = "cpu"
         obj = cls(state["mode"], state["seed"], **state["config"])
         obj.model.load_state_dict(state["state_dict"]); obj.loss_history = state["loss_history"]
         obj.truncation_rate = state["truncation_rate"]
@@ -193,7 +203,9 @@ class DeepTextDetector(Detector):
 
     def get_provenance(self) -> dict[str, Any]:
         return {"implementation": "paper_aligned_self_implementation", "mode": self.mode,
-                "paper_performance_reproduction": False, "cpu_tiny_runthrough": True,
+                "paper_performance_reproduction": False,
+                "device": str(self.device),
+                "cpu_tiny_runthrough": self.config["dim"] <= 24 and self.config["epochs"] <= 2,
                 "config": self.config, "parameter_count": sum(p.numel() for p in self.model.parameters()),
                 "truncation_rate": self.truncation_rate, "loss_history": self.loss_history}
 

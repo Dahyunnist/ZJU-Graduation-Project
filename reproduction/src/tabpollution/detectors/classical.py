@@ -95,8 +95,7 @@ class Char3GramDetector(Detector):
 
     @staticmethod
     def texts(records: pd.DataFrame, shuffle: bool = True, seed: int = 2026) -> list[str]:
-        frame = feature_frame(records)
-        return [serialize_record(row, shuffle=shuffle, seed=seed + i) for i, (_, row) in enumerate(frame.iterrows())]
+        return [serialize_record(row, shuffle=shuffle, seed=seed + i) for i, (_, row) in enumerate(records.iterrows())]
 
     def fit(self, train_records: pd.DataFrame, train_labels: np.ndarray,
             val_records: pd.DataFrame | None = None, val_labels: np.ndarray | None = None,

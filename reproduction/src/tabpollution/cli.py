@@ -24,6 +24,7 @@ from tabpollution.mixing.smoke import inspect_bag, run_c3_smoke
 from tabpollution.pipeline import prepare_benchmark, validate_prepared_benchmark
 from tabpollution.runs import aggregate_formal_runs
 from tabpollution.algorithm_runthrough import run_all as run_algorithm_runthrough, recover_and_aggregate
+from tabpollution.governance import run_governance_benchmark, validate_governance_setup
 from tabpollution.utils import write_json
 
 
@@ -117,6 +118,16 @@ def build_parser() -> argparse.ArgumentParser:
     runthrough_all.add_argument("--project-root", type=Path, default=Path("."))
     runthrough_aggregate = runthrough_commands.add_parser("aggregate")
     runthrough_aggregate.add_argument("--project-root", type=Path, default=Path("."))
+
+    governance = commands.add_parser(
+        "governance",
+        help="Run the unified detection-to-decision contamination benchmark",
+    )
+    governance_commands = governance.add_subparsers(dest="governance_command", required=True)
+    governance_preflight = governance_commands.add_parser("preflight")
+    governance_preflight.add_argument("--config", type=Path, required=True)
+    governance_run = governance_commands.add_parser("run")
+    governance_run.add_argument("--config", type=Path, required=True)
     return parser
 
 
@@ -178,6 +189,10 @@ def main(argv: list[str] | None = None) -> None:
         result = run_algorithm_runthrough(args.project_root)
     elif args.command == "runthrough" and args.runthrough_command == "aggregate":
         result = recover_and_aggregate(args.project_root)
+    elif args.command == "governance" and args.governance_command == "preflight":
+        result = validate_governance_setup(args.config)
+    elif args.command == "governance" and args.governance_command == "run":
+        result = run_governance_benchmark(args.config)
     else:
         raise AssertionError("Unreachable command")
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
