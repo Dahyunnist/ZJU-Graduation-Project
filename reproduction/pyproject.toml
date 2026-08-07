@@ -16,6 +16,8 @@ dependencies = [
 
 [project.optional-dependencies]
 formal = [
+  "sdv==1.37.3",
+  "sdmetrics==0.28.0",
   "xgboost>=2,<4",
 ]
 test = [

@@ -68,3 +68,13 @@ def test_registry_preflight_configuration_can_exist_before_data() -> None:
     assert config.data_mode == "registry"
     assert config.run_type == "formal"
     assert config.device == "cuda"
+
+
+def test_pilot_and_formal_freeze_the_same_protocol_matrix() -> None:
+    pilot = load_governance_config(Path("configs/governance_pilot.yaml"))
+    formal = load_governance_config(Path("configs/governance_formal.yaml"))
+    assert pilot.run_type == "pilot"
+    assert pilot.protocols == formal.protocols
+    assert pilot.detectors == formal.detectors
+    assert pilot.quantifiers == formal.quantifiers
+    assert pilot.seeds == (2026,)

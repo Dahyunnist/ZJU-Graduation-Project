@@ -32,6 +32,7 @@ reproduction/data
 reproduction/runs
 reproduction/outputs
 reproduction/checkpoints
+reproduction/manifests/governance-pools-*/
 *.egg-info/
 *.pkl
 *.joblib

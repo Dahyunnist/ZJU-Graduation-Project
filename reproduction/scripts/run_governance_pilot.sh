@@ -24,7 +24,7 @@ export OPENBLAS_NUM_THREADS=4
 export NUMEXPR_NUM_THREADS=4
 
 nvidia-smi
-mkdir -p runs/governance-formal-v1
-python -m tabpollution environment capture --output runs/governance-formal-v1/environment.txt
-python -m tabpollution governance preflight --config configs/governance_formal.yaml
-python -m tabpollution governance run --config configs/governance_formal.yaml
+mkdir -p runs/governance-pilot-v1
+python -m tabpollution environment capture --output runs/governance-pilot-v1/environment.txt
+python -m tabpollution governance preflight --config configs/governance_pilot.yaml
+python -m tabpollution governance run --config configs/governance_pilot.yaml

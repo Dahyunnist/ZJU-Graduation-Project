@@ -1,0 +1,39 @@
+build_id: governance-pools-v1
+seed: 2026
+sample_size: match_real
+source_train_fraction: 0.35
+
+datasets:
+  adult:
+    domain: social
+    source_path: ../data/processed/adult/adult_clean.csv
+    source_target: income
+    target_column: income
+    target_transform: identity
+  abalone:
+    domain: scientific
+    source_path: ../data/processed/abalone/abalone_clean.csv
+    source_target: rings
+    target_column: rings_high
+    target_transform: threshold_binary
+    target_threshold: 9
+  credit:
+    domain: finance
+    source_path: ../data/processed/credit/credit_clean.csv
+    source_target: default_payment_next_month
+    target_column: default_payment_next_month
+    target_transform: identity
+
+generators:
+  CTGAN:
+    epochs: 300
+    batch_size: 500
+    cuda: true
+    verbose: true
+  TVAE:
+    epochs: 300
+    batch_size: 500
+    cuda: true
+
+output_dir: ../data/governance
+checkpoint_dir: ../checkpoints/governance-generators

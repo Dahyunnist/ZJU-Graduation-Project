@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from datetime import datetime, timezone
 import json
+import importlib.util
 import os
 from pathlib import Path
 import time
@@ -123,7 +124,7 @@ def _detector(name: str, seed: int, config: GovernanceConfig):
         "datum_ta": "datum_ta",
     }
     if name in modes:
-        formal = config.run_type == "formal"
+        formal = config.run_type in {"pilot", "formal"}
         return DeepTextDetector(
             mode=modes[name], seed=seed,
             dim=64 if formal else 24,
@@ -269,10 +270,28 @@ def validate_governance_setup(config_or_path: GovernanceConfig | str | Path) -> 
             "data_mode": config.data_mode,
             "reason": "pool_registry_missing",
             "registry_path": str(config.registry_path),
+            "dependency_checks": [],
             "protocol_checks": [],
             "output_dir": str(config.output_dir),
         }
     source = _source(config, config.seeds[0])
+    dependency_checks: list[dict[str, Any]] = []
+    if "c2st_xgb" in config.detectors:
+        xgboost_available = importlib.util.find_spec("xgboost") is not None
+        dependency_checks.append({
+            "dependency": "xgboost", "passed": xgboost_available,
+            "reason": None if xgboost_available else "xgboost_not_installed",
+        })
+    if config.device == "cuda":
+        try:
+            import torch
+            cuda_available = bool(torch.cuda.is_available())
+        except ImportError:
+            cuda_available = False
+        dependency_checks.append({
+            "dependency": "torch_cuda", "passed": cuda_available,
+            "reason": None if cuda_available else "cuda_unavailable",
+        })
     available_tables = set(source.table_ids)
     available_generators = set(source.generators)
     checks: list[dict[str, Any]] = []
@@ -285,13 +304,14 @@ def validate_governance_setup(config_or_path: GovernanceConfig | str | Path) -> 
             "missing_generators": missing_generators,
             "passed": not missing_tables and not missing_generators,
         })
-    passed = all(row["passed"] for row in checks)
+    passed = all(row["passed"] for row in checks) and all(row["passed"] for row in dependency_checks)
     return {
         "experiment_id": config.experiment_id,
         "passed": passed,
         "data_mode": config.data_mode,
         "available_tables": sorted(available_tables),
         "available_generators": sorted(available_generators),
+        "dependency_checks": dependency_checks,
         "protocol_checks": checks,
         "output_dir": str(config.output_dir),
     }

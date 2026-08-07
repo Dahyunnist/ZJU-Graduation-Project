@@ -25,6 +25,11 @@ from tabpollution.pipeline import prepare_benchmark, validate_prepared_benchmark
 from tabpollution.runs import aggregate_formal_runs
 from tabpollution.algorithm_runthrough import run_all as run_algorithm_runthrough, recover_and_aggregate
 from tabpollution.governance import run_governance_benchmark, validate_governance_setup
+from tabpollution.governance.pools import (
+    build_governance_pools,
+    preflight_pool_build,
+    prepare_governance_sources,
+)
 from tabpollution.utils import write_json
 
 
@@ -128,6 +133,13 @@ def build_parser() -> argparse.ArgumentParser:
     governance_preflight.add_argument("--config", type=Path, required=True)
     governance_run = governance_commands.add_parser("run")
     governance_run.add_argument("--config", type=Path, required=True)
+    source_prepare = governance_commands.add_parser("source-prepare")
+    source_prepare.add_argument("--config", type=Path, required=True)
+    pool_preflight = governance_commands.add_parser("pool-preflight")
+    pool_preflight.add_argument("--config", type=Path, required=True)
+    pool_build = governance_commands.add_parser("pool-build")
+    pool_build.add_argument("--config", type=Path, required=True)
+    pool_build.add_argument("--resume", action="store_true")
     return parser
 
 
@@ -193,6 +205,12 @@ def main(argv: list[str] | None = None) -> None:
         result = validate_governance_setup(args.config)
     elif args.command == "governance" and args.governance_command == "run":
         result = run_governance_benchmark(args.config)
+    elif args.command == "governance" and args.governance_command == "source-prepare":
+        result = prepare_governance_sources(args.config)
+    elif args.command == "governance" and args.governance_command == "pool-preflight":
+        result = preflight_pool_build(args.config)
+    elif args.command == "governance" and args.governance_command == "pool-build":
+        result = build_governance_pools(args.config, resume=args.resume)
     else:
         raise AssertionError("Unreachable command")
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))

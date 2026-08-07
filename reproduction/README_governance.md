@@ -47,8 +47,8 @@ runs/governance-smoke-v1/
 
 正式配置为 `configs/governance_formal.yaml`。正式运行前必须准备：
 
-1. Adult、Credit及B-small训练表的冻结真实数据；
-2. CTGAN和TVAE独立合成池；P3/P4至少包含三个训练表，使table adaptation具有可识别的表域信号；
+1. Adult、Abalone和Credit的冻结真实数据；其中Abalone以冻结阈值 `rings > 9` 定义二分类任务，避免在评测结果产生后调整标签；
+2. CTGAN和TVAE独立合成池；P3/P4使用Adult与Abalone作为训练表，使table adaptation具有可识别的表域信号；
 3. `data/governance/pool_registry.csv`；
 4. 服务器端CUDA环境和共享GPU使用确认。
 
@@ -59,15 +59,25 @@ python -m pip install -e ".[formal,test]"
 ```
 
 CUDA版PyTorch沿用课题组已经验证的独立安装，不由本项目重新覆盖。
+生成器依赖冻结为既有pilot已验证的SDV 1.37.3与SDMetrics 0.28.0；正式矩阵中途不得升级。XGBoost及其他运行时版本会写入环境清单，单次正式矩阵内必须保持不变。
 
-注册表格式参考 `configs/governance_pool_registry.example.csv`。路径相对于注册表文件解析，因此本地和服务器可使用相同配置，不应把绝对机器路径写入实验配置。
+注册表格式参考 `configs/governance_pool_registry.example.csv`。路径相对于注册表文件解析，因此本地和服务器可使用相同配置，不应把绝对机器路径写入实验配置。正式合成池由以下入口构建：
+
+```bash
+python -m tabpollution governance source-prepare --config configs/governance_pool_build.yaml
+python -m tabpollution governance pool-preflight --config configs/governance_pool_build.yaml
+CONFIRM_SHARED_GPU=1 bash scripts/run_governance_pool_build.sh
+```
+
+`source-prepare`从UCI官方地址下载并清洗三张真实表，采用临时文件替换避免留下半成品，并记录原始文件与规范表的SHA-256。构建器先冻结互斥的 `source_train` 与评测真实池：CTGAN/TVAE只拟合前者，后者才进入检测、计量和下游纯真实测试，从而杜绝生成器见到评测记录。两部分及合成CSV、模型权重、目标变换的SHA-256均写入个人NFS；全部组合完成后才原子生成 `pool_registry.csv`。`--resume`只复用同时存在CSV和模型的完整组合，不覆盖已完成产物。
 
 ```bash
 python -m tabpollution governance preflight --config configs/governance_formal.yaml
+CONFIRM_SHARED_GPU=1 bash scripts/run_governance_pilot.sh
 CONFIRM_SHARED_GPU=1 bash scripts/run_governance_formal.sh
 ```
 
-正式配置采用5个冻结种子、7档污染率和每档100个比例估计bags；下游效用只在每档前5个bags上运行，以避免把量化所需重复数机械放大为不可承受的模型训练次数。
+必须先完成与正式矩阵使用相同协议、算法和数据池的单种子pilot；pilot成功后才启动正式脚本。正式配置采用5个冻结种子、7档污染率和每档100个比例估计bags；下游效用只在每档前5个bags上运行，以避免把量化所需重复数机械放大为不可承受的模型训练次数。两个脚本均保存实际Python与依赖环境清单。
 
 ## P1--P4
 

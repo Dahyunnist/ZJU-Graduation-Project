@@ -118,8 +118,8 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     if missing:
         raise GovernanceConfigError(f"Missing governance fields: {missing}")
     run_type = str(raw["run_type"])
-    if run_type not in {"smoke", "formal"}:
-        raise GovernanceConfigError("run_type must be smoke or formal")
+    if run_type not in {"smoke", "pilot", "formal"}:
+        raise GovernanceConfigError("run_type must be smoke, pilot, or formal")
     seeds = _unique_tuple(raw["seeds"], "seeds", int)
     rates = tuple(float(x) for x in _unique_tuple(raw["prevalence_rates"], "prevalence_rates", (int, float)))
     if any(x < 0 or x > 1 for x in rates):
