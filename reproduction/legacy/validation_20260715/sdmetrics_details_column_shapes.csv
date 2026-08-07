@@ -1,0 +1,16 @@
+Column,Metric,Score
+age,KSComplement,0.5316666666666667
+workclass,TVComplement,0.9619248331577098
+fnlwgt,KSComplement,0.796
+education,TVComplement,0.9023333333333333
+education-num,KSComplement,0.8496666666666667
+marital-status,TVComplement,0.9523333333333334
+occupation,TVComplement,0.919111878384627
+relationship,TVComplement,0.8893333333333333
+race,TVComplement,0.898
+sex,TVComplement,0.961
+capital-gain,KSComplement,0.9339999999999999
+capital-loss,KSComplement,0.18366666666666664
+hours-per-week,KSComplement,0.881
+native-country,TVComplement,0.958610033353754
+income,TVComplement,0.977

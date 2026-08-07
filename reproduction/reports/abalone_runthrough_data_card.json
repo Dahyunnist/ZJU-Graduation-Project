@@ -1,0 +1,9 @@
+{
+  "columns": 9,
+  "downloaded_at": "2026-07-15",
+  "license": "CC BY 4.0",
+  "role": "three-table mini cross-table runthrough only",
+  "rows": 4177,
+  "sha256": "755a6a67c5b266961a3f149ea13be2cfb6e6c727e48cee3c83bc0b4526210ee4",
+  "source_url": "https://archive.ics.uci.edu/static/public/1/abalone.zip"
+}

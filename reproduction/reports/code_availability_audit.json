@@ -1,0 +1,93 @@
+[
+  {
+    "algorithm_id": "D1",
+    "commit": null,
+    "conclusion": "paper_aligned_reimplementation",
+    "evidence": "No official repository linked/found; three baselines are described in the paper.",
+    "license": null,
+    "official_code_url": null,
+    "paper": "Cross-table Synthetic Tabular Data Detection",
+    "paper_url": "https://aclanthology.org/2025.genaidetect-1.5/",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "ACL Anthology",
+      "GitHub title/author search"
+    ]
+  },
+  {
+    "algorithm_id": "D2",
+    "commit": null,
+    "conclusion": "paper_aligned_reimplementation",
+    "evidence": "No verified official repository found.",
+    "license": null,
+    "official_code_url": null,
+    "paper": "Synthetic Tabular Data Detection in the Wild",
+    "paper_url": "https://link.springer.com/chapter/10.1007/978-3-031-91398-3_7",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "Springer",
+      "GitHub title/author search"
+    ]
+  },
+  {
+    "algorithm_id": "D3",
+    "commit": null,
+    "conclusion": "paper_aligned_reimplementation",
+    "evidence": "AAAI page/available version says code is to be released with an extended version; no verified official repo found.",
+    "license": null,
+    "official_code_url": null,
+    "paper": "Robust Detection of Synthetic Tabular Data Under Schema Variability",
+    "paper_url": "https://ojs.aaai.org/index.php/AAAI/article/view/39422",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "AAAI",
+      "arXiv",
+      "GitHub title/author search"
+    ]
+  },
+  {
+    "algorithm_id": "QuaPy",
+    "commit": "PyPI release 0.2.0",
+    "conclusion": "official_package_installed",
+    "evidence": "QuaPy 0.2.0 installed in isolated tabpollution environment.",
+    "license": "BSD-3-Clause",
+    "official_code_url": "https://github.com/HLT-ISTI/QuaPy",
+    "paper": "QuaPy",
+    "paper_url": "https://github.com/HLT-ISTI/QuaPy",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "official GitHub",
+      "PyPI"
+    ]
+  },
+  {
+    "algorithm_id": "V-KNN",
+    "commit": null,
+    "conclusion": "paper_aligned_reimplementation",
+    "evidence": "Recurrence implemented from primary paper and checked against exhaustive Shapley.",
+    "license": null,
+    "official_code_url": null,
+    "paper": "Efficient Task-Specific Data Valuation for Nearest Neighbor Algorithms",
+    "paper_url": "https://www.vldb.org/pvldb/vol12/p1610-jia.pdf",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "PVLDB",
+      "GitHub title/author search"
+    ]
+  },
+  {
+    "algorithm_id": "V-OOB",
+    "commit": null,
+    "conclusion": "paper_aligned_reimplementation",
+    "evidence": "Primary page exposes paper/OpenReview but no verified official code repository was found.",
+    "license": null,
+    "official_code_url": null,
+    "paper": "Data-OOB",
+    "paper_url": "https://proceedings.mlr.press/v202/kwon23e.html",
+    "retrieved_at": "2026-07-15",
+    "searched_locations": [
+      "PMLR related material",
+      "GitHub title/author search"
+    ]
+  }
+]

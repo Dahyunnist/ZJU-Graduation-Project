@@ -1,0 +1,5 @@
+generator_id: TVAE
+status: registered_not_trained
+smoke_epochs: 20
+formal_epochs: 300
+

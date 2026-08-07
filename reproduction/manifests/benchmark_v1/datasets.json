@@ -1,0 +1,103 @@
+{
+  "benchmark_id": "benchmark_v1",
+  "datasets": [
+    {
+      "canonical_name": "UCI Adult",
+      "categorical_columns": [
+        "workclass",
+        "education",
+        "marital-status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native-country"
+      ],
+      "cleaning": {
+        "cleaned_columns": 16,
+        "cleaned_rows": 48790,
+        "exact_duplicate_rows_removed": 52,
+        "raw_columns": 15,
+        "raw_rows": 48842
+      },
+      "dataset_id": "adult",
+      "doi": "10.24432/C5XW20",
+      "download_url": "https://archive.ics.uci.edu/static/public/2/adult.zip",
+      "features": 14,
+      "license": "CC BY 4.0",
+      "missing_markers": [
+        "?"
+      ],
+      "numeric_columns": [
+        "age",
+        "fnlwgt",
+        "education-num",
+        "capital-gain",
+        "capital-loss",
+        "hours-per-week"
+      ],
+      "processed_path": "data/processed/adult/adult_clean.csv",
+      "processed_sha256": "9cf6e79f08b62089624828b3b3c60c64950fea93948f5a5b2829d9194724f2d2",
+      "raw_path": "data/raw/adult/adult.zip",
+      "raw_sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+      "retrieval_date": "2026-07-15",
+      "rows": 48790,
+      "source_page": "https://archive.ics.uci.edu/dataset/2/adult",
+      "target": "income",
+      "task_type": "binary_classification"
+    },
+    {
+      "canonical_name": "Default of Credit Card Clients",
+      "categorical_columns": [
+        "SEX",
+        "EDUCATION",
+        "MARRIAGE",
+        "PAY_0",
+        "PAY_2",
+        "PAY_3",
+        "PAY_4",
+        "PAY_5",
+        "PAY_6"
+      ],
+      "cleaning": {
+        "cleaned_columns": 25,
+        "cleaned_rows": 29965,
+        "exact_duplicate_rows_removed": 35,
+        "raw_columns": 24,
+        "raw_rows": 30000
+      },
+      "dataset_id": "credit",
+      "doi": "10.24432/C55S3H",
+      "download_url": "https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip",
+      "features": 23,
+      "license": "CC BY 4.0",
+      "missing_markers": [],
+      "numeric_columns": [
+        "LIMIT_BAL",
+        "AGE",
+        "BILL_AMT1",
+        "BILL_AMT2",
+        "BILL_AMT3",
+        "BILL_AMT4",
+        "BILL_AMT5",
+        "BILL_AMT6",
+        "PAY_AMT1",
+        "PAY_AMT2",
+        "PAY_AMT3",
+        "PAY_AMT4",
+        "PAY_AMT5",
+        "PAY_AMT6"
+      ],
+      "processed_path": "data/processed/credit/credit_clean.csv",
+      "processed_sha256": "ee2fa731865931ec6c4c54d7c16e00f1051b9163a0bfeb7aa318e795302a4d29",
+      "raw_path": "data/raw/credit/default_of_credit_card_clients.zip",
+      "raw_sha256": "56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602",
+      "retrieval_date": "2026-07-15",
+      "rows": 29965,
+      "source_page": "https://archive.ics.uci.edu/dataset/350/defaultofcreditcardclients",
+      "target": "default_payment_next_month",
+      "task_type": "binary_classification"
+    }
+  ],
+  "generated_at": "2026-07-15"
+}

@@ -1,0 +1,31 @@
+digraph BenchmarkFlow {
+  graph [rankdir=LR, bgcolor="white", pad=0.15, nodesep=0.35, ranksep=0.55,
+         fontname="Microsoft YaHei", label=""];
+  node [shape=box, style="rounded,filled", fontname="Microsoft YaHei", fontsize=11,
+        color="#36556E", fillcolor="#F3F7FA", margin="0.12,0.08"];
+  edge [fontname="Microsoft YaHei", fontsize=9, color="#536F82", arrowsize=0.7];
+
+  real [label="公开真实表\nAdult / Credit / Track B", fillcolor="#E8F2F8"];
+  split [label="冻结真实分区\n60%源训练 / 15%检测训练\n10%验证 / 15%最终测试"];
+  gen [label="生成器只拟合源训练分区\nCTGAN / TVAE / GaussianCopula\nTrack B扩展TabDDPM / TabSyn", fillcolor="#FFF4DF", color="#A87525"];
+  pools [label="相互隔离的合成池\n检测训练 / 验证 / 最终测试\n比例bags / 下游混合"];
+
+  detect [label="任务线一：样本级检测\nP1--P4；AUROC为主", fillcolor="#EAF6EA", color="#3E7A4D"];
+  quant [label="任务线二：比例估计\n共享冻结得分；MAE为主", fillcolor="#F1ECFA", color="#70529A"];
+  value [label="任务线三：效用与估值\n四混合条件；纯真实测试", fillcolor="#FCEBEC", color="#A04E57"];
+  audit [label="统一审计与统计\n格式伪影 / 泄漏 / 五种子\n置信区间 / 失败记录", fillcolor="#EEF0F2"];
+
+  real -> split;
+  split -> gen [label="R_source_train"];
+  gen -> pools;
+  split -> detect [label="真实检测分区"];
+  pools -> detect [label="来源标签"];
+  detect -> quant [label="冻结来源得分"];
+  split -> quant [label="真实bags"];
+  pools -> quant [label="合成bags"];
+  split -> value [label="真实基底与测试"];
+  pools -> value [label="污染训练集"];
+  detect -> audit;
+  quant -> audit;
+  value -> audit;
+}

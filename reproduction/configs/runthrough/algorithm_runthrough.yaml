@@ -1,0 +1,10 @@
+run_type: runthrough
+seed: 2026
+formal_inclusion: false
+datasets: [adult, credit, abalone]
+generator: GaussianCopula
+rates: [0.0, 0.05, 0.10, 0.25, 0.50, 0.75, 1.0]
+detectors: [D-LR, D-XGB, D-3G, D-FT, D-TT, D-DW, D-DWTA]
+quantifiers: [Q-CC, Q-PCC, Q-ACC, Q-PACC, Q-EMQ, Q-HDy, Q-DyS, Q-MS]
+valuation: [V-CURVE-LR, V-CURVE-XGB, V-KNN, V-OOB]
+resource_profile: cpu_tiny

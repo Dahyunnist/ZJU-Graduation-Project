@@ -1,0 +1,1187 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  chinese,
+  12pt,
+  a4paper,
+  chinese,
+  UTF8]{ctexart}
+\usepackage{xcolor}
+\usepackage[left=3cm,right=2.5cm,top=2.6cm,bottom=2.6cm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage{setspace}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic,shorthands=off,,provide=*]{babel}
+\else
+\usepackage[bidi=default,shorthands=off,,provide=*]{babel}
+\fi
+\ifLuaTeX
+  \usepackage{selnolig} % disable illegal ligatures
+\fi
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage[backend=biber,style=gb7714-2015,autocite=superscript]{biblatex}
+\addbibresource{references.bib}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={合成表格数据污染检测、比例估计与估值影响},
+  pdflang={zh-CN},
+  pdfkeywords={合成表格数据；污染检测；跨表泛化；量化学习；数据估值；可复现基准},
+  colorlinks=true,
+  linkcolor={NavyBlue},
+  filecolor={Maroon},
+  citecolor={NavyBlue},
+  urlcolor={RoyalBlue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{合成表格数据污染检测、比例估计与估值影响}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{国内外研究综述与研究方案}
+\author{}
+\date{2026年7月16日}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+随着合成表格数据生成技术进入数据共享、隐私保护与数据增强流程，真实数据与合成记录在缺少可靠来源标记的情况下发生混合，正在形成新的数据治理问题。围绕这一问题，可区分样本级来源检测、语料级污染比例估计以及污染对下游效用与训练样本价值的影响三条相互关联但不可互相替代的任务线。现有研究表明，同表分类器两样本检验能够揭示可分伪影，却不能自动等价为可部署的跨表检测器；污染比例估计属于集合层面的量化学习问题，不能由逐条分类后直接计数替代；数据估值依赖固定的学习算法、效用函数与纯真实验证分布，也不能被解释为来源检测指标。针对这些差异，研究方案设置Track
+A两表三生成器主基准与Track
+B十四表跨表复现轨道，统一数据分区、污染构造、评测协议与统计检验，并建立由经典方法、直接相关方法和最新方法组成的分层对比矩阵。该框架旨在同时考察检测泛化、比例估计误差以及污染的任务效应，为合成表格数据污染的识别、计量和影响分析提供可复现的实验基础。
+\end{abstract}
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\setstretch{1.35}
+\section{引言}\label{ux5f15ux8a00}
+
+合成表格数据（synthetic tabular
+data）是通过统计模型、生成对抗网络、变分自编码器、扩散模型或大语言模型，从真实表格的结构与分布中学习并采样得到的新记录。CTGAN/TVAE解决了连续变量多峰分布、类别不平衡和混合类型字段的建模问题\autocite{xu2019ctgan}，TabDDPM和TabSyn进一步将扩散建模引入表格生成\autocite{kotelnikov2023tabddpm,zhang2024tabsyn}。这些方法降低了数据共享和数据增强的门槛，也使``来源不可见的合成记录混入真实数据''成为现实风险。一旦污染记录进入训练或统计分析流程，问题不再只是生成质量高低，而是能否在未知生成器、未知表结构和低污染率条件下识别、计量并评估其实际影响。
+
+在数据来源治理语境中，``污染''可定义为：在未被下游使用者可靠识别、且未经过用途相容性验证的情况下，合成记录进入原本被视为真实来源的数据集合。该定义不预设所有合成数据都有害。合成数据可能增加样本量、改善少数类学习，也可能引入生成伪影、压缩分布尾部、改变变量间条件关系或使统计推断失真。因此，对污染风险的分析不能停留在``能否区分真假''，还应进一步回答整批数据中合成记录所占比例，以及这些记录如何改变下游效用与训练样本价值。
+
+截至2025年前，表格合成研究主要聚焦生成质量、隐私与效用，直接研究``跨表合成记录检测''的工作较少。Kindji等从2025年的工作坊基线\autocite{kindji2025cross}、IDA扩展研究\autocite{kindji2025wild}推进到AAAI
+2026的Datum-wise
+Transformer与表适配方法\autocite{kindji2026robust}，形成目前最直接的跨表检测研究主线；2026年6月出现的LLM逐记录判别研究又把直接检测扩展到提示驱动的通用模型\autocite{slokom2026llm}。与此同时，比例估计已有二十余年的量化学习积累，数据估值也已形成Data
+Shapley、KNN-Shapley和Data-OOB等方法体系。三类研究在输入对象、优化目标和评价尺度上存在明显差异：检测器输出单条记录的来源得分，量化器估计记录集合的类别比例，效用与估值方法则刻画数据对特定学习任务的影响。只有在统一数据来源和污染协议下分别评价三类方法，才能分析检测误差如何传导为比例偏差，以及污染程度如何进一步影响任务性能。
+
+\section{国内外研究综述}\label{ux56fdux5185ux5916ux7814ux7a76ux7efcux8ff0}
+
+合成表格数据污染研究横跨生成建模、来源鉴别、量化学习和数据价值评估等方向。不同方向往往共享相似的统计工具，却面向不同的决策对象：生成质量指标比较两组数据的整体相似性，来源检测器判断单条记录，量化器估计集合比例，效用与估值方法评价数据对具体任务的贡献。为避免概念和算法层级混淆，相关研究可依次从问题边界、样本级检测、语料级比例估计、污染效用与数据估值以及国内外研究格局五个方面展开。
+
+\subsection{问题边界与统一术语}\label{ux95eeux9898ux8fb9ux754cux4e0eux7edfux4e00ux672fux8bed}
+
+统一术语是建立可比实验的前提。若将生成器、两样本检验、跨表检测器、比例估计器和数据估值方法统称为``检测算法''，不仅会造成输入输出不一致，也会使评价指标失去共同含义。以下首先给出三条任务线的形式化定义，再区分与之相邻但不能直接替代的研究方向。
+
+\subsubsection{三条任务线的形式化定义}\label{ux4e09ux6761ux4efbux52a1ux7ebfux7684ux5f62ux5f0fux5316ux5b9aux4e49}
+
+三条任务线共享真实与合成两类来源，却分别以记录、记录集合和训练集为分析单位。形式化定义不仅用于澄清概念，也决定训练标签、测试输入和评价指标应如何构造。
+
+设表格域（或表结构）为 \(t\in\mathcal{T}\)，真实分布为
+\(P_{r}^{t}(x,y)\)，生成器为
+\(g\in\mathcal{G}\)，其拟合真实训练分区后诱导合成分布
+\(P_{s}^{t,g}(x,y)\)。来源标签 \(z=0\) 表示真实，\(z=1\) 表示合成。
+
+\textbf{样本级检测。} 学习来源得分函数
+
+\[s_\theta(x,t)\in[0,1]\approx P(z=1\mid x,t),\]
+
+输入是一条记录，输出是来源分数或二分类结果。部署价值取决于 \(t\) 或
+\(g\) 未见时的泛化，而不只是在同一张表、同一生成器上区分训练/测试样本。
+
+\textbf{语料级污染比例估计。} 给定未知来源的记录袋
+\(B=\{x_i\}_{i=1}^n\)，其中
+
+\[P_B(x)=(1-p)P_r(x)+pP_s(x),\]
+
+估计合成比例 \(\hat p=Q(B;s_\theta,\mathcal C)\)，\(\mathcal C\)
+为独立校准信息。该目标优化的是集合层面的比例误差，而非逐条分类准确率。一个AUROC很高但概率失准的检测器，仍可能产生严重的比例偏差；反之，量化器可以在个体判断不完美时得到较准确的总体比例。
+
+\textbf{效用与估值影响。} 对污染率 \(p\)、混合操作 \(m\) 和生成器 \(g\)
+构造训练集 \(D_{p,g,m}\)。固定学习算法 \(A\)、纯真实验证/测试集
+\(V_r,T_r\) 和效用函数 \(U\)，定义
+
+\[\Delta U(p,g,m)=U(A(D_{p,g,m}),T_r)-U(A(D_{0}),T_r).\]
+
+训练样本价值 \(\phi_i\) 则表示记录 \(i\)
+对固定任务效用的边际贡献。它是任务、模型和验证分布相关量，不是记录``真实性''的同义词。
+
+\subsubsection{容易混淆的相邻概念}\label{ux5bb9ux6613ux6df7ux6dc6ux7684ux76f8ux90bbux6982ux5ff5}
+
+与污染研究相邻的生成质量、主动溯源和错误检测经常使用相似的分类器或统计距离，但它们掌握的信息与回答的问题不同。下表按照输入、输出和决策用途区分这些概念。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3077}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+概念
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+输入与输出
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+是否属于直接对比算法
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+在整体研究中的位置
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+合成数据生成器 & 真实训练表 \(\rightarrow\) 合成记录 & 否 &
+污染源与难度控制变量 \\
+生成质量/效用指标 & 两张表 \(\rightarrow\) 相似度、TSTR等 & 否 &
+数据卡、生成器质量门和解释变量 \\
+C2ST/pMSE & 真实与合成样本 \(\rightarrow\) 可分性 & 是，限同表经典基线 &
+P1上限与伪影诊断 \\
+跨表来源检测 & 单条记录 \(\rightarrow\) 来源分数 & 是 &
+任务线一的直接比较对象 \\
+量化学习 & 一袋记录/得分 \(\rightarrow\) 类别比例 & 是 &
+任务线二，必须独立评价 \\
+数据估值 & 训练样本 \(\rightarrow\) 任务贡献值 & 是，任务线三 &
+解释污染如何改变训练价值 \\
+主动水印/溯源 & 生成时嵌入标记 \(\rightarrow\) 验证标记 &
+否，作为相邻方向 & 依赖生成方合作，不能公平替代事后检测 \\
+表格错误检测 & 单元格/记录 \(\rightarrow\) 错误标签 & 否，范式参考 &
+ZeroED等可启发LLM推理，但标签语义不同 \\
+\end{longtable}
+
+统计分布漂移、密度或典型性分析、训练式分类器和LLM判别更适合作为技术路线分类，而不是四个天然处于同一层级的具体算法。统计指标主要承担生成质量门控和表级诊断；密度方法可构成探索性基线；训练式分类器与跨表模型则直接输出记录来源分数；LLM方法还受到提示、上下文和模型版本的额外影响。公平比较应优先纳入任务定义明确、输入输出一致且能够在同一协议下运行的直接方法，并将生成质量、水印和错误检测保留为解释工具或相邻方向。
+
+\subsection{样本级合成表格数据检测研究进展}\label{ux6837ux672cux7ea7ux5408ux6210ux8868ux683cux6570ux636eux68c0ux6d4bux7814ux7a76ux8fdbux5c55}
+
+样本级检测的目标是从一条记录中推断其真实或合成来源。研究难点并不只在于提高同表分类准确率，而在于区分``生成器在某张表上留下的局部伪影''和``能够迁移到未知表结构的来源特征''。现有方法大致经历了同表两样本检验、表无关序列化基线、结构化跨表编码和表身份不变学习四个阶段，评价协议也由同表随机划分逐步扩展到跨生成器、跨表和完全迁移。
+
+\subsubsection{同表可分性：C2ST与pMSE}\label{ux540cux8868ux53efux5206ux6027c2stux4e0epmse}
+
+分类器两样本检验（C2ST）将来自真实分布和合成分布的样本分别标为0和1，使用相互独立的训练集与检验集训练分类器，再检验其测试准确率是否显著高于随机水平\autocite{lopezpaz2017c2st}。若分类器在独立测试集上持续优于0.5，说明存在可学习的分布差异。在线性逻辑回归下，真实/合成来源预测概率相对总体合成率的平方偏差可聚合为pMSE；Snoke等将其纳入合成数据的一般效用评价体系\autocite{snoke2018pmse}。C2ST的优势是实现简单、可使用强表格分类器并能对高维联合分布敏感；局限是结果依赖分类器容量、预处理、样本量与数据格式。高AUROC只能证明``当前协议中可分''，不能自动证明检测器能迁移到新表或未知生成器。
+
+在算法比较中，逻辑回归和XGBoost可构成两种互补的C2ST基线。逻辑回归容量较低、系数可解释，适合同时计算pMSE并判断一阶可分性；XGBoost能够捕获非线性阈值和特征交互，可作为同表强基线，并结合特征重要性检查可分性是否主要来自取值精度、缺失标记或序列化长度等伪影。二者适用于同表和跨生成器协议，但其高分不应与跨表部署能力等同。
+
+\subsubsection{Cross-table
+Detection：第一组直接基线}\label{cross-table-detectionux7b2cux4e00ux7ec4ux76f4ux63a5ux57faux7ebf}
+
+Kindji等在COLING
+2025的GenAIDetect工作坊首次系统提出跨表合成表格数据检测问题，并给出三种可适配可变schema输入的基线\autocite{kindji2025cross}。
+
+\textbf{字符3-gram + 逻辑回归。}
+每行序列化为若干\texttt{列名:取值}片段，再提取字符三元组TF-IDF特征并训练逻辑回归。字符级表示不要求不同表共享列集合，能捕获数字精度、类别词形、标点与局部取值模式；线性分类头使训练代价较低。其主要风险是过度依赖列名和导出格式。故复现时必须统一数值格式、缺失标记和片段分隔符，并同时报告随机列顺序下的性能。
+
+\textbf{Flat-text字符Transformer。}
+将整行视为一个字符序列，加入行级分类标记后经Transformer编码并二分类。自注意力可以学习跨字段的长程组合，但整行展平会使模型将列位置当作隐含schema；当列多、取值长时还会发生截断。因此最大长度、截断率、字符词表、列顺序扰动和训练自零开始/预训练模型选择都必须明确报告。
+
+\textbf{Table/column-wise Transformer。}
+对数值与类别字段分别进行表内变换或编码，再将各字段投影到共享空间，由行级Transformer聚合。该方法保留字段边界，比平面文本更接近表格结构；但表内编码器会在新表上产生尺度和类别映射问题，且固定列位置会破坏跨表不变性。它是从``序列化文本''走向``结构化表格编码''的重要中间基线。
+
+该工作还提出same-table、cross-generator、cross-table和full-shift四种协议，分别控制表结构与生成器是否在训练中出现。其最重要的贡献并非某一个高分，而是证明``同表区分''和``野外检测''是不同难度的问题。
+
+\subsubsection{Detection in the
+Wild：协议扩展与失败边界}\label{detection-in-the-wildux534fux8baeux6269ux5c55ux4e0eux5931ux8d25ux8fb9ux754c}
+
+IDA
+2025版本把预处理明确扩展为四种表无关表示：字符3-gram、词3-gram、Flat-text字符序列和Column-based字段编码，并将逻辑回归与XGBoost应用到四种表示，同时比较Flat-text
+Transformer与Column-based
+Transformer\autocite{kindji2025wild}。词3-gram比字符3-gram更强调完整列名和取值词元，可能减少局部格式噪声，却更容易遇到未登录词；Column-based编码先对数值字段做分位数变换、对类别字段做序数编码，再以填充/聚合适配可变列数。论文进一步把评测扩展为六种不同程度的``wildness''协议，区分单生成器、全生成器、已见表联合学习以及真正的未见表迁移。
+
+四类预处理与分类头应当作为一个受控组合矩阵理解，而不是笼统地称为``IDA检测器''。字符3-gram把规范化后的整行转化为字符三元组词袋，较少受完整词元变化影响；词3-gram以空格分隔后的连续三个词元为特征，对列名和类别词组合更敏感；Flat-text编码把随机排列后的\texttt{列名:取值}片段拼接为定长字符序列，超长记录截断、短记录填充；Column-based编码则在每张表内分别拟合数值分位数变换和类别序数编码，随后把不同列数的记录填充或裁剪到统一长度。前两类稀疏n-gram和两类定长表示均可接逻辑回归或XGBoost；Flat-text与Column-based还分别对应字符级和字段级Transformer。由此，公平复现至少需要报告``表示×分类头''组合、每表预处理拟合范围、未知类别处理、最大长度、截断率和列顺序策略，不能只报告一个汇总名称。
+
+该研究在14张表、CTGAN、TVAE、TabDDPM与TabSyn四种生成器上进行三折交叉验证。结果表明，在有限表集合上进行跨表联合学习是可行的，但真正对完全未见表进行迁移仍然困难：在同时混合四种生成器的跨表设定中，字符3-gram逻辑回归和Flat-text
+Transformer的平均AUROC均约为0.60，其余多数组合接近随机水平\autocite{kindji2025wild}。这一结果一方面表明轻量字符统计在小样本跨表条件下仍具有竞争力，另一方面也说明同表高分不能外推为未知schema上的可靠检测。这一结论要求完整评价同时报告宏平均、逐表结果和最差表结果，不能只把所有记录混在一起计算一个微平均AUROC；否则大表会掩盖小表或特定领域的失败。
+
+D1与D2属于同一研究脉络的连续版本。前者提出三种基础表示和四类迁移协议，后者扩展表无关编码、分类器组合与更细的部署情境。比较时应把二者视为方法族的演进关系：D1用于复现最初基线，D2用于补齐表示---分类器组合和wildness协议，而不能把高度重叠的方法重复计作两个彼此独立的SOTA。
+
+\subsubsection{Datum-wise
+Transformer与表适配}\label{datum-wise-transformerux4e0eux8868ux9002ux914d}
+
+AAAI 2026工作针对未知schema提出Datum-wise
+Transformer（DWT）\autocite{kindji2026robust}。其核心不是把整行直接分词，而是将每个单元格构造成\texttt{列名:取值}字符序列。第一级datum
+encoder只在单元格内部使用局部位置编码，得到每个字段的表示
+\(h_j\)；第二级row encoder接收 \(\{h_j\}_{j=1}^{d}\)
+和一个行级目标标记，但不加入跨列的全局位置编码：
+
+\[h_j=E_{datum}(\operatorname{chars}(c_j:x_j)),\qquad
+q=E_{row}([h_{\mathrm{target}},h_1,\ldots,h_d]).\]
+
+最终来源概率为
+\(s(x)=\sigma(w^\top q+b)\)。由于行级不使用列位置编码，理论上对列置换保持不变；这一性质可通过对同一行进行多次随机列置换并比较得分最大差值来验证。与Flat-text相比，该结构把长序列分解为多个较短的字段序列，降低单个字段因全行截断而丢失的风险，并显式保留列名---取值边界；与传统Table
+Transformer相比，它不要求跨表共享固定字段集合。代价在于每个单元格均需独立编码，计算量随列数增长，列名语义和字符规范化方式也可能成为新的域偏移来源。
+
+完整方法进一步加入表适配。模型在来源分类头之外增加表身份分类头，并通过梯度反转层使表示难以识别训练表。可写为
+
+\[\min_{\theta_f,\theta_y}\max_{\theta_t}
+\mathcal L_{src}(\theta_f,\theta_y)-\lambda(e)\mathcal L_{table}(\theta_f,\theta_t),\]
+
+其中 \(\lambda(e)\)
+随训练轮次采用余弦调度。梯度反转使特征提取器一方面降低来源分类损失，另一方面提高表身份分类难度，从而倾向于保留来源相关、表身份不相关的表示。论文报告DWT相对既有基线在AUC和准确率上约提升7个百分点，表适配又带来约7个准确率点的增益\autocite{kindji2026robust}。不过，域对抗训练只有在训练表数量和表身份分布足够多样时才可能学到稳定不变量；若来源标签与表身份高度相关，适配还可能删除有用的来源信号。因此，DWT与DWT+TA应成对报告，并通过表身份可预测性、不同适配权重和留出表结果共同判断收益。由于正式页面注明代码将在扩展版本提供，现有实现属于论文对齐自实现，而非官方代码复现。
+
+\subsubsection{解释性、LLM检测与主动水印}\label{ux89e3ux91caux6027llmux68c0ux6d4bux4e0eux4e3bux52a8ux6c34ux5370}
+
+Kapar等将真实/合成分类器与Permutation Feature
+Importance、PDP、SHAP和反事实解释结合，用于定位生成器在字段、取值区间和依赖关系上的伪影\autocite{kapar2026xai}。解释模块的角色是回答``模型为什么能分''，而不是额外制造一个不可比的检测指标。只有通过格式伪影审计的模型才值得解释，否则重要性图只会把导出差异包装成语义发现。
+
+2026年6月的LLM-as-a-Discriminator预印本尝试让LLaMA或Gemini对单条记录直接输出REAL/SYNTHETIC，并区分只给表记录（C1）和额外给分布元数据（C2）的设定\autocite{slokom2026llm}。该工作覆盖Adult与ACS
+Census以及CTGAN、TVAE和GaussianCopula，并与C2ST、记录链接和小规模人工判断比较。C1检验语言模型能否仅凭字段和值识别合成痕迹，C2则允许模型利用真实数据摘要或分布元数据形成参照；二者分别对应无参照与有参照部署。该方向减少了任务专用训练，但性能会随模型提供方、提示模板、字段序列化、上下文长度和元数据质量变化，重复成本与数据泄露风险也高于本地分类器，因此更适合作为前沿扩展，而不是替代D1--D3的直接主线。
+
+ZeroED利用LLM推理进行表格错误检测\autocite{ni2025zeroed}：先以错误原因相关二值特征、预训练嵌入和统计特征构造记录表示，再由LLM标注聚类选出的代表样本，通过簇内标签传播和增强形成训练集，最后训练统一错误检测器。该范式说明LLM可以承担高成本弱监督标注而不必处理全部记录，但其标签语义是数据错误而非合成来源。因而，ZeroED可启发提示设计、代表样本选择和混合推理流程，却不能直接列为合成来源检测对比算法。
+
+主动水印在生成时嵌入可验证信号，适合有生成方合作且水印密钥可用的溯源场景。事后来源检测面对的则是来源标记缺失、生成器未知甚至数据已被再处理的情形，二者的可用信息并不相同。因此水印属于相邻治理路线，不能在无水印数据上公平替代被动检测器。
+
+\subsubsection{直接相关工作的检索边界与完整性判断}\label{ux76f4ux63a5ux76f8ux5173ux5de5ux4f5cux7684ux68c0ux7d22ux8fb9ux754cux4e0eux5b8cux6574ux6027ux5224ux65ad}
+
+直接对比算法的完整性取决于是否使用一致的任务定义。检索范围限定为：输入至少包含单条或成批的表格记录，目标是被动判断真实/合成来源，且不要求生成时预埋水印；检索式组合``synthetic
+tabular data detection''\,``cross-table''\,``in the wild''\,``schema
+variability''\,``real or synthetic tabular''\,``LLM
+discriminator''，覆盖ACL Anthology、AAAI Digital
+Library、arXiv、Springer、DBLP和通用学术检索，并在2026年7月16日再次核验题名、版本、发表状态与代码链接。在该口径下，D1、D2和D3构成同一作者组连续推进的跨表正式研究主线，LLM-as-a-Discriminator是检索时点最新的直接预印本；XGBoost+C2ST及其XAI扩展属于同表直接检测/诊断。水印、生成质量评价、表格异常检测、错误检测和仅比较TSTR的生成研究没有与来源标签一致的输入输出，故不列为主对比算法。
+
+``找全''并不等于把所有相邻论文均转化为算法条目。D1与D2共享字符3-gram、Flat-text与字段编码思路，D3的arXiv早期稿、修订稿和AAAI正式稿也属于同一方法版本链；将版本重复计数会人为扩大对比算法数量。对比矩阵因此按可执行的方法族计数，同时保留论文版本和发表状态。持续更新机制则用于发现真正改变任务定义、表示机制或评测协议的新方法，并在代码可获得性、输入输出一致性和重复成本核验后决定是否进入主比较。
+
+\subsubsection{方法演进与对比定位}\label{ux65b9ux6cd5ux6f14ux8fdbux4e0eux5bf9ux6bd4ux5b9aux4f4d}
+
+样本级检测方法在表示方式、可用schema信息和部署假设上差异明显。下表将经典同表基线、直接跨表方法与前沿扩展置于同一框架中，并同时记录其协议覆盖与复现状态。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+方法族/论文
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+发表状态
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+表示与核心机制
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+主要协议
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+比较定位
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+截至2026-07-16的复现状态
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+C2ST-LR / pMSE & 经典正式发表 & 表内编码 + 线性来源分类 & P1 &
+经典弱基线、统计效用桥梁 & run-through通过 \\
+C2ST-XGBoost & 经典/直接辅助 & 强表格分类器 & P1、P2 &
+同表强基线、伪影解释 & run-through通过 \\
+字符3-gram+LR & COLING Workshop 2025 & 行序列化、字符TF-IDF & P1--P4 &
+直接跨表基线 & mini跨表通过 \\
+Flat-text Transformer & COLING Workshop 2025 & 整行字符Transformer &
+P1--P4 & 直接深度基线 & tiny闭环，截断待修 \\
+Table Transformer & COLING Workshop 2025 & 字段编码 + 行聚合 & P1--P4 &
+结构化直接基线 & tiny闭环 \\
+IDA表示---分类头矩阵 & IDA 2025 & 四种预处理×LR/XGB，并含两类Transformer
+& 六类wildness & 协议与基线扩展 &
+D-3G及两类Transformer已闭环；完整矩阵未跑 \\
+Datum-wise Transformer & AAAI 2026 & 单元格局部编码 + 无序行聚合 &
+P1--P4 & 当前正式SOTA核心 & 自实现tiny闭环 \\
+DWT + Table Adaptation & AAAI 2026 & 梯度反转抑制表身份 & P3--P5 &
+跨表SOTA/消融重点 & 自实现tiny闭环 \\
+LLM-as-a-Discriminator & arXiv 2026-06 & LLM逐行判别、可给元数据 &
+P1/P2为主 & 最新直接扩展 & 作者代码已定位；仓库获取失败，未跑 \\
+\end{longtable}
+
+\subsection{语料级污染比例估计研究进展}\label{ux8bedux6599ux7ea7ux6c61ux67d3ux6bd4ux4f8bux4f30ux8ba1ux7814ux7a76ux8fdbux5c55}
+
+当决策目标由识别单条记录转向评估整批数据的污染程度时，问题由分类转化为量化学习。量化器不追求每条记录均判断正确，而是利用分类器输出、校准集混淆率或类别条件分数分布估计集合中的正类比例。该区别在低污染率场景尤其重要：少量假阳性即可淹没真实的合成记录数量，使高准确率分类器仍产生严重比例偏差。现有方法可按利用信息的层次分为直接计数、误差校正、先验偏移估计、分布匹配以及连续密度建模。
+
+\subsubsection{从分类到量化}\label{ux4eceux5206ux7c7bux5230ux91cfux5316}
+
+量化学习（quantification）关注测试集合中的类别比例，而非逐实例标签\autocite{gonzalez2017review}。在污染比例估计中，``正类''定义为合成记录。最简单的Classify
+and Count（CC）在验证集选定阈值后计算
+
+\[\hat p_{CC}=\frac{1}{n}\sum_{i=1}^{n}\mathbb I[s(x_i)\ge \tau].\]
+
+若以概率均值代替硬标签，得到Probabilistic Classify and Count（PCC）：
+
+\[\hat p_{PCC}=\frac{1}{n}\sum_{i=1}^{n}s(x_i).\]
+
+CC把所有高于阈值的记录赋予相同权重，因此阈值变化会造成比例估计的阶跃；PCC保留了模型不确定性，在概率校准良好时方差通常更低，但若检测器系统性过度自信或欠自信，概率均值也会产生偏差。两者无需额外估计测试分布，因而适合作为计算开销最低的朴素基线，但不能代表量化任务已经解决。
+
+\subsubsection{混淆率校正：ACC与PACC}\label{ux6df7ux6dc6ux7387ux6821ux6b63accux4e0epacc}
+
+Adjusted Classify and
+Count（ACC）使用独立校准集估计检测器的真阳性率与假阳性率：
+
+\[\hat p_{ACC}=\frac{\hat p_{CC}-\widehat{FPR}}{\widehat{TPR}-\widehat{FPR}}.\]
+
+PACC以正类和负类上的平均预测概率替代硬混淆率\autocite{bella2010quantification}。ACC可以理解为对观测正类比例进行混淆矩阵逆变换：当检测器具有稳定且可区分的TPR与FPR时，校正能够抵消系统性漏检和误报；当两者接近时，分类器几乎不含比例信息，分母会放大校准噪声。PACC通过软分数降低阈值敏感性，但仍要求正负类平均得分能够从校准集迁移到测试bag。实验中应同时保存原始值和裁剪到\([0,1]\)后的值，主要误差用裁剪值计算，越界率与分母退化率则使用原始输出单独报告。
+
+\subsubsection{先验偏移EM：EMQ/SLD}\label{ux5148ux9a8cux504fux79fbememqsld}
+
+Saerens--Latinne--Decaestecker方法假设训练与测试之间主要发生类别先验变化，而类条件分布
+\(P(x\mid z)\)
+基本稳定\autocite{saerens2002emq}。它从训练先验和分类器后验出发，交替更新测试后验与新先验，直到比例收敛。二分类时，第
+\(k\) 次迭代可写为
+
+\[q_i^{(k)}(z)=\frac{\frac{p^{(k)}(z)}{p_{tr}(z)}p_{tr}(z\mid x_i)}
+{\sum_{z'}\frac{p^{(k)}(z')}{p_{tr}(z')}p_{tr}(z'\mid x_i)},\quad
+p^{(k+1)}(z)=\frac1n\sum_i q_i^{(k)}(z).\]
+
+EMQ利用全体软分数而非固定阈值，常是强基线。其E步按照候选测试先验重新加权每条记录的训练后验，M步再对更新后的软标签求平均；迭代收敛后得到与测试集合自洽的类别比例。方法的关键不是EM算法本身，而是``仅类别先验变化''的假设。跨生成器或跨表时，合成类和真实类的条件分布均可能改变，使训练后验无法通过先验重加权恢复。此时EMQ的偏差反映假设失效，应与迭代次数、收敛容差和最终似然一并报告，而不能简单归因于实现错误。
+
+\subsubsection{分数分布匹配：HDy与DyS}\label{ux5206ux6570ux5206ux5e03ux5339ux914dhdyux4e0edys}
+
+分布匹配方法估计校准集中真实类与合成类的检测分数分布
+\(H_0,H_1\)，寻找使测试分布 \(H_B\) 与混合分布 \((1-p)H_0+pH_1\)
+最接近的
+\(p\)。HDy使用Hellinger距离，DyS把直方图距离和比例搜索统一成框架\autocite{maletzke2019dys}：
+
+\[\hat p=\arg\min_{p\in[0,1]}D\big(H_B,(1-p)H_0+pH_1\big).\]
+
+HDy通常在多个分箱数下构造直方图，并以Hellinger距离衡量测试分数分布与候选混合分布的差异；DyS则把Topsoe、Hellinger等距离、分箱方案和比例网格纳入统一搜索框架。它们利用完整得分形状，可识别仅靠均值或单阈值难以发现的混合变化，但分箱过细会放大抽样噪声，分箱过粗又会抹去类别差异。校准样本规模、比例搜索步长和距离函数都应固定或做敏感性分析。所有量化器还必须复用同一冻结检测器得分，才能把误差差异归因于量化方法本身。
+
+\subsubsection{多阈值与连续密度的最新发展}\label{ux591aux9608ux503cux4e0eux8fdeux7eedux5bc6ux5ea6ux7684ux6700ux65b0ux53d1ux5c55}
+
+Forman系统整理了阈值选择、混合模型和Median
+Sweep等经典方法\autocite{forman2008quantification}。Median
+Sweep先在一组候选阈值上分别计算ACC，只保留具有足够TPR--FPR间隔的稳定阈值，再以多个估计的中位数作为最终比例。中位数聚合能够抑制个别阈值因混淆率估计误差产生的极端值，但候选阈值范围和稳定性筛选规则会影响结果，实现时需固定QuaPy版本与参数\autocite{moreo2021quapy}。2025年对24种量化方法、40余数据集的系统比较发现不存在全局最优算法，但Median
+Sweep、DyS/HDy及若干混合方法在二分类设定中构成稳定强组\autocite{schumacher2025comparison}，说明仅比较CC与ACC不足以覆盖量化方法的主要技术路线。
+
+Continuous
+Sweep将有限阈值上的中位数聚合改为稳定区间上的连续积分，并依据偏差---方差权衡确定积分区间，从而减少阈值网格离散化带来的不连续性\autocite{kloos2026continuous}。KDEy不再将后验分数压缩为直方图，而是在概率单纯形上分别估计各类别的核密度，再通过最大似然求解测试分布的混合权重\autocite{moreo2025kdey}；它降低了分箱边界敏感性，却引入带宽选择和数值优化问题。2026年7月出现的几何感知贝叶斯量化预印本进一步采用Aitchison几何与log-ratio变换处理单纯形的闭合约束和边界，并输出比例后验及不确定性\autocite{moreo2026geometry}。Continuous
+Sweep与KDEy代表阈值连续化和密度连续化两条先进路线，几何感知方法则可作为需要持续核验的前沿扩展。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+量化器
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+信息来源
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+核心假设/弱点
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+主表地位
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+状态
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+CC、PCC & 阈值或概率均值 & 忽略分类误差/依赖校准 & 朴素基线 & 已闭环 \\
+ACC、PACC & 混淆率或软混淆率 & 分母退化、跨域混淆率漂移 & 经典校正 &
+已闭环 \\
+EMQ/SLD & 全部后验分数 & 先验偏移假设 & 经典强基线 & 已闭环 \\
+HDy、DyS & 类条件分数直方图 & 分箱与距离敏感 & 分布匹配强基线 &
+已闭环 \\
+Median Sweep & 多阈值ACC & 版本与阈值筛选敏感 & 经典强基线 & 已闭环 \\
+KDEy & 连续核密度 & 带宽/优化敏感 & 2025先进方法 & 待正式复现 \\
+Continuous Sweep & 连续阈值积分 & 二分类、区间选择 & 2026先进方法 &
+待正式复现 \\
+几何感知贝叶斯量化 & 单纯形几何+贝叶斯 & 2026预印本、偏多类 & 前沿跟踪 &
+可选扩展 \\
+\end{longtable}
+
+\subsection{污染效用与数据估值研究进展}\label{ux6c61ux67d3ux6548ux7528ux4e0eux6570ux636eux4f30ux503cux7814ux7a76ux8fdbux5c55}
+
+来源可检测并不意味着合成记录必然损害任务，无法检测也不意味着其影响可以忽略。污染影响需要在固定的下游任务、训练算法和纯真实评价分布上直接测量，并区分总体效用变化与单条记录的边际贡献。前者回答``不同污染率和混合机制会使模型性能如何变化''，后者回答``哪些训练记录推动或损害了任务效用''。两类分析相互补充，但数据估值不能取代污染率---效用曲线。
+
+\subsubsection{先评价效用，再解释价值}\label{ux5148ux8bc4ux4ef7ux6548ux7528ux518dux89e3ux91caux4ef7ux503c}
+
+合成数据影响至少包含预测效用和推断效用两个层面。预测效用关注在纯真实测试集上的AUROC、F1或log-loss，衡量合成污染是否改变模型的泛化能力；推断效用关注回归系数偏差、标准误、置信区间覆盖率与一类错误率，衡量把合成数据当作真实独立观测后统计结论是否可靠。Decruyenaere等的模拟研究表明，即使点估计近似无偏，合成过程引入且未被计入的额外不确定性仍可能导致标准误低估和假阳性率上升\autocite{decruyenaere2024utility}。因此，预测性能稳定不能外推为因果或统计推断有效，二分类预测效用只能代表污染影响的一个层面。
+
+污染操作同样决定结论。固定样本量的``合成替换''保持训练规模不变，主要隔离数据来源变化；追加合成数据同时改变来源组成与样本量，必须用等量追加真实数据控制单纯的规模收益。递归地用合成数据替换前代数据可能造成尾部概率质量丢失和模型坍塌\autocite{shumailov2024collapse}；保留历史真实数据并累积新数据时，坍塌并非必然\autocite{gerstgrasser2024collapse}。进一步的研究将训练流程区分为完全替换、持续累积和固定预算抽样，并观察到从快速坍塌到缓慢退化或保持稳定的不同结果\autocite{kazdan2025thrive}。因而，纯真实、追加真实、追加合成和等量合成替换应构成最基本的四条件对照。
+
+\subsubsection{Data Shapley与近似}\label{data-shapleyux4e0eux8fd1ux4f3c}
+
+给定训练记录集合 \(N\) 和集合效用 \(v(S)=U(A(S),V_r)\)，记录 \(i\)
+的Shapley值为
+
+\[\phi_i=\sum_{S\subseteq N\setminus\{i\}}
+\frac{|S|!(|N|-|S|-1)!}{|N|!}\,[v(S\cup\{i\})-v(S)].\]
+
+Data
+Shapley将合作博弈中的公平分摊用于训练数据价值，并满足效率性、对称性和虚玩家等公理\autocite{ghorbani2019datashapley}。精确计算需要枚举指数数量的子集，TMC-Shapley因而通过随机采样训练样本排列来估计边际贡献，并在联盟效用接近全数据效用时提前截断。其优点是定义清晰且可适用于任意学习算法，缺点是需要重复训练大量模型，估计方差又受排列数、截断阈值和学习算法随机性影响。因此，小规模TMC更适合作为通用参照和近似误差检查，而不适合作为全量数据上的唯一估值算法。
+
+\subsubsection{KNN-Shapley}\label{knn-shapley}
+
+对未加权K近邻，KNN-Shapley可按验证样本到训练样本的距离排序，通过递推在
+\(O(N\log N)\) 时间得到精确的任务特定价值\autocite{jia2019knn}。设
+\(\alpha_1,\ldots,\alpha_N\)
+为相对某一验证样本由近到远排列的训练记录，算法从最远样本的基础贡献开始，依据相邻样本标签是否与验证标签一致递推更新，再对全部验证样本的贡献求平均。该闭式结构避免了反复训练KNN，并可在小规模数据上与全子集Shapley精确核验。其局限是价值严格绑定于KNN、距离函数和特征空间；数值标准化、类别编码以及\(K\)值改变都会重排邻域，从而改变估值结果。
+
+\subsubsection{Data-OOB与Data Banzhaf}\label{data-oobux4e0edata-banzhaf}
+
+Data-OOB复用bagging训练过程中自然产生的袋外预测：对每条训练记录，只聚合未抽到该记录的基学习器对其标签的预测质量，从而近似该记录对模型泛化的贡献\autocite{kwon2023dataoob}。它不需要为每个样本重新训练模型，能够扩展到较大数据集，并与随机森林或其他bagging树模型自然衔接。估值可信度取决于OOB覆盖次数；覆盖过少会增大方差，零覆盖记录则不能被默认赋予可信价值。Data
+Banzhaf采用不同于Shapley值的联盟权重，使不同规模联盟获得更均衡的采样机会，并强调随机效用环境下的排序稳定性\autocite{wang2023banzhaf}，可用于检验估值结论是否依赖单一价值公理。
+
+估值的目的不是证明``合成记录价值必然更低''，而是检验：（1）真实与合成价值分布是否系统偏移；（2）这种偏移是否随生成器和污染率改变；（3）删除低价值记录是否恢复纯真实测试效用；（4）不同种子、估值方法和验证集下排序是否稳定。2026年最新预印本指出，即使训练集和模型固定，验证集噪声也可能压缩并平移Shapley值\autocite{shen2026validation}。因此必须使用冻结的纯真实验证集，并加入验证种子/边界样本敏感性分析。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1875}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1875}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1875}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1875}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+方法
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+适用模型
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+计算代价
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+输出与验证
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+比较定位
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+污染率---效用曲线 & LR、XGBoost & 中 & \(\Delta U(p)\)、四条件对照 &
+任务线三的首要证据 \\
+TMC-Shapley & 任意 & 高 & Monte Carlo误差、删除曲线 & 小样本经典参照 \\
+KNN-Shapley & KNN & 低 & 小N精确核验、删除曲线 & 核心高效估值 \\
+Data-OOB & Bagging/树 & 低至中 & OOB覆盖、删除曲线 & 核心可扩展估值 \\
+Data Banzhaf & 任意 & 高 & 跨随机训练稳定性 & 预算允许的鲁棒扩展 \\
+\end{longtable}
+
+\subsection{国内外研究格局与综合评述}\label{ux56fdux5185ux5916ux7814ux7a76ux683cux5c40ux4e0eux7efcux5408ux8bc4ux8ff0}
+
+从国际研究演进看，合成表格生成与质量评价发展最早，已经形成统计模型、GAN、VAE和扩散模型并行的技术体系；量化学习和数据估值也分别积累了长期、相对独立的方法传统。相比之下，跨表来源检测直到2025年才出现从工作坊基线、wildness协议到Datum-wise
+Transformer的连续直接工作，研究对象仍集中在少数数据表和生成器上。国内及中文语境下的公开研究更多关注表格生成、隐私保护、异常或错误检测以及数据质量评价，直接以``未知schema下合成记录来源检测''为目标并给出完整跨表协议的公开方法仍较少。由此形成的现实格局是：生成、质量和数据治理方面已有可借鉴基础，但直接检测算法和统一评测基准仍主要依赖最新国际工作。
+
+现有工作仍有四个关键不足。第一，检测研究主要追求样本AUROC，对低污染率比例估计关注不足。第二，同表高分常与格式、精度和生成器失败共变，缺少统一伪影审计。第三，跨表论文主要使用14表和四生成器，但代码与完整复现条件并非全部公开，研究者必须区分官方复现与论文对齐自实现。第四，检测、量化和估值通常分别评价，尚缺在同一冻结数据来源和真实测试分布下的端到端研究。
+
+上述不足说明，仅继续提高某一同表检测器的AUROC并不足以回答污染治理问题。更具解释力的研究路径是构建冻结且可复现的评测基准，公平比较直接相关检测算法，并在相同数据来源上连接样本检测、比例估计和效用/估值分析。其关键科学问题在于：检测器在不同迁移协议下的误差如何传导为比例估计偏差，以及污染率、生成器和混合方式如何共同改变下游效用与样本价值。
+
+\section{研究问题与可检验假设}\label{ux7814ux7a76ux95eeux9898ux4e0eux53efux68c0ux9a8cux5047ux8bbe}
+
+根据现有研究的能力边界与缺口，研究问题沿``记录来源---集合比例---任务影响''逐层展开。每个问题均对应明确的实验变量、评价指标和可证伪假设，使跨表泛化、低比例估计和污染效用不再被压缩为单一的真假分类结果。
+
+\textbf{RQ1：在表结构和生成器变化时，哪些表示与适配机制能够稳定识别单条合成记录？}
+
+\begin{itemize}
+\tightlist
+\item
+  RQ1.1：同表C2ST高分能否在跨生成器P2、跨表P3和完全迁移P4中保持？
+\item
+  RQ1.2：字符3-gram、Flat-text、Table
+  Transformer、DWT和DWT+TA的性能---效率权衡如何？
+\item
+  RQ1.3：格式伪影、列顺序与生成质量对检测结果的贡献分别有多大？
+\item
+  H1：DWT在P3/P4的宏平均AUROC和最差表AUROC优于三种D1基线；表适配对P3/P4有效，但对P1收益有限。
+\end{itemize}
+
+\textbf{RQ2：在低污染率和分布偏移下，如何从冻结检测器得分稳定估计语料级合成比例？}
+
+\begin{itemize}
+\tightlist
+\item
+  RQ2.1：相同检测器得分下，校正、EM、直方图匹配与连续密度方法的MAE/Bias差异如何？
+\item
+  RQ2.2：检测AUROC、概率校准误差与量化MAE之间是否存在稳定关系？
+\item
+  RQ2.3：先验偏移假设在跨生成器/跨表场景中何时失效？
+\item
+  H2：P1中EMQ、DyS/HDy、Median Sweep、KDEy或Continuous
+  Sweep优于CC/PCC；P2--P4中优势随类条件分布漂移减弱，5\%和10\%污染率最能暴露系统偏差。
+\end{itemize}
+
+\textbf{RQ3：污染率、生成器和混合机制如何改变纯真实测试效用与训练样本价值？}
+
+\begin{itemize}
+\tightlist
+\item
+  RQ3.1：固定预算替换与追加式混合是否产生方向不同的效用曲线？
+\item
+  RQ3.2：合成记录的价值分布是否与真实记录显著不同，且能否用低价值删除恢复效用？
+\item
+  RQ3.3：KNN-Shapley与Data-OOB排序在种子、模型和验证集变化下是否稳定？
+\item
+  H3：替换式污染的效用下降强于追加式污染；但高质量生成器在低污染率下可能无害或有益，因此不预设单调下降。纯真实验证集下合成记录的平均价值预计较低，但存在任务有益的正价值合成样本。
+\end{itemize}
+
+\section{初步算法思路}\label{ux521dux6b65ux7b97ux6cd5ux601dux8def}
+
+算法设计以统一数据接口和逐级增加的迁移难度为基础。三条任务线共享冻结的真实数据来源与合成污染池，但分别保持独立的训练、校准和测试过程：检测器学习记录来源得分，量化器只读取冻结得分估计集合比例，效用与估值模块则直接评价污染训练集对纯真实任务分布的影响。这种模块化结构既便于复现单个算法，也能够追踪误差在任务线之间的传导。
+
+\subsection{总体技术框架与两条评测轨道}\label{ux603bux4f53ux6280ux672fux6846ux67b6ux4e0eux4e24ux6761ux8bc4ux6d4bux8f68ux9053}
+
+整体框架先冻结数据与协议，再让所有算法读取同一manifest，从而避免算法之间因数据版本、划分或污染池不同而失去可比性。Track
+A服务全部三条任务线，固定UCI Adult与Default of Credit Card
+Clients，以及CTGAN、TVAE和GaussianCopula三种污染源。Track
+B专门用于跨表样本检测：B-small以六张表检查可变schema输入、批处理和资源消耗，B-full采用D1--D3对应的十四表、四生成器（CTGAN、TVAE、TabDDPM、TabSyn）设置。B-small只证明跨表工程链路成立，B-full结果才与原论文十四表实验具有直接可比性。
+
+\begin{figure}
+\centering
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={固定基准的数据流与三条任务线关系。生成器只接触源训练分区，检测、量化和估值共享冻结数据来源但具有不同输出与指标。}]{figures/benchmark_flow.png}
+\caption{固定基准的数据流与三条任务线关系。生成器只接触源训练分区，检测、量化和估值共享冻结数据来源但具有不同输出与指标。}
+\end{figure}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+轨道
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+数据与污染源
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+主协议
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+功能定位
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Track A & Adult、Credit；三种核心生成器 & P1、P2及污染率实验 &
+检测、量化、效用/估值完整结果 \\
+B-small & 6表；先使用CTGAN、TVAE & P3、P4 & 跨表代码与资源工程检查 \\
+B-full & D1论文14表；四生成器 & P1--P4 & D1--D3论文对齐主比较 \\
+\end{longtable}
+
+\subsection{任务线一：由同表可分性走向跨表不变表示}\label{ux4efbux52a1ux7ebfux4e00ux7531ux540cux8868ux53efux5206ux6027ux8d70ux5411ux8de8ux8868ux4e0dux53d8ux8868ux793a}
+
+样本级算法按照由弱到强、由同表到跨表的顺序组织，使每一层新增结构都能通过成对比较解释。C2ST基线提供同表可分性参照，序列化方法检验无需固定schema的轻量表示，结构化Transformer进一步建模字段边界，域适配模块则专门抑制训练表身份。
+
+首先以C2ST-LR和C2ST-XGBoost建立同表可分性上下界，并通过格式诊断、标签置换和解释性分析判断高分是否源于生成器伪影。随后使用统一的\texttt{列名:取值}规范化表示复现3-gram、Flat-text和Table
+Transformer。核心模型采用DWT的两级结构：单元格编码器学习列名与取值内部关系，行编码器在无全局列位置的条件下聚合字段，从结构上获得列置换不变性；DWT+TA再通过梯度反转压制表身份信息。该路线用P1到P4逐级增加迁移难度，以回答模型究竟学习了``合成来源特征''还是某张表、某个生成器的指纹。
+
+\subsection{任务线二：冻结检测得分后的污染比例估计}\label{ux4efbux52a1ux7ebfux4e8cux51bbux7ed3ux68c0ux6d4bux5f97ux5206ux540eux7684ux6c61ux67d3ux6bd4ux4f8bux4f30ux8ba1}
+
+语料级比例估计采用``检测器与量化器解耦''的两阶段设计。若不同量化器各自训练不同检测器，最终误差会同时包含表示、分类、校准和量化差异，无法判断改进来源；冻结逐记录得分后，量化方法的比较才具有明确解释。
+
+比例估计不重新训练来源检测器。先固定D-XGB与D-3G等代表性检测器，使用独立验证分区做概率校准并保存逐记录得分；随后让CC至Continuous
+Sweep等量化器读取完全相同的得分与校准bag。算法从直接计数、混淆率校正、先验偏移EM、分数分布匹配到连续密度估计逐级增强。通过同一底层得分比较，可以把误差变化归因于量化方法，而不是分类器不同；通过P2--P4则检验各方法的先验偏移或类条件稳定假设何时失效。
+
+\subsection{任务线三：污染机制、下游效用与样本价值}\label{ux4efbux52a1ux7ebfux4e09ux6c61ux67d3ux673aux5236ux4e0bux6e38ux6548ux7528ux4e0eux6837ux672cux4ef7ux503c}
+
+影响分析先考察总体效用，再考察记录价值，避免把估值算法误用为来源检测器。四类混合条件控制训练规模和数据来源，污染率曲线刻画平均效应；KNN-Shapley、Data-OOB和小规模TMC-Shapley则从不同模型假设与计算代价出发解释个体贡献。
+
+第三条任务线先构造污染率---效用曲线，再进行逐记录估值。对每一污染率同时生成纯真实、追加真实、追加合成和等量替换四种训练条件，并始终在纯真实最终测试集上评价LR与XGBoost。KNN-Shapley和Data-OOB分别提供任务特定的精确近邻价值与可扩展树模型价值，TMC-Shapley只在小样本上作为通用参照。估值结果用于比较真实与合成记录的价值分布、低价值删除后的效用恢复以及跨种子排序稳定性，而不直接充当真实/合成来源标签。若部分合成记录获得稳定正价值，还应结合类别覆盖、边界位置和生成质量解释其任务贡献。
+
+\section{对比算法整理与复现进展}\label{ux5bf9ux6bd4ux7b97ux6cd5ux6574ux7406ux4e0eux590dux73b0ux8fdbux5c55}
+
+对比算法按样本检测、比例估计和效用/估值三类列示，并统一采用R0--R4五级状态。R0表示仅完成文献定位，R1表示代码或论文对齐实现已准备，R2表示在小规模数据上完成训练、保存、加载、推理、指标与汇总闭环，R3表示按照论文的主要数据、协议和容量完成多种子复现，R4表示在冻结基准上完成正式比较、统计检验和结果归档。下文所称``已跑通''严格对应R2，不等于重现论文数值；只有R3/R4才能支持算法优劣结论。截至2026年7月16日，19个核心运行单元达到R2，R3与R4仍为0项。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2308}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3077}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+等级
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+可核验完成条件
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+可以支持的结论
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+当前数量
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+R0 文献定位 & 论文、版本、发表状态与任务定义已核验 & 可列入研究综述 &
+若干前沿扩展 \\
+R1 实现准备 & 官方代码或论文对齐实现可执行，依赖与入口明确 & 可进入smoke
+& D2未覆盖组合、KDEy等 \\
+R2 代码闭环 & 训练/拟合、推理、保存/加载、指标和manifest均成功 &
+代码能够运行 & 19个运行单元 \\
+R3 论文协议复现 & 主要论文数据、协议、模型容量及不少于5种子 &
+可与论文趋势对照 & 0 \\
+R4 冻结基准正式比较 & 完整基准、置信区间、显著性、失败率与资源统计 &
+可形成论文主结论 & 0 \\
+\end{longtable}
+
+\subsection{样本级检测算法}\label{ux6837ux672cux7ea7ux68c0ux6d4bux7b97ux6cd5}
+
+样本级对比矩阵覆盖经典同表基线、D1/D2直接跨表基线、D3结构化SOTA、解释性诊断和LLM扩展。DWT与DWT+TA相邻比较以隔离表适配收益，D1与D2中重叠的编码则按方法族合并解释。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID与方法
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+文献来源
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+基本原理与对比角色
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+协议
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前进展与正式下一步
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+D-LR：C2ST-LR/pMSE & C2ST、pMSE\autocite{lopezpaz2017c2st,snoke2018pmse}
+& 统一表内编码后线性区分来源；经典弱基线与pMSE桥梁 & P1 &
+\textbf{R2}；Adult+GaussianCopula AUROC
+0.9287；待修复格式伪影后进入R3 \\
+D-XGB：C2ST-XGBoost & 辅助分类器检测\autocite{zein2022xgb} &
+非线性强表格分类器；同表强基线和XAI载体 & P1、P2 &
+\textbf{R2}；同一mini设定AUROC 0.9995，但受格式伪影警告；待R3 \\
+D-3G：字符3-gram+LR & D1\autocite{kindji2025cross} &
+\texttt{列名:取值}字符TF-IDF；最轻量的直接跨表基线 & P1--P4 &
+\textbf{R2}；Adult/Credit/Abalone三表mini AUROC 0.6471；待B-full \\
+D-FT：Flat-text Transformer & D1\autocite{kindji2025cross} &
+整行字符Transformer；检验长程序列表示 & P1--P4 & \textbf{R2}；tiny AUROC
+0.5452，截断率1.0；修复长度后才能进入R3 \\
+D-TT：Table Transformer & D1/D2\autocite{kindji2025cross,kindji2025wild}
+& 字段级编码后行聚合；结构化直接基线 & P1--P4 & \textbf{R2}；tiny AUROC
+0.2859，仅证明闭环；待论文预处理与容量 \\
+D2-LX：LR/XGBoost×四种编码 & D2\autocite{kindji2025wild} &
+字符3-gram、词3-gram、Flat-text和Column编码分别接LR/XGB；补全D2四表示比较
+& D2六类协议 &
+\textbf{部分R2}；D-3G及两个Transformer已闭环，八个LR/XGB组合未完整跑通 \\
+D-DW：Datum-wise Transformer & D3\autocite{kindji2026robust} &
+单元格局部字符编码+无列位置行编码；当前正式SOTA核心 & P1--P4 &
+\textbf{R2（论文对齐自实现）}；tiny AUROC
+0.2817，列置换最大分数差约\(5.96\times10^{-8}\)；非官方复现 \\
+D-DWTA：DWT+Table Adaptation & D3\autocite{kindji2026robust} &
+梯度反转抑制表身份；DWT成对消融 & P3--P5 &
+\textbf{R2（论文对齐自实现）}；tiny AUROC
+0.3008；待论文容量、余弦权重与B-full \\
+D-XAI：XGBoost解释诊断 & Kapar等\autocite{kapar2026xai} &
+PFI/PDP/SHAP/反事实解释生成伪影；诊断模块而非独立SOTA & P1、P2 &
+\textbf{R0}；待在通过伪影审计的R3模型上运行 \\
+D-LLM：LLM逐行判别 & 2026预印本\autocite{slokom2026llm} &
+C1仅记录、C2附分布元数据；截至检索日最新直接扩展 & P1、P2 &
+\textbf{R0}；作者代码已定位，但2026-07-16仓库获取失败且需模型/密钥，未跑 \\
+\end{longtable}
+
+\subsection{语料级比例估计算法}\label{ux8bedux6599ux7ea7ux6bd4ux4f8bux4f30ux8ba1ux7b97ux6cd5}
+
+比例估计矩阵从直接计数逐步扩展到混淆率校正、先验偏移EM、分布匹配和连续方法。全部量化器读取相同检测器得分与校准bag，主结果既比较总体误差，也单独报告5\%和10\%低污染率下的Bias与越界率。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID与方法
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+文献来源
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+基本原理与对比角色
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+核心风险
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前进展与正式下一步
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Q-CC / Q-PCC &
+Forman、Bella等\autocite{forman2008quantification,bella2010quantification}
+& 硬标签比例/概率均值；朴素下界 & 分类误差或概率失准直接累积 &
+同一D-XGB得分run-through通过；待正式bags \\
+Q-ACC / Q-PACC &
+Forman、Bella等\autocite{forman2008quantification,bella2010quantification}
+& 用硬/软混淆率校正计数；经典校正 & 分母接近零、越界、跨域混淆率漂移 &
+run-through通过；正式报告原值、裁剪值和越界率 \\
+Q-EMQ / SLD & Saerens等\autocite{saerens2002emq} &
+EM迭代更新测试先验；经典强基线 & 依赖类条件分布稳定 &
+run-through通过；补迭代收敛与P2--P4失效分析 \\
+Q-HDy & DyS相关体系\autocite{maletzke2019dys} &
+Hellinger距离匹配类条件分数直方图 & 分箱敏感 &
+run-through通过；冻结分箱并做敏感性分析 \\
+Q-DyS & DyS\autocite{maletzke2019dys} &
+搜索使混合分数分布最接近测试分布的比例 & 距离、分箱和网格敏感 &
+run-through通过；待正式bags与跨生成器 \\
+Q-MS：Median Sweep &
+Forman；QuaPy\autocite{forman2008quantification,moreo2021quapy} &
+多个稳定阈值ACC取中位数；经典强基线 & 版本与阈值筛选差异 & QuaPy
+0.2.0闭环；待版本核验和正式bags \\
+Q-KDEy & 2025连续密度方法\autocite{moreo2025kdey} &
+后验概率空间KDE+最大似然混合 & 带宽和优化器敏感 &
+文献精读完成；待实现/官方代码smoke \\
+Q-CS：Continuous Sweep & 2026正式论文\autocite{kloos2026continuous} &
+稳定阈值区间上的连续积分 & 二分类限定、区间选择 &
+文献精读完成；待跑代码并与MS/SLD/DyS比较 \\
+Q-GABQ & 2026预印本\autocite{moreo2026geometry} &
+Aitchison几何与贝叶斯比例后验 & 新预印本且偏多分类 &
+持续跟踪；暂不进入最低必做集合 \\
+\end{longtable}
+
+\subsection{效用与数据估值算法}\label{ux6548ux7528ux4e0eux6570ux636eux4f30ux503cux7b97ux6cd5}
+
+第三类矩阵包含污染率---效用曲线和四种代表性估值方法。效用曲线是影响分析的主要证据；KNN-Shapley与Data-OOB分别覆盖精确近邻价值和可扩展袋外价值，TMC-Shapley与Data
+Banzhaf用于小样本参照或稳定性扩展。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID与方法
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+文献来源
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+基本原理与对比角色
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+输出
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前进展与正式下一步
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+V-CURVE-LR/XGB &
+合成效用与坍塌研究\autocite{snoke2018pmse,shumailov2024collapse,kazdan2025thrive}
+& 四混合条件×七污染率；任务线三首要证据 & 纯真实测试效用曲线 &
+56次小规模拟合闭环；待两表三生成器五种子 \\
+V-KNN：KNN-Shapley & Jia等\autocite{jia2019knn} &
+按近邻距离递推精确任务特定价值 & 价值分布、删除曲线 &
+run-through通过；小N精确误差\(2.78\times10^{-17}\)；待正式分批 \\
+V-OOB：Data-OOB & Kwon与Zou\autocite{kwon2023dataoob} &
+复用bagging袋外预测估值；可扩展主方法 & 价值、OOB覆盖、删除曲线 &
+run-through通过且零覆盖为0；待正式种子与稳定性 \\
+V-TMC：TMC-Shapley & Data Shapley\autocite{ghorbani2019datashapley} &
+随机排列近似边际贡献；通用经典参照 & 价值及Monte Carlo误差 &
+文献精读完成；仅计划在小样本运行 \\
+V-BZ：Data Banzhaf & Wang与Jia\autocite{wang2023banzhaf} &
+等概率联盟边际贡献；强调随机效用稳定性 & 价值稳定性 &
+文献精读完成；预算允许时扩展 \\
+\end{longtable}
+
+\section{实验数据集准备情况}\label{ux5b9eux9a8cux6570ux636eux96c6ux51c6ux5907ux60c5ux51b5}
+
+数据集配置同时承担方法开发、跨表复现和污染影响分析三种需求。Track
+A使用两张规模适中、目标明确的二分类表，便于完整运行检测、量化和估值流程；Track
+B扩大领域、字段数量和schema差异，专门检验跨表泛化。所有原始数据、清洗规则、冻结分区和合成池均通过数据卡与哈希记录，以保证不同算法读取完全一致的样本。
+
+\subsection{Track A主数据集}\label{track-aux4e3bux6570ux636eux96c6}
+
+Track A选择Adult与Default of Credit Card
+Clients。Adult同时包含连续变量、名义类别、有序信息和缺失标记，收入正类比例约为四分之一，适合检验混合类型字段上的来源检测和类别不平衡下游任务；Credit以数值和编码后的类别/序数变量为主，字段更多且无缺失，可与Adult形成不同schema和数据质量条件。两张表均已完成下载、许可记录、原始与处理文件SHA-256、去重、字段类型核验、目标分布统计及2026--2030五种子冻结分区。表中行数均为去除完全重复记录后的规模。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+数据集（来源/许可）
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+原始→清洗行数
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+特征
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+目标分布
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+缺失与重复
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前准备状态
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+UCI Adult；CC BY 4.0 & 48,842→48,790 & 14（数值6/类别8） &
+\texttt{\textgreater{}50K}占23.94\% & 移除52条重复；3个类别列含缺失 &
+数据卡、哈希、五种子分区已完成 \\
+Credit Default；CC BY 4.0 & 30,000→29,965 & 23（数值14/类别9） &
+违约类占22.13\% & 移除35条重复；无缺失 &
+数据卡、哈希、五种子分区已完成 \\
+\end{longtable}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1579}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2105}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2105}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2105}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2105}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+数据集
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\(R_{source\_train}\)（60\%）
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\(R_{detector\_train}\)（15\%）
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\(R_{detector\_val}\)（10\%）
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\(R_{final\_test}\)（15\%）
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Adult & 29,273 & 7,319 & 4,879 & 7,319 \\
+Credit & 17,978 & 4,495 & 2,997 & 4,495 \\
+\end{longtable}
+
+\subsection{Track
+B跨表复现数据}\label{track-bux8de8ux8868ux590dux73b0ux6570ux636e}
+
+Track
+B复现D1/D2使用的多表环境，覆盖社会人口、消费金融和科学环境三个领域。数据表之间在行数、字段数量、数值/类别比例和目标语义上均存在显著差异，能够检验模型是否依赖特定领域词汇、固定列数或训练表规模。下表规模和字段类型取自D1/D2论文；本地状态仅记录已经完成的下载、许可与清洗核验，尚未注册的数据不会计入正式实验。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+领域
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+数据集
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+论文行数
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+数值/类别列
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+检查点
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+本地状态
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+社会/人口 & Adult & 48,842 & 6/9 & B-small、B-full &
+已正式注册并冻结分区 \\
+社会/人口 & HELOC & 5,229 & 23/1 & B-small、B-full & 待下载与许可核验 \\
+社会/人口 & House 16H & 22,784 & 17/0 & B-full &
+待建来源、许可与哈希清单 \\
+社会/人口 & King & 21,613 & 19/1 & B-full & 待建来源、许可与哈希清单 \\
+消费/金融 & Bank Marketing & 45,211 & 7/10 & B-small、B-full &
+待下载与许可核验 \\
+消费/金融 & Churn Modelling & 4,999 & 8/4 & B-small、B-full &
+待下载与许可核验 \\
+消费/金融 & Diamonds & 26,970 & 7/3 & B-full &
+待建来源、许可与哈希清单 \\
+消费/金融 & Black Friday & 166,821 & 6/4 & B-full &
+待建来源、许可与哈希清单 \\
+消费/金融 & Insurance & 1,338 & 4/3 & B-full &
+待建来源、许可与哈希清单 \\
+科学/环境 & Abalone & 4,177 & 7/2 & B-small、B-full &
+三表mini已使用，待正式注册 \\
+科学/环境 & Bike Sharing & 17,379 & 9/4 & B-small、B-full &
+待下载与许可核验 \\
+科学/环境 & Cardio & 70,000 & 11/1 & B-full &
+待建来源、许可与哈希清单 \\
+科学/环境 & Higgs & 98,050 & 28/1 & B-full & 待建来源、许可与哈希清单 \\
+科学/环境 & MiniBooNE & 130,064 & 50/1 & B-full &
+待建来源、许可与哈希清单 \\
+\end{longtable}
+
+\subsection{合成污染源准备情况}\label{ux5408ux6210ux6c61ux67d3ux6e90ux51c6ux5907ux60c5ux51b5}
+
+污染源同时覆盖统计模型、对抗生成、变分生成和扩散生成。GaussianCopula结构简单、训练稳定，适合快速审计数据格式和协议实现；CTGAN与TVAE代表常用深度表格生成器；TabDDPM与TabSyn提高分布拟合能力和训练成本，用于检验检测器是否仍能识别质量更高的扩散样本。每个生成器只拟合源训练分区，并为检测训练、检测验证、最终测试和下游混合分别生成隔离记录池。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+生成器
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+类型与固定用途
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+当前已完成
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+正式阶段缺口
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+GaussianCopula & 统计Copula；Track A核心、快速审计 &
+Adult四隔离池、质量门和run-through完成 & Credit五种子正式池 \\
+CTGAN & 条件GAN；Track A核心、Track B论文生成器 & Adult
+smoke与单种子正式就绪检查完成 & 两表300 epochs×五种子及B-small/B-full \\
+TVAE & VAE；Track A核心、Track B论文生成器 & Adult
+smoke与单种子正式就绪检查完成 & 两表300 epochs×五种子及B-small/B-full \\
+TabDDPM & 扩散模型；Track B论文对齐 & 文献和配置路线已整理 &
+官方代码、四池生成和资源预算 \\
+TabSyn & 潜空间扩散；Track B论文对齐 & 文献和配置路线已整理 &
+官方代码、四池生成和资源预算 \\
+\end{longtable}
+
+正式数据卡除上述汇总信息外，还保存来源URL、获取日期、许可、SHA-256、缺失率、重复率、目标分布、分区哈希、生成参数、无效记录率、合成内部重复率、与真实训练集精确重合率、SDMetrics和TSTR。原始数据与处理后数据分开存储，任何清洗或字段类型修订均形成新版本并更新哈希，避免在算法运行过程中隐式改变数据。
+
+\section{测试方案}\label{ux6d4bux8bd5ux65b9ux6848}
+
+测试方案遵循``训练信息不可进入测试、算法差异不与数据差异混合、迁移难度逐级增加''的原则。分区和合成池控制数据泄漏，P1--P5协议控制表结构与生成器偏移，任务特定指标分别评价记录检测、集合比例和下游效用，重复实验与配对统计检验用于量化不确定性。
+
+\subsection{分区、合成池与污染构造}\label{ux5206ux533aux5408ux6210ux6c60ux4e0eux6c61ux67d3ux6784ux9020}
+
+真实数据先完成去重和稳定标识，再进行分层划分；合成数据随后从源训练分区独立生成。该顺序能够防止同一真实记录或由其直接派生的合成记录同时出现在训练、校准和最终测试环节。
+
+每个Track
+A数据集去除完全重复行并建立稳定\texttt{row\_id}，按目标分层冻结为60\%
+\texttt{R\_source\_train}、15\% \texttt{R\_detector\_train}、10\%
+\texttt{R\_detector\_val}和15\%
+\texttt{R\_final\_test}。生成器仅可拟合60\%源训练分区。每个``表×生成器×种子''独立产生\texttt{S\_detector\_train}、\texttt{S\_detector\_val}、\texttt{S\_final\_test}和\texttt{S\_downstream\_mix}，禁止跨用途复用同一记录。
+
+正式随机种子固定为2026--2030。污染率固定为0\%、5\%、10\%、25\%、50\%、75\%和100\%。主协议为固定训练集大小的等量替换，同时设置纯真实、追加真实、追加合成三个对照。比例估计中每个bag固定1000条；每个条件生成50个校准bag和100个测试bag，两类bag使用不同记录池和采样种子。
+
+\subsection{协议与泄漏控制}\label{ux534fux8baeux4e0eux6cc4ux6f0fux63a7ux5236}
+
+迁移协议通过是否留出表结构和生成器定义部署难度。P1测量同分布可分性上限，P2检验未知生成器，P3检验未知schema，P4同时改变表与生成器，P5进一步考察跨领域迁移。所有算法在同一协议下使用相同的训练表、留出表和污染池。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+ID
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+训练表/测试表
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+训练生成器/测试生成器
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+回答的问题
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+P1 same-table & 相同 & 相同 & 同表可分性上限 \\
+P2 cross-generator & 相同 & 留出生成器 & 未知生成器泛化 \\
+P3 cross-table & 表集合/留出表 & 相同集合 & 未知schema泛化 \\
+P4 full-shift & 表集合/留出表 & 生成器集合/留出生成器 & 完全迁移 \\
+P5 cross-domain & 一个领域/另一领域 & 相同或留出 &
+扩展失败场景，不与P3平均 \\
+\end{longtable}
+
+预处理器只能拟合训练分区；阈值、概率校准、量化器和早停只能使用验证/校准数据；测试记录ID和来源标签在最终运行前锁定。所有检测输入删除来源字段、行号和导出时间，并使用同一dtype与序列化流程。格式诊断器仅使用缺失数、空字符串数和序列化长度；若AUROC显著高于0.5，应先修复数据再解释正式检测结果。
+
+\subsection{评价指标与结果表组织}\label{ux8bc4ux4ef7ux6307ux6807ux4e0eux7ed3ux679cux8868ux7ec4ux7ec7}
+
+指标选择需要同时反映排序能力、阈值决策、概率质量和低污染部署表现。只报告Accuracy容易受到类别比例影响，只报告AUROC又无法描述概率校准和固定低误报率下的召回，因此样本检测、比例估计和估值分析分别采用成组指标。
+
+样本检测以AUROC为主，报告AUPRC、balanced
+accuracy、F1、FPR为5\%时的TPR、ECE、Brier
+score、训练时间、推理速度和模型大小。低污染部署下AUPRC和固定低FPR时的TPR尤其重要；跨表结果按表宏平均，并同时给最差表和逐表值。检测主表按P1--P4分列，DWT与DWT+TA相邻排列以形成适配消融。
+
+比例估计以 \(\mathrm{MAE}=K^{-1}\sum_k|\hat p_k-p_k|\)
+为主，报告RMSE、Bias、最大绝对误差和越界率；总体、5\%、10\%、每生成器和每协议分层展示。效用以纯真实测试AUROC为主，辅以F1、balanced
+accuracy和log-loss；估值报告真实/合成价值分布、负价值比例、低价值删除曲线、跨种子Spearman及OOB覆盖。
+
+\subsection{重复、统计推断与消融}\label{ux91cdux590dux7edfux8ba1ux63a8ux65adux4e0eux6d88ux878d}
+
+单次随机划分无法区分算法差异与采样波动。重复实验以预注册种子为基本重复单位，跨表比较则以表而非记录作为统计区组；消融实验保持数据和优化设置不变，仅移除或替换一个结构因素。
+
+每个正式条件使用五个预注册种子，报告均值、标准差和95\%分层bootstrap置信区间。算法成对比较以同一``表×生成器×协议×种子''为区组，优先使用双侧Wilcoxon符号秩检验；同一研究问题内多重比较采用Holm校正，同时报告配对效应量和置信区间。对跨表结果不把记录当作独立重复，避免大表制造虚假显著性。若算法OOM、不收敛或输出退化，保留失败次数，不从平均值中静默删除。
+
+消融至少包括：DWT去除列名、加入全局列位置、去除表适配及改变适配权重；3-gram随机列顺序；Flat-text不同最大长度；量化方法更换冻结检测器分数；估值改变纯真实验证种子和边界样本。生成质量指标作为解释变量，而不是筛选有利结果的事后条件。
+
+\section{预实验与可行性分析}\label{ux9884ux5b9eux9a8cux4e0eux53efux884cux6027ux5206ux6790}
+
+预实验用于检验算法接口、数据流和指标汇总是否能够闭环，并提前暴露正式实验中的格式与资源风险。现有run-through覆盖7个检测器、8个量化器、2组效用曲线和2个估值器，共19个运行单元；2026年7月16日重新执行的92项自动化测试全部通过（0失败、0错误）。D1--D3、KNN-Shapley和Data-OOB采用论文对齐自实现，QuaPy
+0.2.0、XGBoost和PyTorch使用官方发行包。全部运行均保存run
+ID、配置、模型或结果、指标、日志与总manifest；失败尝试也单独留档，不以覆盖旧文件的方式隐藏。这些证据证明训练、保存、加载、推理、指标和汇总链路具备可运行性，但不构成论文性能复现。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+运行组
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+已达到R2的算法/运行单元
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+实际运行范围
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+关键核验结果
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+尚不能声称的内容
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+经典同表检测 & D-LR、D-XGB & Adult+GaussianCopula，P1小样本 & AUROC
+0.9287/0.9995；标签置换接近随机 & 不能视为跨表能力或正式性能 \\
+D1/D2直接基线 & D-3G、D-FT、D-TT &
+Adult/Credit/Abalone三表mini；深度模型仅Abalone tiny & 3-gram AUROC
+0.6471；全部完成保存/加载/推理 & D2完整四编码×两分类头尚未跑全 \\
+D3正式SOTA & D-DW、D-DWTA & 论文对齐自实现、Abalone tiny、2 epochs CPU &
+两者闭环；DWT列置换最大差约\(5.96\times10^{-8}\) &
+非官方代码；未重现AAAI增益和绝对数值 \\
+经典比例估计 & CC、PCC、ACC、PACC、EMQ、HDy、DyS、Median Sweep &
+同一D-XGB冻结分数、21个mini bags &
+八种方法均输出MAE/Bias/RMSE；不稳定与越界保留 &
+简单数据上的低MAE无正式排名意义 \\
+效用曲线 & LR、XGBoost & 4条件×7污染率，各28次拟合 &
+56次拟合和曲线汇总成功 & 尚非两表三生成器五种子结果 \\
+数据估值 & KNN-Shapley、Data-OOB & 800条mini训练集 &
+KNN精确核验误差\(2.78\times10^{-17}\)；OOB最小覆盖17 &
+尚无正式价值分布和稳定性结论 \\
+\end{longtable}
+
+最新直接扩展LLM-as-a-Discriminator没有计入19个已跑通单元。其作者仓库链接已经从预印本核验，但本地在2026年7月16日获取仓库时连接失败，且Gemini路径需要外部服务凭证、LLaMA路径需要额外模型权重与算力。因而当前状态如实保持R0，待代码、许可和模型条件满足后再进行smoke。AAAI
+D3正式页面注明代码将在扩展版提供，故D-DW和D-DWTA的R2证据均明确标记为论文对齐自实现；正式稿不会把它们表述为``官方代码已复现''。
+
+经典检测在Adult+GaussianCopula小样本P1上得到较高AUROC，而跨表mini的3-gram约为0.647；tiny
+Transformer与DWT尚未得到有效分类性能。Flat-text截断率为1.0，DWT/DWT+TA虽通过列置换不变性检查，但低于随机的AUROC只说明当前tiny训练不足，不能据此否定论文方法。八个量化器在同一D-XGB得分和21个小bag上均已产出，但由于底层检测器近乎完美且数据简单，其极低MAE没有正式比较意义。KNN-Shapley在小N精确核验中的最大误差为
+\(2.78\times10^{-17}\)；Data-OOB没有零覆盖记录，表明两个估值实现的核心检查通过。
+
+仅使用缺失数、空字符串数和总序列化长度的格式诊断器即可达到0.6861的AUROC，高于0.65警戒线，说明D-XGB的较高P1分数可能部分来自格式差异。正式实验需先统一真实与合成数据的缺失标记、数值精度、dtype和序列化过程，再在P2--P4中复核。该发现也说明格式诊断应成为所有来源检测实验的前置质量门，而不是结果产生后的补充解释。
+
+\begin{figure}
+\centering
+\includegraphics[width=0.85\linewidth,height=\textheight,keepaspectratio,alt={预实验效用曲线，用于检查四条件、七污染率和两类下游模型的结果汇总链路；数值不作为正式性能结论。}]{figures/utility_curve_runthrough.png}
+\caption{预实验效用曲线，用于检查四条件、七污染率和两类下游模型的结果汇总链路；数值不作为正式性能结论。}
+\end{figure}
+
+\section{实验实施安排}\label{ux5b9eux9a8cux5b9eux65bdux5b89ux6392}
+
+实验按照数据审计、同表基线、跨表复现、比例估计和效用/估值的依赖关系依次推进。前一阶段输出将作为后一阶段的冻结输入，例如比例估计只读取已经完成格式审计和校准的检测器分数，估值分析只读取预先定义的纯真实验证集与污染训练集。
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+阶段
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+核心工作
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+完成判据
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+结果用途
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+S1 文献与方案冻结 & D1--D3、量化与估值方法核验；更新检索 &
+引文、算法矩阵、数据矩阵与RQ一致 & 形成方法选择依据 \\
+S2 伪影修复与正式基线 &
+统一序列化；Adult/Credit三生成器五种子；D-LR/XGB/3G &
+格式诊断接近随机；完整run manifest & 形成可信同表与跨生成器基线 \\
+S3 跨表直接复现 & B-small后扩B-full；D-FT/TT/DWT/DWT+TA &
+P1--P4逐表结果、消融与失败记录 & 回答跨表检测研究问题 \\
+S4 比例估计实验 & 八种经典量化器 + KDEy/Continuous Sweep &
+50个校准bag、100个测试bag及低污染分层 & 回答比例误差与假设失效问题 \\
+S5 效用与估值实验 & 四条件曲线；KNN/Data-OOB；小样本TMC &
+删除曲线、覆盖、稳定性与置信区间 & 回答污染任务影响问题 \\
+S6 综合关联分析 & 连接检测、量化和效用；补查新文献 &
+配对统计检验、图表、局限与可复现清单 & 分析三条任务线的误差传导 \\
+\end{longtable}
+
+核心实验范围包括Track
+A两表三生成器五种子、D-LR、D-XGB、3-gram和DWT、八个经典量化器、四条件LR/XGBoost效用曲线、KNN-Shapley与Data-OOB，以及P1、P2和B-small上的P3。扩展实验进一步覆盖B-full、DWT+TA、KDEy、Continuous
+Sweep和LLM判别。核心与扩展范围分层可以保证直接研究问题获得完整证据，同时避免因高算力模型或未公开代码阻塞全部实验。
+
+持续文献更新采用滚动检索：每两周按``synthetic tabular detection /
+cross-table / schema variability / quantification / prevalence
+estimation / data valuation / synthetic contamination''检索arXiv、ACL
+Anthology、AAAI、PMLR、JMLR、Springer和DBLP；记录标题、版本、发表状态、代码与是否改变对比矩阵。新增预印本先进入``跟踪''，有正式发表或可运行代码后再升级为主比较。
+
+\section{结论}\label{ux7ed3ux8bba}
+
+合成表格数据污染需要从记录来源、集合比例和任务影响三个层面分别建模。样本检测提供来源得分，量化器在独立校准假设下将得分转换为集合比例，效用与估值分析进一步检验污染是否真正改变任务价值。直接相关检测方法已经从同表C2ST和跨表序列化基线发展到Datum-wise
+Transformer与表适配，但仍处于快速演进阶段；量化学习提供了比简单计数更完整的误差校正、分布匹配和连续密度方法；数据估值则为解释合成记录的任务贡献提供工具，同时要求严格控制学习算法、效用函数与纯真实验证分布。由两条数据轨道、五类迁移协议、冻结分区和分层算法矩阵组成的评测框架，可在统一实验基础上公平比较直接相关算法、估计污染比例，并分析不同污染机制对效用与样本价值的影响。
+
+\printbibliography[title=参考文献]
+
+\end{document}

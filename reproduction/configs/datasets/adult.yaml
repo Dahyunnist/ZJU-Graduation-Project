@@ -1,0 +1,28 @@
+dataset_id: adult
+canonical_name: UCI Adult
+uci_id: 2
+doi: 10.24432/C5XW20
+source_page: https://archive.ics.uci.edu/dataset/2/adult
+download_url: https://archive.ics.uci.edu/static/public/2/adult.zip
+raw_filename: adult.zip
+license: CC BY 4.0
+task_type: binary_classification
+target_column: income
+numeric_columns:
+  - age
+  - fnlwgt
+  - education-num
+  - capital-gain
+  - capital-loss
+  - hours-per-week
+categorical_columns:
+  - workclass
+  - education
+  - marital-status
+  - occupation
+  - relationship
+  - race
+  - sex
+  - native-country
+missing_markers: ["?"]
+

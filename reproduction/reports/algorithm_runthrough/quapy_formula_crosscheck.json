@@ -1,0 +1,24 @@
+{
+  "absolute_errors": {
+    "acc": 0.0,
+    "cc": 0.0,
+    "pacc": 1.0382990689450367e-08,
+    "pcc": 0.0
+  },
+  "local_positive_prevalence": {
+    "acc": 0.5,
+    "cc": 0.5,
+    "pacc": 0.5163043478260868,
+    "pcc": 0.5125
+  },
+  "max_absolute_error": 1.0382990689450367e-08,
+  "official_positive_prevalence": {
+    "acc": 0.5,
+    "cc": 0.5,
+    "pacc": 0.5163043374430961,
+    "pcc": 0.5125
+  },
+  "passed": true,
+  "quapy_version": "0.2.0",
+  "tolerance": 1e-07
+}

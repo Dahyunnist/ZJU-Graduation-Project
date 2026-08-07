@@ -1,0 +1,17 @@
+track: B-small
+status: registered_not_prepared
+datasets:
+  - dataset_id: adult
+    source: https://archive.ics.uci.edu/dataset/2/adult
+  - dataset_id: heloc
+    source: https://www.openml.org/search?type=data&sort=runs&id=45020
+  - dataset_id: bank_marketing
+    source: https://archive.ics.uci.edu/dataset/222/bank+marketing
+  - dataset_id: churn_modelling
+    source: https://www.kaggle.com/datasets/shrutimechlearn/churn-modelling
+  - dataset_id: abalone
+    source: https://archive.ics.uci.edu/dataset/1/abalone
+  - dataset_id: bike_sharing
+    source: https://archive.ics.uci.edu/dataset/275/bike+sharing+dataset
+note: C1 only registers these entries; download and cross-table preparation start after Track A C1 acceptance.
+

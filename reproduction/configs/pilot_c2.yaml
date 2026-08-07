@@ -1,0 +1,30 @@
+run_type: pilot
+dataset: adult
+split_seed: 2026
+generator_seed: 2026
+fit_scope: full_R_source_train
+pool_redundancy: 1.10
+pool_seed_offsets:
+  S_detector_train: 101
+  S_detector_val: 202
+  S_final_test: 303
+  S_downstream_mix: 404
+minimum_free_disk_bytes: 1073741824
+generators:
+  GaussianCopula:
+    enforce_min_max_values: true
+    enforce_rounding: true
+  CTGAN:
+    epochs: 300
+    batch_size: 500
+    pac: 10
+    verbose: true
+    enable_gpu: true
+  TVAE:
+    epochs: 300
+    batch_size: 500
+    embedding_dim: 128
+    compress_dims: [128, 128]
+    decompress_dims: [128, 128]
+    verbose: true
+    enable_gpu: true

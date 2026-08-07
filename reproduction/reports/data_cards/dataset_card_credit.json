@@ -1,0 +1,345 @@
+{
+  "canonical_name": "Default of Credit Card Clients",
+  "categorical_columns": [
+    "SEX",
+    "EDUCATION",
+    "MARRIAGE",
+    "PAY_0",
+    "PAY_2",
+    "PAY_3",
+    "PAY_4",
+    "PAY_5",
+    "PAY_6"
+  ],
+  "cleaning": {
+    "cleaned_columns": 25,
+    "cleaned_rows": 29965,
+    "exact_duplicate_rows_removed": 35,
+    "raw_columns": 24,
+    "raw_rows": 30000
+  },
+  "dataset_id": "credit",
+  "doi": "10.24432/C55S3H",
+  "download_url": "https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip",
+  "feature_count": 23,
+  "known_risks": [
+    "Preprocessors must be fit only on the permitted training partition.",
+    "row_id, split and provenance fields are metadata and must never become model features.",
+    "Categorical codes in Credit carry semantics and are not continuous measurements."
+  ],
+  "license": "CC BY 4.0",
+  "missing": {
+    "AGE": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT1": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT2": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT3": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT4": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT5": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "BILL_AMT6": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "EDUCATION": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "LIMIT_BAL": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "MARRIAGE": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_0": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_2": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_3": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_4": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_5": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_6": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT1": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT2": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT3": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT4": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT5": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "PAY_AMT6": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "SEX": {
+      "count": 0,
+      "rate": 0.0
+    }
+  },
+  "numeric_columns": [
+    "LIMIT_BAL",
+    "AGE",
+    "BILL_AMT1",
+    "BILL_AMT2",
+    "BILL_AMT3",
+    "BILL_AMT4",
+    "BILL_AMT5",
+    "BILL_AMT6",
+    "PAY_AMT1",
+    "PAY_AMT2",
+    "PAY_AMT3",
+    "PAY_AMT4",
+    "PAY_AMT5",
+    "PAY_AMT6"
+  ],
+  "processed_sha256": "ee2fa731865931ec6c4c54d7c16e00f1051b9163a0bfeb7aa318e795302a4d29",
+  "raw_sha256": "56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602",
+  "retrieval_date": "2026-07-15",
+  "source_page": "https://archive.ics.uci.edu/dataset/350/defaultofcreditcardclients",
+  "split_summaries": [
+    {
+      "assignment_sha256": "9febe610a191d7008f5394f731596b383c877b31451703b96b6cf0f9839d6971",
+      "counts": {
+        "R_detector_train": 4495,
+        "R_detector_val": 2997,
+        "R_final_test": 4495,
+        "R_source_train": 17978
+      },
+      "dataset_id": "credit",
+      "proportions": {
+        "R_detector_train": 0.1500083430669114,
+        "R_detector_val": 0.1000166861338228,
+        "R_final_test": 0.1500083430669114,
+        "R_source_train": 0.5999666277323544
+      },
+      "rows": 29965,
+      "seed": 2026,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "0": 0.7788654060066741,
+          "1": 0.2211345939933259
+        },
+        "R_detector_val": {
+          "0": 0.7787787787787788,
+          "1": 0.22122122122122123
+        },
+        "R_final_test": {
+          "0": 0.778642936596218,
+          "1": 0.22135706340378197
+        },
+        "R_source_train": {
+          "0": 0.7787295583490933,
+          "1": 0.22127044165090667
+        }
+      }
+    },
+    {
+      "assignment_sha256": "b5f0378bb3b3d52b1873062dc6ee3f737f96bfe473eb92c1a317f37bd173d6d9",
+      "counts": {
+        "R_detector_train": 4495,
+        "R_detector_val": 2997,
+        "R_final_test": 4495,
+        "R_source_train": 17978
+      },
+      "dataset_id": "credit",
+      "proportions": {
+        "R_detector_train": 0.1500083430669114,
+        "R_detector_val": 0.1000166861338228,
+        "R_final_test": 0.1500083430669114,
+        "R_source_train": 0.5999666277323544
+      },
+      "rows": 29965,
+      "seed": 2027,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "0": 0.7788654060066741,
+          "1": 0.2211345939933259
+        },
+        "R_detector_val": {
+          "0": 0.7787787787787788,
+          "1": 0.22122122122122123
+        },
+        "R_final_test": {
+          "0": 0.778642936596218,
+          "1": 0.22135706340378197
+        },
+        "R_source_train": {
+          "0": 0.7787295583490933,
+          "1": 0.22127044165090667
+        }
+      }
+    },
+    {
+      "assignment_sha256": "988939610d07e7de573687dc6db366d662b7c084c8f024af7aa254eb086e2688",
+      "counts": {
+        "R_detector_train": 4495,
+        "R_detector_val": 2997,
+        "R_final_test": 4495,
+        "R_source_train": 17978
+      },
+      "dataset_id": "credit",
+      "proportions": {
+        "R_detector_train": 0.1500083430669114,
+        "R_detector_val": 0.1000166861338228,
+        "R_final_test": 0.1500083430669114,
+        "R_source_train": 0.5999666277323544
+      },
+      "rows": 29965,
+      "seed": 2028,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "0": 0.7788654060066741,
+          "1": 0.2211345939933259
+        },
+        "R_detector_val": {
+          "0": 0.7787787787787788,
+          "1": 0.22122122122122123
+        },
+        "R_final_test": {
+          "0": 0.778642936596218,
+          "1": 0.22135706340378197
+        },
+        "R_source_train": {
+          "0": 0.7787295583490933,
+          "1": 0.22127044165090667
+        }
+      }
+    },
+    {
+      "assignment_sha256": "746659abbbb320bd25e6ea71dcf0c34a3e650fb96d482f550e6b2be17fae73a7",
+      "counts": {
+        "R_detector_train": 4495,
+        "R_detector_val": 2997,
+        "R_final_test": 4495,
+        "R_source_train": 17978
+      },
+      "dataset_id": "credit",
+      "proportions": {
+        "R_detector_train": 0.1500083430669114,
+        "R_detector_val": 0.1000166861338228,
+        "R_final_test": 0.1500083430669114,
+        "R_source_train": 0.5999666277323544
+      },
+      "rows": 29965,
+      "seed": 2029,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "0": 0.7788654060066741,
+          "1": 0.2211345939933259
+        },
+        "R_detector_val": {
+          "0": 0.7787787787787788,
+          "1": 0.22122122122122123
+        },
+        "R_final_test": {
+          "0": 0.778642936596218,
+          "1": 0.22135706340378197
+        },
+        "R_source_train": {
+          "0": 0.7787295583490933,
+          "1": 0.22127044165090667
+        }
+      }
+    },
+    {
+      "assignment_sha256": "bf5e2413f2ad9fdbae744472ccced208388dd92c9e577048020ad84092e2a47d",
+      "counts": {
+        "R_detector_train": 4495,
+        "R_detector_val": 2997,
+        "R_final_test": 4495,
+        "R_source_train": 17978
+      },
+      "dataset_id": "credit",
+      "proportions": {
+        "R_detector_train": 0.1500083430669114,
+        "R_detector_val": 0.1000166861338228,
+        "R_final_test": 0.1500083430669114,
+        "R_source_train": 0.5999666277323544
+      },
+      "rows": 29965,
+      "seed": 2030,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "0": 0.7788654060066741,
+          "1": 0.2211345939933259
+        },
+        "R_detector_val": {
+          "0": 0.7787787787787788,
+          "1": 0.22122122122122123
+        },
+        "R_final_test": {
+          "0": 0.778642936596218,
+          "1": 0.22135706340378197
+        },
+        "R_source_train": {
+          "0": 0.7787295583490933,
+          "1": 0.22127044165090667
+        }
+      }
+    }
+  ],
+  "target_column": "default_payment_next_month",
+  "target_distribution": {
+    "0": {
+      "count": 23335,
+      "proportion": 0.7787418655097614
+    },
+    "1": {
+      "count": 6630,
+      "proportion": 0.22125813449023862
+    }
+  },
+  "task_type": "binary_classification",
+  "uci_id": 350
+}

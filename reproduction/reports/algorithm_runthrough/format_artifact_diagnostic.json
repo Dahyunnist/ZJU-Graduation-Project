@@ -1,0 +1,12 @@
+{
+  "auroc": 0.68608,
+  "dataset": "adult",
+  "features": [
+    "missing_count",
+    "empty_string_count",
+    "total_serialized_value_length"
+  ],
+  "generator": "GaussianCopula",
+  "interpretation": "High values indicate row-format/length artifacts; main detector results remain runthrough only.",
+  "warning": true
+}

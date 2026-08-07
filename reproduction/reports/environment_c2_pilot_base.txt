@@ -1,0 +1,16 @@
+captured_at_utc=2026-07-14T18:03:16.050073+00:00
+python_version=3.13.11 | packaged by Anaconda, Inc. | (main, Dec 10 2025, 21:21:58) [MSC v.1929 64 bit (AMD64)]
+python_executable=D:\Anaconda3\python.exe
+platform=Windows-11-10.0.26200-SP0
+processor=Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+machine=AMD64
+logical_cpu_count=32
+package.pandas=2.3.3
+package.numpy=2.3.5
+package.scikit-learn=1.8.0
+package.PyYAML=6.0.3
+package.pytest=9.0.2
+package.sdv=NOT_INSTALLED
+package.sdmetrics=NOT_INSTALLED
+package.torch=2.8.0+cpu
+nvidia_smi=NVIDIA GeForce RTX 4070 Laptop GPU, 576.40, 8188 MiB

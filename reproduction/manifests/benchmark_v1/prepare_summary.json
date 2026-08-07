@@ -1,0 +1,38 @@
+{
+  "adult": {
+    "cleaning": {
+      "cleaned_columns": 16,
+      "cleaned_rows": 48790,
+      "exact_duplicate_rows_removed": 52,
+      "raw_columns": 15,
+      "raw_rows": 48842
+    },
+    "processed_sha256": "9cf6e79f08b62089624828b3b3c60c64950fea93948f5a5b2829d9194724f2d2",
+    "raw_sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+    "split_hashes": {
+      "2026": "47d75a9fc88b09901a020f5eb57f62fadd6c55921aaf63e5fcdcb8a2b904eff1",
+      "2027": "54e13902a34e68a9e03213f50eb7d354d3f7622c844d1a752286592c52bc2b45",
+      "2028": "3b61014cba56bf0c173f4b6699fb32f4be7502c233759428a6d916ec38fe6810",
+      "2029": "744bccdbd3d94f3e8de3401f24025a46cb6f80271b44ef3b7a9cec061a91f974",
+      "2030": "ff44fedc90aa5099ea12fbfb2d8338f331627c9dc180bb9cd61feae0999c5c6f"
+    }
+  },
+  "credit": {
+    "cleaning": {
+      "cleaned_columns": 25,
+      "cleaned_rows": 29965,
+      "exact_duplicate_rows_removed": 35,
+      "raw_columns": 24,
+      "raw_rows": 30000
+    },
+    "processed_sha256": "ee2fa731865931ec6c4c54d7c16e00f1051b9163a0bfeb7aa318e795302a4d29",
+    "raw_sha256": "56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602",
+    "split_hashes": {
+      "2026": "9febe610a191d7008f5394f731596b383c877b31451703b96b6cf0f9839d6971",
+      "2027": "b5f0378bb3b3d52b1873062dc6ee3f737f96bfe473eb92c1a317f37bd173d6d9",
+      "2028": "988939610d07e7de573687dc6db366d662b7c084c8f024af7aa254eb086e2688",
+      "2029": "746659abbbb320bd25e6ea71dcf0c34a3e650fb96d482f550e6b2be17fae73a7",
+      "2030": "bf5e2413f2ad9fdbae744472ccced208388dd92c9e577048020ad84092e2a47d"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+Accuracy: 0.7600
+AUROC: 0.8490
+
+              precision    recall  f1-score   support
+
+           0     0.7481    0.7840    0.7656       250
+           1     0.7731    0.7360    0.7541       250
+
+    accuracy                         0.7600       500
+   macro avg     0.7606    0.7600    0.7599       500
+weighted avg     0.7606    0.7600    0.7599       500

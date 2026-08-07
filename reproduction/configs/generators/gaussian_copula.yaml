@@ -1,0 +1,6 @@
+generator_id: GaussianCopula
+status: registered_not_trained
+formal_defaults:
+  enforce_min_max: true
+  enforce_rounding: true
+

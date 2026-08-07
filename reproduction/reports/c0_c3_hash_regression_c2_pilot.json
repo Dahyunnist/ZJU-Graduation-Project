@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-07-15",
+  "expected_and_actual": {
+    "data/processed/adult/adult_clean.csv": "9cf6e79f08b62089624828b3b3c60c64950fea93948f5a5b2829d9194724f2d2",
+    "data/processed/credit/credit_clean.csv": "ee2fa731865931ec6c4c54d7c16e00f1051b9163a0bfeb7aa318e795302a4d29",
+    "data/splits/benchmark_v1/adult/seed_2026.csv": "47d75a9fc88b09901a020f5eb57f62fadd6c55921aaf63e5fcdcb8a2b904eff1",
+    "outputs/adult_baseline/baseline_summary.json": "bf7b05721ef78424fe05ec4d279c9830162a32f9cf1900c9a8d94aa1b76422ef",
+    "run_adult_baseline.py": "f3d08bae0393f48ae8f9a460b763b34b939234ba6ab6a5650b027ef381196349",
+    "run_minimal_loop.py": "495d59d81c40202a762dec2d001cdc6397e19e2dacdeab4cfc43d006a0974b6f",
+    "runs/c2-smoke-adult-ctgan-s42-a2/smoke_summary.json": "444e244318850e1ca9b80dee85a3f396ed6755fbf6c2787fa97a02d95747a855",
+    "runs/c2-smoke-adult-gaussiancopula-s42-a2/smoke_summary.json": "0e266f4d1dedee94cdbcb851941d8bee3eec08dc7a24ea78b783d7485c728eb1",
+    "runs/c2-smoke-adult-tvae-s42-a2/smoke_summary.json": "db11046593c58efe9c6a6f7d8a6d5345a003c3a051f8b3b8578dc38d310823f3",
+    "runs/c3-smoke-adult-ctgan-s42/smoke_summary.json": "926f23122173bb33025325a0b7cfae3155b8abc12f36d6232ce46eb4df7da680",
+    "runs/c3-smoke-adult-gaussiancopula-s42/smoke_summary.json": "caae3aa2780bc439c9c2c5cd60ba7cd4cda02dfbf971bd1f7f27a7009460c151",
+    "runs/c3-smoke-adult-tvae-s42/smoke_summary.json": "15f76f6932a18ad8884aa97f1da4f2bf1bf04d254552a0a81c264737f2c822b5"
+  },
+  "mismatches": [],
+  "passed": true
+}

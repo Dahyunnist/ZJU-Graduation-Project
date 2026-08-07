@@ -1,0 +1,36 @@
+{
+  "dataset": "adult",
+  "generator_seed": 42,
+  "pool_sizes": {
+    "S_detector_train": 8051,
+    "S_detector_val": 5367,
+    "S_downstream_mix": 32201,
+    "S_final_test": 8051
+  },
+  "pool_seeds": {
+    "S_detector_train": 143,
+    "S_detector_val": 244,
+    "S_downstream_mix": 446,
+    "S_final_test": 345
+  },
+  "runs": {
+    "CTGAN": {
+      "manifest": "runs/c2-smoke-adult-ctgan-s42-a2/pools_manifest.json",
+      "manifest_sha256": "de47ccf1b74266489bd6f9d2ecc58a6ee553b94019461537ab17671839f82a9e",
+      "run_id": "c2-smoke-adult-ctgan-s42-a2"
+    },
+    "GaussianCopula": {
+      "manifest": "runs/c2-smoke-adult-gaussiancopula-s42-a2/pools_manifest.json",
+      "manifest_sha256": "0e59c6558ed17e73cd3e823087c4674e3977394984470f5bd0df7db0ca77ec6e",
+      "run_id": "c2-smoke-adult-gaussiancopula-s42-a2"
+    },
+    "TVAE": {
+      "manifest": "runs/c2-smoke-adult-tvae-s42-a2/pools_manifest.json",
+      "manifest_sha256": "e5bb77781f57abfa1fae2cee703f2180e571c80e226111daa266eb35140e858f",
+      "run_id": "c2-smoke-adult-tvae-s42-a2"
+    }
+  },
+  "run_type": "smoke",
+  "split_seed": 2026,
+  "status": "smoke_passed"
+}

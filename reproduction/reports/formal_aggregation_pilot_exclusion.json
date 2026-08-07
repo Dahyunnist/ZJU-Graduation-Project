@@ -1,0 +1,12 @@
+{
+  "excluded": {
+    "c2-pilot-adult-ctgan-s2026-20260714T180335714131Z": "run_type=pilot;status=blocked_by_gpu;complete=False",
+    "c2-pilot-adult-gaussiancopula-s2026-20260714T180355316988Z": "run_type=pilot;status=quality_blocked;complete=False",
+    "c2-pilot-adult-gaussiancopula-s2026-20260714T181051915952Z": "run_type=pilot;status=failed;complete=False",
+    "c2-pilot-adult-gaussiancopula-s2026-20260714T181119905473Z": "run_type=pilot;status=pilot_passed;complete=True",
+    "c2-pilot-adult-tvae-s2026-20260714T180335715148Z": "run_type=pilot;status=blocked_by_gpu;complete=False"
+  },
+  "included": [],
+  "passed": true,
+  "rule": "Only run_type=formal + status=formal_passed + COMPLETE may be included."
+}

@@ -1,0 +1,23 @@
+{
+  "actual_synthetic_proportion": 0.24999145970689715,
+  "base_n": 29273,
+  "condition": "synthetic_replace",
+  "dataset": "adult",
+  "effective_condition": "synthetic_replace",
+  "format": "manifest-first-v1",
+  "generator": "GaussianCopula",
+  "materialized_by_default": false,
+  "members_sha256": "4125005c8ca0684c68a2b7531d1198282c78729db29f65674b8b700b779d6dc1",
+  "mix_seed": 420303,
+  "p_requested": 0.25,
+  "reconstruction": {
+    "real_extra_sampling_seed": null,
+    "real_id_column": "row_id",
+    "real_sampling_seed": 420303,
+    "synthetic_id_column": "synth_row_id",
+    "synthetic_sampling_seed": 420304
+  },
+  "rounding": "half_up=floor(p*N+0.5)",
+  "rows": 29273,
+  "synthetic_count": 7318
+}

@@ -1,0 +1,2 @@
+run_id,status,error,path
+runthrough-v-curve-lr-20260715T025152529402,failed,"ValueError(""columns are missing: {'source_type', 'p', 'source_synth_row_id'}"")",E:\毕设\reproduction\runs\runthrough-v-curve-lr-20260715T025152529402

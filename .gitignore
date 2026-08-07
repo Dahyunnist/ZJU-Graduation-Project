@@ -1,0 +1,66 @@
+# Local credentials and machine-specific handoff notes
+.env
+.env.*
+*.pem
+*.key
+*远程服务器环境与配置交接说明*.md
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Temporary and editor files
+tmp/
+**/tmp/
+~$*
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Reproduction dependencies, datasets, generated runs and bulky artifacts
+reproduction/.deps/
+reproduction/data/
+reproduction/runs/
+reproduction/outputs/
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Downloaded third-party paper corpora and archives
+暑期工程实践/文献/
+**/论文PDF/
+第一次面谈前准备/
+选导调查/
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Superseded/generated review artifacts
+baibaiAIGC/
+论文综述与研究方案/output/pdf/*_预览版.pdf
+
+# Legacy validation copies of source/synthetic rows (reports remain tracked)
+reproduction/legacy/**/adult_*.csv
+
+# LaTeX/Typst build auxiliaries
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

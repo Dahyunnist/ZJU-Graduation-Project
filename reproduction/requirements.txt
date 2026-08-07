@@ -1,0 +1,14 @@
+setuptools<82
+sdv
+scikit-learn
+xgboost
+torch
+transformers
+openai
+scipy
+numpy
+dvc-data
+matplotlib
+seaborn
+pandas
+streamlit

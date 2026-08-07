@@ -1,0 +1,144 @@
+{
+  "created_at": "2026-07-14T19:02:14.444871+00:00",
+  "formal_inclusion": false,
+  "run_type": "runthrough",
+  "runs": [
+    {
+      "algorithm_id": "D-LR",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-lr-20260715T025856794836",
+      "run_id": "runthrough-d-lr-20260715T025856794836",
+      "seconds": 6.188165499996103,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-XGB",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-xgb-20260715T025903115090",
+      "run_id": "runthrough-d-xgb-20260715T025903115090",
+      "seconds": 6.332300000001851,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-3G",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-3g-20260715T025239531938",
+      "run_id": "runthrough-d-3g-20260715T025239531938",
+      "seconds": 0.33097770000313176,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-FT",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-ft-20260715T025239973258",
+      "run_id": "runthrough-d-ft-20260715T025239973258",
+      "seconds": 1.8208006999993813,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-TT",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-tt-20260715T025241846411",
+      "run_id": "runthrough-d-tt-20260715T025241846411",
+      "seconds": 3.023847399999795,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-DW",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-dw-20260715T025244913596",
+      "run_id": "runthrough-d-dw-20260715T025244913596",
+      "seconds": 6.143506599997636,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "D-DWTA",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-d-dwta-20260715T025251199918",
+      "run_id": "runthrough-d-dwta-20260715T025251199918",
+      "seconds": 14.565486899999087,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-CC",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-cc-20260715T025320176607",
+      "run_id": "runthrough-q-cc-20260715T025320176607",
+      "seconds": 2.340159200000926,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-PCC",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-pcc-20260715T025322641124",
+      "run_id": "runthrough-q-pcc-20260715T025322641124",
+      "seconds": 0.08429790000081994,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-ACC",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-acc-20260715T025322849214",
+      "run_id": "runthrough-q-acc-20260715T025322849214",
+      "seconds": 0.08552570000028936,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-PACC",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-pacc-20260715T025323042327",
+      "run_id": "runthrough-q-pacc-20260715T025323042327",
+      "seconds": 0.08895019999908982,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-EMQ",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-emq-20260715T025323257551",
+      "run_id": "runthrough-q-emq-20260715T025323257551",
+      "seconds": 0.10730810000677593,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-HDy",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-hdy-20260715T025323499160",
+      "run_id": "runthrough-q-hdy-20260715T025323499160",
+      "seconds": 0.34704079999937676,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-DyS",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-dys-20260715T025324010546",
+      "run_id": "runthrough-q-dys-20260715T025324010546",
+      "seconds": 0.3479063999984646,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "Q-MS",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-q-ms-20260715T025324479660",
+      "run_id": "runthrough-q-ms-20260715T025324479660",
+      "seconds": 0.20079460000124527,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "V-CURVE-LR",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-v-curve-lr-20260715T025325572400",
+      "run_id": "runthrough-v-curve-lr-20260715T025325572400",
+      "seconds": 32.5991847999976,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "V-CURVE-XGB",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-v-curve-xgb-20260715T025358360336",
+      "run_id": "runthrough-v-curve-xgb-20260715T025358360336",
+      "seconds": 34.0264698999963,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "V-KNN",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-v-knn-20260715T025910715869",
+      "run_id": "runthrough-v-knn-20260715T025910715869",
+      "seconds": 4.6903068000028725,
+      "status": "runthrough_passed"
+    },
+    {
+      "algorithm_id": "V-OOB",
+      "path": "E:\\毕设\\reproduction\\runs\\runthrough-v-oob-20260715T025915532472",
+      "run_id": "runthrough-v-oob-20260715T025915532472",
+      "seconds": 1.1531529999992927,
+      "status": "runthrough_passed"
+    }
+  ],
+  "status_counts": {
+    "failed": 0,
+    "passed": 19
+  }
+}

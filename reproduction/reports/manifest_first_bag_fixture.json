@@ -1,0 +1,19 @@
+{
+  "actual_proportion": 0.5,
+  "bag_id": "bag:adult:GaussianCopula:s42:test:p050:b00",
+  "bag_size": 1000,
+  "dataset": "adult",
+  "format": "bag-manifest-first-v1",
+  "generator": "GaussianCopula",
+  "materialized_features": false,
+  "members_file": "manifest_first_bag_fixture.members.csv",
+  "members_file_sha256": "3fdf3497c3bd31cff5f07241f2e6e85ea76666333b7bcdd59245e5da1c5d477c",
+  "members_sha256": "3fdf3497c3bd31cff5f07241f2e6e85ea76666333b7bcdd59245e5da1c5d477c",
+  "mix_seed": 4210400,
+  "real_count": 500,
+  "requested_proportion": 0.5,
+  "run_type": "smoke_fixture",
+  "sampling": "without_replacement_within_bag;reuse_allowed_between_bags",
+  "stage": "test",
+  "synthetic_count": 500
+}

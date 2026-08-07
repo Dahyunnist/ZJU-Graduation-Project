@@ -1,0 +1,56 @@
+{
+  "cpu_count": 32,
+  "cuda_available": false,
+  "cudnn": null,
+  "disk": {
+    "free_bytes": 106489966592,
+    "total_bytes": 514690379776,
+    "used_bytes": 408200413184
+  },
+  "enable_gpu_supported": true,
+  "estimate": {
+    "ctgan_full_300_seconds": 11579.636809173498,
+    "method": "linear CPU extrapolation from Adult 3000-row/20-epoch smoke; GPU runtime may differ",
+    "pilot_artifact_bytes_each": 220000000,
+    "tvae_full_300_seconds": 6651.396306408
+  },
+  "executable": "D:\\Anaconda3\\envs\\tabpollution\\python.exe",
+  "gpu_environment_repair": {
+    "commands": [
+      "conda create -n tabpollution-gpu python=3.11 -y",
+      "conda activate tabpollution-gpu",
+      "pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128",
+      "pip install sdv==1.37.3 sdmetrics==0.28.0 pandas==2.3.3 scikit-learn==1.9.0",
+      "python -c \"import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None)\""
+    ],
+    "estimated_download_and_disk": "Several GB; verify official PyTorch selector against the installed driver before executing.",
+    "executed": false,
+    "note": "Create an isolated conda environment, install a PyTorch CUDA build compatible with driver, then reinstall pinned SDV/SDMetrics; verify with the commands below before use.",
+    "recommended_environment": "tabpollution-gpu",
+    "rollback": "Remove only the isolated tabpollution-gpu environment; do not modify tabpollution."
+  },
+  "hard_gpu_passed": false,
+  "nvidia_smi": {
+    "driver_version": "576.40",
+    "memory_free_mib": 7926,
+    "memory_total_mib": 8188,
+    "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "visible": true
+  },
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.15 | packaged by Anaconda, Inc. | (main, Jun 11 2026, 15:12:53) [MSC v.1942 64 bit (AMD64)]",
+  "sdmetrics": "0.28.0",
+  "sdv": "1.37.3",
+  "sdv_constructor_signatures": {
+    "CTGAN": "(self, metadata, enforce_min_max_values=True, enforce_rounding=True, locales=['en_US'], embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256), generator_lr=0.0002, generator_decay=1e-06, discriminator_lr=0.0002, discriminator_decay=1e-06, batch_size=500, discriminator_steps=1, log_frequency=True, verbose=False, epochs=300, pac=10, enable_gpu=True, cuda=None)",
+    "TVAE": "(self, metadata, enforce_min_max_values=True, enforce_rounding=True, embedding_dim=128, compress_dims=(128, 128), decompress_dims=(128, 128), l2scale=1e-05, batch_size=500, verbose=False, epochs=300, loss_factor=2, enable_gpu=True, cuda=None)"
+  },
+  "sklearn": "1.9.0",
+  "tensor_gpu_test": {
+    "error": "torch.cuda.is_available() is False",
+    "passed": false
+  },
+  "torch": "2.12.1+cpu",
+  "torch_cuda": null,
+  "torch_gpu_name": null
+}

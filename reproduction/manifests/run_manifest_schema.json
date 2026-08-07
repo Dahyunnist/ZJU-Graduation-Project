@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "tabpollution run manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "created_at",
+    "code_state",
+    "config_snapshot",
+    "data_checksums",
+    "dataset",
+    "protocol",
+    "algorithm",
+    "generator",
+    "seed",
+    "input_artifacts",
+    "output_artifacts",
+    "environment"
+  ],
+  "properties": {
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$"},
+    "created_at": {"type": "string"},
+    "code_state": {"type": "object"},
+    "config_snapshot": {"type": "string"},
+    "data_checksums": {"type": "object"},
+    "dataset": {"type": "string"},
+    "protocol": {"type": "string"},
+    "algorithm": {"type": "string"},
+    "generator": {"type": "string"},
+    "seed": {
+      "oneOf": [
+        {"type": "integer"},
+        {"type": "array", "items": {"type": "integer"}, "minItems": 1, "uniqueItems": true}
+      ]
+    },
+    "input_artifacts": {"type": "array"},
+    "output_artifacts": {"type": "array"},
+    "environment": {"type": "object"}
+  }
+}

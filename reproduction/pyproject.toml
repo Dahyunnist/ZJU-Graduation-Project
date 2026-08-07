@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabpollution"
+version = "0.1.0"
+description = "Reproducible benchmark infrastructure for synthetic tabular data pollution"
+requires-python = ">=3.11"
+dependencies = [
+  "pandas>=2.0,<3",
+  "scikit-learn>=1.4,<2",
+  "PyYAML>=6,<7",
+  "xlrd>=2,<3",
+]
+
+[project.scripts]
+tabpollution = "tabpollution.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+

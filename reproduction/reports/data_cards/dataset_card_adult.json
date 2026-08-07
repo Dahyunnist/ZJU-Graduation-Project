@@ -1,0 +1,300 @@
+{
+  "canonical_name": "UCI Adult",
+  "categorical_columns": [
+    "workclass",
+    "education",
+    "marital-status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "native-country"
+  ],
+  "cleaning": {
+    "cleaned_columns": 16,
+    "cleaned_rows": 48790,
+    "exact_duplicate_rows_removed": 52,
+    "raw_columns": 15,
+    "raw_rows": 48842
+  },
+  "dataset_id": "adult",
+  "doi": "10.24432/C5XW20",
+  "download_url": "https://archive.ics.uci.edu/static/public/2/adult.zip",
+  "feature_count": 14,
+  "known_risks": [
+    "Preprocessors must be fit only on the permitted training partition.",
+    "row_id, split and provenance fields are metadata and must never become model features.",
+    "Categorical codes in Credit carry semantics and are not continuous measurements."
+  ],
+  "license": "CC BY 4.0",
+  "missing": {
+    "age": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "capital-gain": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "capital-loss": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "education": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "education-num": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "fnlwgt": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "hours-per-week": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "marital-status": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "native-country": {
+      "count": 856,
+      "rate": 0.01754457880713261
+    },
+    "occupation": {
+      "count": 2805,
+      "rate": 0.05749128919860627
+    },
+    "race": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "relationship": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "sex": {
+      "count": 0,
+      "rate": 0.0
+    },
+    "workclass": {
+      "count": 2795,
+      "rate": 0.057286329165812666
+    }
+  },
+  "numeric_columns": [
+    "age",
+    "fnlwgt",
+    "education-num",
+    "capital-gain",
+    "capital-loss",
+    "hours-per-week"
+  ],
+  "processed_sha256": "9cf6e79f08b62089624828b3b3c60c64950fea93948f5a5b2829d9194724f2d2",
+  "raw_sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+  "retrieval_date": "2026-07-15",
+  "source_page": "https://archive.ics.uci.edu/dataset/2/adult",
+  "split_summaries": [
+    {
+      "assignment_sha256": "47d75a9fc88b09901a020f5eb57f62fadd6c55921aaf63e5fcdcb8a2b904eff1",
+      "counts": {
+        "R_detector_train": 7319,
+        "R_detector_val": 4879,
+        "R_final_test": 7319,
+        "R_source_train": 29273
+      },
+      "dataset_id": "adult",
+      "proportions": {
+        "R_detector_train": 0.15001024800163967,
+        "R_detector_val": 0.1,
+        "R_final_test": 0.15001024800163967,
+        "R_source_train": 0.5999795039967206
+      },
+      "rows": 48790,
+      "seed": 2026,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_detector_val": {
+          "<=50K": 0.760606681697069,
+          ">50K": 0.23939331830293092
+        },
+        "R_final_test": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_source_train": {
+          "<=50K": 0.7605643425682369,
+          ">50K": 0.23943565743176307
+        }
+      }
+    },
+    {
+      "assignment_sha256": "54e13902a34e68a9e03213f50eb7d354d3f7622c844d1a752286592c52bc2b45",
+      "counts": {
+        "R_detector_train": 7319,
+        "R_detector_val": 4879,
+        "R_final_test": 7319,
+        "R_source_train": 29273
+      },
+      "dataset_id": "adult",
+      "proportions": {
+        "R_detector_train": 0.15001024800163967,
+        "R_detector_val": 0.1,
+        "R_final_test": 0.15001024800163967,
+        "R_source_train": 0.5999795039967206
+      },
+      "rows": 48790,
+      "seed": 2027,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_detector_val": {
+          "<=50K": 0.760606681697069,
+          ">50K": 0.23939331830293092
+        },
+        "R_final_test": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_source_train": {
+          "<=50K": 0.7605643425682369,
+          ">50K": 0.23943565743176307
+        }
+      }
+    },
+    {
+      "assignment_sha256": "3b61014cba56bf0c173f4b6699fb32f4be7502c233759428a6d916ec38fe6810",
+      "counts": {
+        "R_detector_train": 7319,
+        "R_detector_val": 4879,
+        "R_final_test": 7319,
+        "R_source_train": 29273
+      },
+      "dataset_id": "adult",
+      "proportions": {
+        "R_detector_train": 0.15001024800163967,
+        "R_detector_val": 0.1,
+        "R_final_test": 0.15001024800163967,
+        "R_source_train": 0.5999795039967206
+      },
+      "rows": 48790,
+      "seed": 2028,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_detector_val": {
+          "<=50K": 0.760606681697069,
+          ">50K": 0.23939331830293092
+        },
+        "R_final_test": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_source_train": {
+          "<=50K": 0.7605643425682369,
+          ">50K": 0.23943565743176307
+        }
+      }
+    },
+    {
+      "assignment_sha256": "744bccdbd3d94f3e8de3401f24025a46cb6f80271b44ef3b7a9cec061a91f974",
+      "counts": {
+        "R_detector_train": 7319,
+        "R_detector_val": 4879,
+        "R_final_test": 7319,
+        "R_source_train": 29273
+      },
+      "dataset_id": "adult",
+      "proportions": {
+        "R_detector_train": 0.15001024800163967,
+        "R_detector_val": 0.1,
+        "R_final_test": 0.15001024800163967,
+        "R_source_train": 0.5999795039967206
+      },
+      "rows": 48790,
+      "seed": 2029,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_detector_val": {
+          "<=50K": 0.760606681697069,
+          ">50K": 0.23939331830293092
+        },
+        "R_final_test": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_source_train": {
+          "<=50K": 0.7605643425682369,
+          ">50K": 0.23943565743176307
+        }
+      }
+    },
+    {
+      "assignment_sha256": "ff44fedc90aa5099ea12fbfb2d8338f331627c9dc180bb9cd61feae0999c5c6f",
+      "counts": {
+        "R_detector_train": 7319,
+        "R_detector_val": 4879,
+        "R_final_test": 7319,
+        "R_source_train": 29273
+      },
+      "dataset_id": "adult",
+      "proportions": {
+        "R_detector_train": 0.15001024800163967,
+        "R_detector_val": 0.1,
+        "R_final_test": 0.15001024800163967,
+        "R_source_train": 0.5999795039967206
+      },
+      "rows": 48790,
+      "seed": 2030,
+      "strategy": "sequential_stratified_sklearn(seed, seed+1, seed+2)",
+      "target_distribution": {
+        "R_detector_train": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_detector_val": {
+          "<=50K": 0.760606681697069,
+          ">50K": 0.23939331830293092
+        },
+        "R_final_test": {
+          "<=50K": 0.7606230359338707,
+          ">50K": 0.23937696406612927
+        },
+        "R_source_train": {
+          "<=50K": 0.7605643425682369,
+          ">50K": 0.23943565743176307
+        }
+      }
+    }
+  ],
+  "target_column": "income",
+  "target_distribution": {
+    "<=50K": {
+      "count": 37109,
+      "proportion": 0.7605861856937897
+    },
+    ">50K": {
+      "count": 11681,
+      "proportion": 0.23941381430621028
+    }
+  },
+  "task_type": "binary_classification",
+  "uci_id": 2
+}

@@ -1,0 +1,22 @@
+{
+  "dataset": "UCI Adult",
+  "random_state": 42,
+  "generator": "CTGAN",
+  "real_rows": 3000,
+  "synthetic_rows": 1000,
+  "epochs": 20,
+  "classifier": "LogisticRegression",
+  "sdmetrics_quality_score": 0.7732779684196133,
+  "sdmetrics_properties": [
+    {
+      "Property": "Column Shapes",
+      "Score": 0.8397097829930726
+    },
+    {
+      "Property": "Column Pair Trends",
+      "Score": 0.7068461538461539
+    }
+  ],
+  "classifier_accuracy": 0.76,
+  "classifier_auroc": 0.848992
+}

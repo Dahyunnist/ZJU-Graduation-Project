@@ -1,0 +1,10 @@
+{
+  "test_domains": ["finance"],
+  "test_generators": ["GaussianCopula"],
+  "test_records": ["test-record"],
+  "test_tables": ["credit"],
+  "train_domains": ["social"],
+  "train_generators": ["GaussianCopula"],
+  "train_records": ["train-record"],
+  "train_tables": ["adult"]
+}
