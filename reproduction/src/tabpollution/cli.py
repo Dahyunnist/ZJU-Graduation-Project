@@ -24,7 +24,15 @@ from tabpollution.mixing.smoke import inspect_bag, run_c3_smoke
 from tabpollution.pipeline import prepare_benchmark, validate_prepared_benchmark
 from tabpollution.runs import aggregate_formal_runs
 from tabpollution.algorithm_runthrough import run_all as run_algorithm_runthrough, recover_and_aggregate
-from tabpollution.governance import run_governance_benchmark, validate_governance_setup
+from tabpollution.governance import (
+    aggregate_governance_shards,
+    build_shard_plan,
+    run_governance_benchmark,
+    run_governance_shard,
+    run_governance_sharded,
+    shard_status,
+    validate_governance_setup,
+)
 from tabpollution.governance.pools import (
     build_governance_pools,
     preflight_pool_build,
@@ -133,6 +141,20 @@ def build_parser() -> argparse.ArgumentParser:
     governance_preflight.add_argument("--config", type=Path, required=True)
     governance_run = governance_commands.add_parser("run")
     governance_run.add_argument("--config", type=Path, required=True)
+    shard_plan = governance_commands.add_parser("shard-plan")
+    shard_plan.add_argument("--config", type=Path, required=True)
+    shard_status_parser = governance_commands.add_parser("shard-status")
+    shard_status_parser.add_argument("--config", type=Path, required=True)
+    shard_run = governance_commands.add_parser("shard-run")
+    shard_run.add_argument("--config", type=Path, required=True)
+    shard_run.add_argument("--shard-id", required=True)
+    shard_run.add_argument("--resume", action="store_true")
+    sharded_run = governance_commands.add_parser("sharded-run")
+    sharded_run.add_argument("--config", type=Path, required=True)
+    sharded_run.add_argument("--resume", action="store_true")
+    sharded_run.add_argument("--max-shards", type=int)
+    shard_aggregate = governance_commands.add_parser("shard-aggregate")
+    shard_aggregate.add_argument("--config", type=Path, required=True)
     source_prepare = governance_commands.add_parser("source-prepare")
     source_prepare.add_argument("--config", type=Path, required=True)
     pool_preflight = governance_commands.add_parser("pool-preflight")
@@ -205,6 +227,18 @@ def main(argv: list[str] | None = None) -> None:
         result = validate_governance_setup(args.config)
     elif args.command == "governance" and args.governance_command == "run":
         result = run_governance_benchmark(args.config)
+    elif args.command == "governance" and args.governance_command == "shard-plan":
+        result = build_shard_plan(args.config)
+    elif args.command == "governance" and args.governance_command == "shard-status":
+        result = shard_status(args.config)
+    elif args.command == "governance" and args.governance_command == "shard-run":
+        result = run_governance_shard(args.config, args.shard_id, resume=args.resume)
+    elif args.command == "governance" and args.governance_command == "sharded-run":
+        result = run_governance_sharded(
+            args.config, resume=args.resume, max_shards=args.max_shards,
+        )
+    elif args.command == "governance" and args.governance_command == "shard-aggregate":
+        result = aggregate_governance_shards(args.config)
     elif args.command == "governance" and args.governance_command == "source-prepare":
         result = prepare_governance_sources(args.config)
     elif args.command == "governance" and args.governance_command == "pool-preflight":

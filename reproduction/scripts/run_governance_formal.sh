@@ -43,7 +43,9 @@ export CUDA_VISIBLE_DEVICES="$GPU_INDEX"
 mkdir -p runs/governance-formal-v1
 python -m tabpollution environment capture --output runs/governance-formal-v1/environment.txt
 python -m tabpollution governance preflight --config configs/governance_formal.yaml
-nice -n 10 python -m tabpollution governance run --config configs/governance_formal.yaml &
+MAX_SHARDS="${MAX_SHARDS:-1}"
+nice -n 10 python -m tabpollution governance sharded-run \
+  --config configs/governance_formal.yaml --resume --max-shards "$MAX_SHARDS" &
 run_pid=$!
 watchdog_pid=""
 cleanup_run() {
