@@ -47,24 +47,38 @@ mkdir -p runs/governance-pool-pilot-v1
 nice -n 10 "$PYTHON" -m tabpollution governance pool-build \
   --config configs/governance_pool_build_pilot.yaml --resume &
 pilot_pid=$!
-terminate_pilot() {
+watchdog_pid=""
+cleanup_pilot() {
   if kill -0 "$pilot_pid" 2>/dev/null; then
     kill -TERM "$pilot_pid" 2>/dev/null || true
-    wait "$pilot_pid" || true
+  fi
+  if [[ -n "$watchdog_pid" ]]; then
+    kill "$watchdog_pid" 2>/dev/null || true
   fi
 }
-trap terminate_pilot INT TERM
+trap cleanup_pilot INT TERM
 
 # If another compute process appears, stop only this user's pilot.
-while kill -0 "$pilot_pid" 2>/dev/null; do
-  while IFS= read -r observed_pid; do
-    observed_pid="${observed_pid//[[:space:]]/}"
-    if [[ -n "$observed_pid" && "$observed_pid" != "$pilot_pid" ]]; then
-      echo "Another GPU process ($observed_pid) appeared; terminating pilot $pilot_pid." >&2
-      terminate_pilot
-      exit 5
-    fi
-  done < <(nvidia-smi -i "$GPU_INDEX" --query-compute-apps=pid --format=csv,noheader,nounits)
-  sleep 10
-done
+(
+  while kill -0 "$pilot_pid" 2>/dev/null; do
+    while IFS= read -r observed_pid; do
+      observed_pid="${observed_pid//[[:space:]]/}"
+      if [[ -n "$observed_pid" && "$observed_pid" != "$pilot_pid" ]]; then
+        echo "Another GPU process ($observed_pid) appeared; terminating pilot $pilot_pid." >&2
+        kill -TERM "$pilot_pid" 2>/dev/null || true
+        exit 5
+      fi
+    done < <(nvidia-smi -i "$GPU_INDEX" --query-compute-apps=pid --format=csv,noheader,nounits)
+    sleep 10
+  done
+) &
+watchdog_pid=$!
+
+set +e
 wait "$pilot_pid"
+pilot_status=$?
+set -e
+kill "$watchdog_pid" 2>/dev/null || true
+wait "$watchdog_pid" 2>/dev/null || true
+trap - INT TERM
+exit "$pilot_status"

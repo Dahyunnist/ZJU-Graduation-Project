@@ -45,25 +45,39 @@ export CUDA_VISIBLE_DEVICES="$GPU_INDEX"
 nice -n 10 python -m tabpollution governance pool-build \
   --config configs/governance_pool_build.yaml --resume &
 build_pid=$!
-terminate_build() {
+watchdog_pid=""
+cleanup_build() {
   if kill -0 "$build_pid" 2>/dev/null; then
     kill -TERM "$build_pid" 2>/dev/null || true
-    wait "$build_pid" || true
+  fi
+  if [[ -n "$watchdog_pid" ]]; then
+    kill "$watchdog_pid" 2>/dev/null || true
   fi
 }
-trap terminate_build INT TERM
+trap cleanup_build INT TERM
 
 # Protect the shared card: if any compute PID other than this build appears,
 # terminate only this user's resumable build.
-while kill -0 "$build_pid" 2>/dev/null; do
-  while IFS= read -r observed_pid; do
-    observed_pid="${observed_pid//[[:space:]]/}"
-    if [[ -n "$observed_pid" && "$observed_pid" != "$build_pid" ]]; then
-      echo "Another GPU process ($observed_pid) appeared; terminating formal pool build $build_pid." >&2
-      terminate_build
-      exit 5
-    fi
-  done < <(nvidia-smi -i "$GPU_INDEX" --query-compute-apps=pid --format=csv,noheader,nounits)
-  sleep 10
-done
+(
+  while kill -0 "$build_pid" 2>/dev/null; do
+    while IFS= read -r observed_pid; do
+      observed_pid="${observed_pid//[[:space:]]/}"
+      if [[ -n "$observed_pid" && "$observed_pid" != "$build_pid" ]]; then
+        echo "Another GPU process ($observed_pid) appeared; terminating formal pool build $build_pid." >&2
+        kill -TERM "$build_pid" 2>/dev/null || true
+        exit 5
+      fi
+    done < <(nvidia-smi -i "$GPU_INDEX" --query-compute-apps=pid --format=csv,noheader,nounits)
+    sleep 10
+  done
+) &
+watchdog_pid=$!
+
+set +e
 wait "$build_pid"
+build_status=$?
+set -e
+kill "$watchdog_pid" 2>/dev/null || true
+wait "$watchdog_pid" 2>/dev/null || true
+trap - INT TERM
+exit "$build_status"
