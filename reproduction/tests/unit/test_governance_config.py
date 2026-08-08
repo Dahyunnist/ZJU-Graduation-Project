@@ -82,6 +82,16 @@ def test_pilot_and_formal_freeze_the_same_protocol_matrix() -> None:
     assert pilot.seeds == (2026,)
 
 
+def test_resource_probe_uses_one_formal_size_deep_detector_and_is_not_formal() -> None:
+    probe = load_governance_config(Path("configs/governance_resource_probe.yaml"))
+    assert probe.run_type == "pilot"
+    assert set(probe.protocols) == {"P1"}
+    assert probe.detectors == ("flat_transformer",)
+    assert probe.bags_per_rate == 1
+    assert not probe.valuation_enabled
+    assert probe.device == "cuda"
+
+
 def test_formal_contract_rejects_legacy_approximation() -> None:
     raw = valid_governance_config()
     formal = load_governance_config(Path("configs/governance_formal.yaml"))
