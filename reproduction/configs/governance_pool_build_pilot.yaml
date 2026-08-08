@@ -1,0 +1,28 @@
+build_id: governance-pools-pilot-v1
+seed: 2026
+sample_size: 2000
+source_train_fraction: 0.35
+
+datasets:
+  adult:
+    domain: social
+    source_path: ../data/processed/adult/adult_clean.csv
+    source_target: income
+    target_column: income
+    target_transform: identity
+
+generators:
+  CTGAN:
+    epochs: 10
+    batch_size: 500
+    cuda: true
+    verbose: true
+  TVAE:
+    epochs: 10
+    batch_size: 500
+    cuda: true
+
+# Pilot artifacts are deliberately isolated from the formal registry and
+# checkpoints. They must never be consumed by governance_formal.yaml.
+output_dir: ../data/governance-pilot
+checkpoint_dir: ../checkpoints/governance-generators-pilot

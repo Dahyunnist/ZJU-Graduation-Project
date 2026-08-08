@@ -47,6 +47,17 @@ def test_shipped_pool_config_is_structurally_valid() -> None:
     assert abalone.target_threshold == 9
 
 
+def test_pool_pilot_is_small_and_isolated_from_formal_artifacts() -> None:
+    pilot = load_pool_build_config("configs/governance_pool_build_pilot.yaml")
+    formal = load_pool_build_config("configs/governance_pool_build.yaml")
+    assert {spec.table_id for spec in pilot.datasets} == {"adult"}
+    assert set(pilot.generators) == {"CTGAN", "TVAE"}
+    assert pilot.sample_size == 2000
+    assert all(config["epochs"] <= 10 for config in pilot.generators.values())
+    assert pilot.output_dir != formal.output_dir
+    assert pilot.checkpoint_dir != formal.checkpoint_dir
+
+
 def test_pool_builder_writes_atomic_registry_and_binary_target(tmp_path: Path, monkeypatch) -> None:
     source = tmp_path / "source.csv"
     pd.DataFrame({
