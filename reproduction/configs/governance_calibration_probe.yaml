@@ -1,0 +1,62 @@
+experiment_id: governance-calibration-probe-v1
+run_type: pilot
+seeds: [2026]
+
+# Real-pool, CPU-only launch-readiness probe. It exercises the hardest table
+# transfer boundary without consuming the shared GPU or producing formal data.
+protocols:
+  P3:
+    train_tables: [adult, abalone]
+    test_tables: [credit]
+    train_generators: [CTGAN]
+    test_generators: [CTGAN]
+
+prevalence_rates: [0.0, 0.05, 0.10]
+contamination_modes: [replace]
+bags_per_rate: 2
+utility_bags_per_rate: 1
+bag_size: 1000
+detectors: [char3gram]
+quantifiers: [cc, pcc, pacc]
+primary_quantifier: pacc
+calibration:
+  policies: [source_only, target_real_anchor, oracle_target]
+  primary_policy: source_only
+  target_real_anchor_size: 500
+
+valuation:
+  enabled: false
+  methods: []
+  bags_per_rate: 0
+  sample_limit: 80
+  oob_estimators: 20
+
+data:
+  mode: registry
+  registry_path: ../data/governance/pool_registry.csv
+
+thresholds:
+  detector_fpr_target: 0.05
+  artifact_auc_gate: 0.65
+  governance_prevalence: 0.10
+  harm_tolerance: 0.005
+
+output_dir: ../runs/governance-calibration-probe-v1
+resources:
+  device: cpu
+  max_cpu_threads: 2
+
+deep_training:
+  dim: 24
+  heads: 4
+  layers: 1
+  max_len: 192
+  max_datum: 32
+  max_columns: 24
+  epochs: 2
+  batch_size: 32
+  learning_rate: 0.002
+  weight_decay: 0.01
+  gradient_clip_norm: 1.0
+  early_stopping_patience: 2
+  min_epochs: 1
