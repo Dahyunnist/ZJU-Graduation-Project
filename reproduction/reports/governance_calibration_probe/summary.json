@@ -1,0 +1,53 @@
+{
+  "analysis_ready": true,
+  "artifact_gate_failures": 0,
+  "calibration_policies": [
+    "oracle_target",
+    "source_only",
+    "target_real_anchor"
+  ],
+  "created_at": "2026-08-10T13:59:59.606111+00:00",
+  "detectors": [
+    "char3gram"
+  ],
+  "evidence_rows": 54,
+  "experiment_id": "governance-calibration-probe-v1",
+  "formal_inclusion": false,
+  "low_prevalence_rows": 36,
+  "max_absolute_error_decomposition_residual": 1.1102230246251565e-16,
+  "mean_decision_regret": 0.0017794622988729174,
+  "mean_prevalence_mae": 0.5784828286753644,
+  "outputs": {
+    "detector_diagnostics": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/detector_diagnostics.json",
+    "evidence": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/governance_evidence.csv",
+    "findings": [
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_1_transfer.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_2_format_artifacts.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_3_low_prevalence.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_4_quantifier_shift.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_5_utility_curve.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_6_detectability_vs_harm.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_6_quality_detectability_utility.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_7_calibration_threshold_transfer.csv",
+      "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/finding_8_error_decomposition.csv"
+    ],
+    "method_registry": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/method_registry_snapshot.json",
+    "paired_tests": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/paired_detector_tests.csv",
+    "statistical_summary": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/statistical_summary_ci95.csv",
+    "valuation": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-calibration-probe-v1/record_valuation.csv"
+  },
+  "primary_quantifier_failure_rows": 0,
+  "protocols": [
+    "P3"
+  ],
+  "quantifier_failure_rows": 0,
+  "quantifiers": [
+    "cc",
+    "pacc",
+    "pcc"
+  ],
+  "run_type": "pilot",
+  "seconds": 10.504474714398384,
+  "status": "complete",
+  "valuation_rows": 0
+}
