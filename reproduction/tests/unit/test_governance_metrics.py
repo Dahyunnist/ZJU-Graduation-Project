@@ -9,6 +9,7 @@ from tabpollution.governance.metrics import (
     detection_metrics,
     expected_calibration_error,
     select_fpr_threshold,
+    select_negative_anchor_threshold,
 )
 from tabpollution.quantification.methods import ScoreQuantifier
 from tabpollution.detectors.base import serialize_record
@@ -28,6 +29,13 @@ def test_detection_metrics_include_calibration_and_operating_point() -> None:
     assert metrics["auroc"] == 1.0
     assert metrics["fpr"] <= .05
     assert expected_calibration_error(labels, scores) >= 0
+
+
+def test_negative_anchor_threshold_controls_empirical_fpr_with_ties() -> None:
+    scores = np.array([.1, .2, .3, .4, .4, .9])
+    result = select_negative_anchor_threshold(scores, .20)
+    assert np.mean(scores >= result["threshold"]) <= .20
+    assert result["validation_fpr"] <= .20
 
 
 def test_artifact_features_have_schema_independent_columns() -> None:

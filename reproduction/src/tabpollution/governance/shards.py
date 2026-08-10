@@ -327,7 +327,11 @@ def aggregate_governance_shards(config_path: str | Path) -> dict[str, Any]:
         "evidence_rows": len(evidence),
         "protocols": sorted(evidence["protocol"].unique().tolist()),
         "detectors": sorted(evidence["detector"].unique().tolist()),
+        "calibration_policies": sorted(evidence["calibration_policy"].unique().tolist()),
         "quantifiers": sorted(evidence["quantifier"].unique().tolist()),
+        "max_absolute_error_decomposition_residual": finite_or_none(
+            evidence["error_decomposition_residual"].abs().max()
+        ),
         "low_prevalence_rows": int(evidence["true_prevalence"].isin([.05, .10]).sum()),
         "artifact_gate_failures": int((~artifacts["artifact_gate_passed"].astype(bool)).sum()),
         "valuation_rows": len(valuation),

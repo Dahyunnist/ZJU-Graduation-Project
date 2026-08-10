@@ -44,6 +44,17 @@ def select_fpr_threshold(labels: np.ndarray, scores: np.ndarray, target_fpr: flo
     return {"threshold": threshold, "validation_fpr": float(fpr[index]), "validation_tpr": float(tpr[index])}
 
 
+def select_negative_anchor_threshold(scores: np.ndarray, target_fpr: float) -> dict[str, float]:
+    """Choose the most permissive threshold whose empirical clean-anchor FPR is controlled."""
+    scores = np.asarray(scores, float)
+    if not len(scores) or not np.isfinite(scores).all():
+        raise ValueError("negative anchor scores must be non-empty and finite")
+    candidates = np.concatenate(([np.nextafter(scores.max(), np.inf)], np.unique(scores)))
+    valid = [(float(t), float(np.mean(scores >= t))) for t in candidates if np.mean(scores >= t) <= target_fpr]
+    threshold, achieved = min(valid, key=lambda item: item[0])
+    return {"threshold": threshold, "validation_fpr": achieved, "validation_tpr": float("nan")}
+
+
 def detection_metrics(labels: np.ndarray, scores: np.ndarray, threshold: float) -> dict[str, float]:
     labels = np.asarray(labels, int)
     scores = np.clip(np.asarray(scores, float), 0, 1)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import json
 import importlib.util
@@ -41,6 +41,7 @@ from tabpollution.governance.metrics import (
     finite_or_none,
     prevalence_error,
     select_fpr_threshold,
+    select_negative_anchor_threshold,
 )
 from tabpollution.mixing.protocols import validate_protocol
 from tabpollution.quantification.methods import ScoreQuantifier
@@ -193,6 +194,100 @@ class _PlattCalibrator:
         return self.model.predict_proba(scores.reshape(-1, 1))[:, 1]
 
 
+@dataclass(frozen=True)
+class _CalibrationPolicy:
+    name: str
+    calibrator: _PlattCalibrator
+    threshold: float
+    quantifier_scores: np.ndarray
+    quantifier_labels: np.ndarray
+    reference_fpr: float
+    reference_tpr: float
+    uses_target_real_records: bool
+    uses_target_labels: bool
+    deployment_status: str
+
+
+def _target_real_anchor(source: GovernanceDataSource, tables: tuple[str, ...], seed: int,
+                        limit: int) -> pd.DataFrame:
+    frames = [
+        _split(source.table(table_id).real, seed + table_index * 113)["source"]
+        for table_index, table_id in enumerate(tables)
+    ]
+    anchor = pd.concat(frames, ignore_index=True, sort=False)
+    if len(anchor) > limit:
+        anchor = anchor.sample(n=limit, random_state=seed + 9109)
+    return anchor.reset_index(drop=True)
+
+
+def _calibration_policies(
+    config: GovernanceConfig,
+    detector: Any,
+    source: GovernanceDataSource,
+    spec: Any,
+    seed: int,
+    raw_source_val: np.ndarray,
+    source_val_labels: np.ndarray,
+) -> dict[str, _CalibrationPolicy]:
+    policies: dict[str, _CalibrationPolicy] = {}
+    for name in config.calibration_policies:
+        if name == "source_only":
+            fit_scores, fit_labels = raw_source_val, source_val_labels
+            calibrator = _PlattCalibrator(seed).fit(fit_scores, fit_labels)
+            quantifier_scores = calibrator.predict(fit_scores)
+            threshold_info = select_fpr_threshold(fit_labels, quantifier_scores, config.detector_fpr_target)
+            policies[name] = _CalibrationPolicy(
+                name, calibrator, threshold_info["threshold"], quantifier_scores, fit_labels,
+                threshold_info["validation_fpr"], threshold_info["validation_tpr"],
+                False, False, "deployable_without_target_data",
+            )
+            continue
+
+        if name == "target_real_anchor":
+            anchor = _target_real_anchor(
+                source, spec.test_tables, seed, config.target_real_anchor_size,
+            )
+            raw_anchor = detector.predict_score(anchor)
+            positive = raw_source_val[source_val_labels == 1]
+            n = min(len(raw_anchor), len(positive), config.target_real_anchor_size)
+            if n < 1:
+                raise RuntimeError("target_real_anchor requires clean target records and source positives")
+            rng = np.random.default_rng(seed + 9119)
+            positive = positive[rng.choice(len(positive), size=n, replace=False)]
+            raw_anchor = raw_anchor[rng.choice(len(raw_anchor), size=n, replace=False)]
+            fit_scores = np.concatenate([raw_anchor, positive])
+            fit_labels = np.concatenate([np.zeros(n, dtype=int), np.ones(n, dtype=int)])
+            calibrator = _PlattCalibrator(seed + 1).fit(fit_scores, fit_labels)
+            quantifier_scores = calibrator.predict(fit_scores)
+            calibrated_anchor = calibrator.predict(raw_anchor)
+            threshold_info = select_negative_anchor_threshold(calibrated_anchor, config.detector_fpr_target)
+            policies[name] = _CalibrationPolicy(
+                name, calibrator, threshold_info["threshold"], quantifier_scores, fit_labels,
+                threshold_info["validation_fpr"], float("nan"),
+                True, False, "deployable_with_clean_target_anchor",
+            )
+            continue
+
+        if name == "oracle_target":
+            target_val, target_val_labels = _collect(
+                source, spec.test_tables, spec.test_generators, "detector_val", seed,
+            )
+            raw_target_val = detector.predict_score(target_val)
+            calibrator = _PlattCalibrator(seed + 2).fit(raw_target_val, target_val_labels)
+            quantifier_scores = calibrator.predict(raw_target_val)
+            threshold_info = select_fpr_threshold(
+                target_val_labels, quantifier_scores, config.detector_fpr_target,
+            )
+            policies[name] = _CalibrationPolicy(
+                name, calibrator, threshold_info["threshold"], quantifier_scores, target_val_labels,
+                threshold_info["validation_fpr"], threshold_info["validation_tpr"],
+                True, True, "diagnostic_oracle_not_deployable",
+            )
+            continue
+        raise ValueError(f"Unsupported calibration policy: {name}")
+    return policies
+
+
 def _target_xy(frame: pd.DataFrame, target: str) -> tuple[pd.DataFrame, np.ndarray]:
     features = frame.drop(columns=[target, *[c for c in META_COLUMNS if c in frame]], errors="ignore")
     labels = pd.Series(frame[target]).astype(str)
@@ -317,7 +412,7 @@ def _write_findings(
     primary_quantifier: str,
 ) -> None:
     output.mkdir(parents=True, exist_ok=True)
-    detection = rows.groupby(["protocol", "detector"], as_index=False).agg(
+    detection = rows.groupby(["protocol", "detector", "calibration_policy"], as_index=False).agg(
         auroc=("detection_auroc", "mean"),
         auprc=("detection_auprc", "mean"),
         fpr=("detection_fpr", "mean"),
@@ -326,37 +421,61 @@ def _write_findings(
     detection.to_csv(output / "finding_1_transfer.csv", index=False)
     artifact_rows.to_csv(output / "finding_2_format_artifacts.csv", index=False)
     low = rows.loc[rows["true_prevalence"].isin([.05, .10])]
-    low.groupby(["protocol", "detector", "quantifier", "contamination_mode", "true_prevalence"], as_index=False).agg(
+    low.groupby(["protocol", "detector", "calibration_policy", "quantifier", "contamination_mode", "true_prevalence"], as_index=False).agg(
         mae=("prevalence_absolute_error", "mean"),
         bias=("prevalence_error", "mean"),
         decision_error_rate=("decision_error", "mean"),
         false_positive_share=("false_positive_share", "mean"),
     ).to_csv(output / "finding_3_low_prevalence.csv", index=False)
-    rows.groupby(["protocol", "quantifier", "contamination_mode"], as_index=False).agg(
+    rows.groupby(["protocol", "calibration_policy", "quantifier", "contamination_mode"], as_index=False).agg(
         mae=("prevalence_absolute_error", "mean"),
         bias=("prevalence_error", "mean"),
         decision_regret=("decision_regret", "mean"),
     ).to_csv(output / "finding_4_quantifier_shift.csv", index=False)
     primary = rows.loc[rows["quantifier"] == primary_quantifier]
-    primary.groupby(["protocol", "test_table", "test_generator", "contamination_mode", "true_prevalence"], as_index=False).agg(
+    primary.groupby(["protocol", "calibration_policy", "test_table", "test_generator", "contamination_mode", "true_prevalence"], as_index=False).agg(
         contaminated_delta=("contaminated_utility_delta", "mean"),
         detector_cleanup_delta=("detector_cleanup_delta", "mean"),
         oracle_cleanup_delta=("oracle_cleanup_delta", "mean"),
     ).to_csv(output / "finding_5_utility_curve.csv", index=False)
-    primary.groupby(["protocol", "detectability_harm_quadrant"], as_index=False).agg(
+    primary.groupby(["protocol", "calibration_policy", "detectability_harm_quadrant"], as_index=False).agg(
         cases=("bag_id", "count"),
         mean_auroc=("detection_auroc", "mean"),
         mean_utility_delta=("contaminated_utility_delta", "mean"),
         mean_regret=("decision_regret", "mean"),
     ).to_csv(output / "finding_6_detectability_vs_harm.csv", index=False)
     primary.groupby([
-        "protocol", "test_table", "test_generator", "contamination_mode",
+        "protocol", "calibration_policy", "test_table", "test_generator", "contamination_mode",
     ], as_index=False).agg(
         generator_quality=("generator_quality", "mean"),
         detection_auroc=("detection_auroc", "mean"),
         mean_utility_delta=("contaminated_utility_delta", "mean"),
         worst_utility_delta=("contaminated_utility_delta", "min"),
     ).to_csv(output / "finding_6_quality_detectability_utility.csv", index=False)
+    rows.groupby(["protocol", "detector", "calibration_policy"], as_index=False).agg(
+        source_validation_auroc=("source_validation_auroc", "mean"),
+        target_test_auroc=("detection_auroc", "mean"),
+        ranking_shift=("ranking_shift", "mean"),
+        source_validation_ece=("source_validation_ece", "mean"),
+        target_test_ece=("detection_ece", "mean"),
+        calibration_shift=("calibration_shift", "mean"),
+        reference_fpr=("calibration_reference_fpr", "mean"),
+        target_test_fpr=("detection_fpr", "mean"),
+        threshold_fpr_shift=("threshold_fpr_shift", "mean"),
+        prevalence_mae=("prevalence_absolute_error", "mean"),
+        prevalence_decision_error_rate=("prevalence_decision_error", "mean"),
+        governance_regret=("decision_regret", "mean"),
+    ).to_csv(output / "finding_7_calibration_threshold_transfer.csv", index=False)
+    rows.groupby([
+        "protocol", "detector", "calibration_policy", "quantifier",
+        "contamination_mode", "true_prevalence",
+    ], as_index=False).agg(
+        detection_error_contribution=("detection_error_contribution", "mean"),
+        bag_sampling_error_contribution=("bag_sampling_error_contribution", "mean"),
+        quantifier_adjustment_contribution=("quantifier_adjustment_contribution", "mean"),
+        total_prevalence_error=("prevalence_error", "mean"),
+        max_absolute_residual=("error_decomposition_residual", lambda x: float(np.abs(x).max())),
+    ).to_csv(output / "finding_8_error_decomposition.csv", index=False)
     if not valuation_rows.empty:
         valuation_summary = valuation_rows.groupby([
             "protocol", "test_table", "test_generator", "contamination_mode",
@@ -375,7 +494,7 @@ def _write_findings(
 
 def _write_statistical_inference(rows: pd.DataFrame, output: Path, primary_quantifier: str) -> None:
     group_columns = [
-        "protocol", "detector", "quantifier", "contamination_mode", "true_prevalence",
+        "protocol", "detector", "calibration_policy", "quantifier", "contamination_mode", "true_prevalence",
     ]
     metrics = ["prevalence_absolute_error", "contaminated_utility_delta", "decision_regret"]
     summaries: list[dict[str, Any]] = []
@@ -397,11 +516,11 @@ def _write_statistical_inference(rows: pd.DataFrame, output: Path, primary_quant
     primary = rows.loc[rows["quantifier"] == primary_quantifier]
     index = [
         "seed", "protocol", "test_table", "test_generator", "contamination_mode",
-        "true_prevalence", "bag_index",
+        "calibration_policy", "true_prevalence", "bag_index",
     ]
     paired_rows: list[dict[str, Any]] = []
-    for (protocol, mode, prevalence), group in primary.groupby([
-        "protocol", "contamination_mode", "true_prevalence",
+    for (protocol, calibration_policy, mode, prevalence), group in primary.groupby([
+        "protocol", "calibration_policy", "contamination_mode", "true_prevalence",
     ]):
         pivot = group.pivot_table(
             index=index, columns="detector", values="prevalence_absolute_error", aggfunc="first"
@@ -413,6 +532,7 @@ def _write_statistical_inference(rows: pd.DataFrame, output: Path, primary_quant
             test = ttest_rel(paired[left], paired[right])
             paired_rows.append({
                 "protocol": protocol, "contamination_mode": mode,
+                "calibration_policy": calibration_policy,
                 "true_prevalence": prevalence, "metric": "prevalence_absolute_error",
                 "left_detector": left, "right_detector": right, "paired_n": len(paired),
                 "mean_left": float(paired[left].mean()), "mean_right": float(paired[right].mean()),
@@ -420,7 +540,7 @@ def _write_statistical_inference(rows: pd.DataFrame, output: Path, primary_quant
                 "t_statistic": float(test.statistic), "p_value": float(test.pvalue),
             })
     paired_columns = [
-        "protocol", "contamination_mode", "true_prevalence", "metric",
+        "protocol", "calibration_policy", "contamination_mode", "true_prevalence", "metric",
         "left_detector", "right_detector", "paired_n", "mean_left", "mean_right",
         "mean_difference", "t_statistic", "p_value",
     ]
@@ -592,21 +712,37 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                             f"{diagnostic_key}:ptp={np.ptp(raw_val):.3e}:"
                             f"auroc={raw_validation_auroc:.4f}"
                         )
-                calibrator = _PlattCalibrator(seed).fit(raw_val, val_labels)
-                val_scores = calibrator.predict(raw_val)
-                threshold_info = select_fpr_threshold(val_labels, val_scores, config.detector_fpr_target)
-                threshold = threshold_info["threshold"]
-                test_scores = calibrator.predict(raw_test)
-                detector_diagnostics[diagnostic_key].update({
-                    "calibrated_validation_score_ptp": finite_or_none(np.ptp(val_scores)),
-                    "calibrated_test_score_ptp": finite_or_none(np.ptp(test_scores)),
-                    "selected_threshold": finite_or_none(threshold),
-                })
+                calibration_policies = _calibration_policies(
+                    config, detector, source, spec, seed, raw_val, val_labels,
+                )
+                policy_metrics: dict[str, dict[str, float]] = {}
+                policy_quantifiers: dict[str, dict[str, ScoreQuantifier]] = {}
+                policy_diagnostics: dict[str, Any] = {}
+                for policy_name, policy in calibration_policies.items():
+                    val_scores = policy.calibrator.predict(raw_val)
+                    test_scores = policy.calibrator.predict(raw_test)
+                    policy_metrics[policy_name] = detection_metrics(test_labels, test_scores, policy.threshold)
+                    policy_quantifiers[policy_name] = {
+                        method: ScoreQuantifier(method).fit(
+                            policy.quantifier_scores, policy.quantifier_labels, threshold=policy.threshold,
+                        )
+                        for method in config.quantifiers
+                    }
+                    source_metrics = detection_metrics(val_labels, val_scores, policy.threshold)
+                    policy_diagnostics[policy_name] = {
+                        "calibrated_source_validation_score_ptp": finite_or_none(np.ptp(val_scores)),
+                        "calibrated_target_test_score_ptp": finite_or_none(np.ptp(test_scores)),
+                        "selected_threshold": finite_or_none(policy.threshold),
+                        "reference_fpr": finite_or_none(policy.reference_fpr),
+                        "reference_tpr": finite_or_none(policy.reference_tpr),
+                        "source_validation_auroc": source_metrics["auroc"],
+                        "source_validation_ece": source_metrics["ece"],
+                        "uses_target_real_records": policy.uses_target_real_records,
+                        "uses_target_labels": policy.uses_target_labels,
+                        "deployment_status": policy.deployment_status,
+                    }
+                detector_diagnostics[diagnostic_key]["calibration_policies"] = policy_diagnostics
                 write_json(detector_diagnostics, output / "detector_diagnostics.json")
-                det_metrics = detection_metrics(test_labels, test_scores, threshold)
-                quantifiers: dict[str, ScoreQuantifier] = {}
-                for method in config.quantifiers:
-                    quantifiers[method] = ScoreQuantifier(method).fit(val_scores, val_labels, threshold=threshold)
 
                 for table_index, test_table in enumerate(spec.test_tables):
                     table = source.table(test_table)
@@ -651,65 +787,87 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                                         },
                                     ))
                                     valuation_seen.add(valuation_key)
-                                bag_scores = calibrator.predict(detector.predict_score(bag))
+                                raw_bag_scores = detector.predict_score(bag)
                                 actual_prevalence = float(bag["source_label"].mean())
-                                detector_clean = _detector_cleanup(bag, bag_scores, threshold)
                                 oracle_clean = _source_cleanup(bag)
                                 evaluate_utility = bag_index < config.utility_bags_per_rate
                                 if evaluate_utility:
                                     clean_train = sample_rows(downstream_real, config.bag_size, bag_seed + 71)
                                     clean_utility = _utility(clean_train, pure_test, table.target_column, bag_seed, config.max_cpu_threads)
                                     contaminated_utility = _utility(bag, pure_test, table.target_column, bag_seed, config.max_cpu_threads)
-                                    detector_cleanup_utility = _utility(
-                                        detector_clean, pure_test, table.target_column, bag_seed, config.max_cpu_threads
-                                    )
                                     oracle_cleanup_utility = _utility(
                                         oracle_clean, pure_test, table.target_column, bag_seed, config.max_cpu_threads
                                     )
                                 else:
                                     clean_utility = contaminated_utility = float("nan")
-                                    detector_cleanup_utility = oracle_cleanup_utility = float("nan")
-                                predictions = bag_scores >= threshold
-                                true_source = bag["source_label"].to_numpy(dtype=int)
-                                cleanup_precision = float(true_source[predictions].mean()) if predictions.any() else 0.0
-                                cleanup_recall = float(predictions[true_source == 1].mean()) if (true_source == 1).any() else 1.0
-                                propagation = analytical_positive_rate(actual_prevalence, det_metrics["tpr"], det_metrics["fpr"])
-                                for method, quantifier in quantifiers.items():
-                                    try:
-                                        estimate = quantifier.predict_prevalence(bag_scores)["clipped"]
-                                        quantifier_status = "ok"
-                                    except ValueError as exc:
-                                        estimate = float("nan")
-                                        quantifier_status = f"failed:{exc}"
-                                    estimated_decision = bool(np.isfinite(estimate) and estimate >= config.governance_prevalence_threshold)
-                                    detector_action_better = bool(
-                                        np.isfinite(detector_cleanup_utility)
-                                        and detector_cleanup_utility > contaminated_utility + config.harm_tolerance
+                                    oracle_cleanup_utility = float("nan")
+                                for calibration_policy, calibration in calibration_policies.items():
+                                    det_metrics = policy_metrics[calibration_policy]
+                                    threshold = calibration.threshold
+                                    bag_scores = calibration.calibrator.predict(raw_bag_scores)
+                                    detector_clean = _detector_cleanup(bag, bag_scores, threshold)
+                                    if evaluate_utility:
+                                        detector_cleanup_utility = _utility(
+                                            detector_clean, pure_test, table.target_column, bag_seed,
+                                            config.max_cpu_threads,
+                                        )
+                                    else:
+                                        detector_cleanup_utility = float("nan")
+                                    predictions = bag_scores >= threshold
+                                    observed_positive_rate = float(predictions.mean())
+                                    true_source = bag["source_label"].to_numpy(dtype=int)
+                                    cleanup_precision = float(true_source[predictions].mean()) if predictions.any() else 0.0
+                                    cleanup_recall = float(predictions[true_source == 1].mean()) if (true_source == 1).any() else 1.0
+                                    propagation = analytical_positive_rate(
+                                        actual_prevalence, det_metrics["tpr"], det_metrics["fpr"],
                                     )
-                                    policy_utility = detector_cleanup_utility if estimated_decision else contaminated_utility
-                                    best_available = _safe_max(contaminated_utility, detector_cleanup_utility)
-                                    decision_regret = (
-                                        float(best_available - policy_utility)
-                                        if np.isfinite(best_available) and np.isfinite(policy_utility) else float("nan")
-                                    )
-                                    error = prevalence_error(actual_prevalence, estimate) if np.isfinite(estimate) else {
-                                        "prevalence_error": float("nan"),
-                                        "prevalence_absolute_error": float("nan"),
-                                        "prevalence_squared_error": float("nan"),
-                                    }
-                                    contaminated_delta = contaminated_utility - clean_utility
-                                    row = {
+                                    for method, quantifier in policy_quantifiers[calibration_policy].items():
+                                        try:
+                                            estimate = quantifier.predict_prevalence(bag_scores)["clipped"]
+                                            quantifier_status = "ok"
+                                        except ValueError as exc:
+                                            estimate = float("nan")
+                                            quantifier_status = f"failed:{exc}"
+                                        estimated_decision = bool(np.isfinite(estimate) and estimate >= config.governance_prevalence_threshold)
+                                        true_prevalence_decision = bool(actual_prevalence >= config.governance_prevalence_threshold)
+                                        detector_action_better = bool(
+                                            np.isfinite(detector_cleanup_utility)
+                                            and detector_cleanup_utility > contaminated_utility + config.harm_tolerance
+                                        )
+                                        policy_utility = detector_cleanup_utility if estimated_decision else contaminated_utility
+                                        best_available = _safe_max(contaminated_utility, detector_cleanup_utility)
+                                        decision_regret = (
+                                            float(best_available - policy_utility)
+                                            if np.isfinite(best_available) and np.isfinite(policy_utility) else float("nan")
+                                        )
+                                        error = prevalence_error(actual_prevalence, estimate) if np.isfinite(estimate) else {
+                                            "prevalence_error": float("nan"),
+                                            "prevalence_absolute_error": float("nan"),
+                                            "prevalence_squared_error": float("nan"),
+                                        }
+                                        detection_contribution = propagation["expected_positive_rate"] - actual_prevalence
+                                        sampling_contribution = observed_positive_rate - propagation["expected_positive_rate"]
+                                        quantifier_contribution = estimate - observed_positive_rate if np.isfinite(estimate) else float("nan")
+                                        decomposition_sum = detection_contribution + sampling_contribution + quantifier_contribution
+                                        decomposition_residual = error["prevalence_error"] - decomposition_sum
+                                        contaminated_delta = contaminated_utility - clean_utility
+                                        source_diagnostics = policy_diagnostics[calibration_policy]
+                                        row = {
                                         "experiment_id": config.experiment_id,
                                         "run_type": config.run_type,
                                         "seed": seed,
                                         "protocol": protocol,
                                         "detector": detector_name,
+                                        "calibration_policy": calibration_policy,
+                                        "calibration_deployment_status": calibration.deployment_status,
+                                        "calibration_uses_target_real_records": calibration.uses_target_real_records,
+                                        "calibration_uses_target_labels": calibration.uses_target_labels,
                                         "quantifier": method,
                                         "quantifier_status": quantifier_status,
                                         "test_table": test_table,
                                         "test_generator": test_generator,
                                         "generator_quality": table.synthetic_quality.get(test_generator, float("nan")),
-                                        "bag_id": f"{seed}-{protocol}-{detector_name}-{test_table}-{test_generator}-{contamination_mode}-{prevalence:.3f}-{bag_index}",
+                                        "bag_id": f"{seed}-{protocol}-{detector_name}-{calibration_policy}-{test_table}-{test_generator}-{contamination_mode}-{prevalence:.3f}-{bag_index}",
                                         "bag_index": bag_index,
                                         "bag_size": len(bag),
                                         "contamination_mode": contamination_mode,
@@ -717,6 +875,8 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                                         "true_prevalence": actual_prevalence,
                                         "estimated_prevalence": estimate,
                                         **error,
+                                        "source_validation_auroc": source_diagnostics["source_validation_auroc"],
+                                        "source_validation_ece": source_diagnostics["source_validation_ece"],
                                         "detection_auroc": det_metrics["auroc"],
                                         "detection_auprc": det_metrics["auprc"],
                                         "detection_brier": det_metrics["brier"],
@@ -724,9 +884,20 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                                         "detection_fpr": det_metrics["fpr"],
                                         "detection_tpr": det_metrics["tpr"],
                                         "detector_threshold": threshold,
+                                        "calibration_reference_fpr": calibration.reference_fpr,
+                                        "calibration_reference_tpr": calibration.reference_tpr,
+                                        "ranking_shift": det_metrics["auroc"] - source_diagnostics["source_validation_auroc"],
+                                        "calibration_shift": det_metrics["ece"] - source_diagnostics["source_validation_ece"],
+                                        "threshold_fpr_shift": det_metrics["fpr"] - calibration.reference_fpr,
                                         "artifact_auroc": artifact["artifact_auroc"],
                                         "artifact_gate_passed": artifact_row["artifact_gate_passed"],
                                         **propagation,
+                                        "observed_positive_rate": observed_positive_rate,
+                                        "detection_error_contribution": detection_contribution,
+                                        "bag_sampling_error_contribution": sampling_contribution,
+                                        "quantifier_adjustment_contribution": quantifier_contribution,
+                                        "error_decomposition_sum": decomposition_sum,
+                                        "error_decomposition_residual": decomposition_residual,
                                         "clean_utility": clean_utility,
                                         "contaminated_utility": contaminated_utility,
                                         "detector_cleanup_utility": detector_cleanup_utility,
@@ -737,15 +908,17 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                                         "cleanup_precision": cleanup_precision,
                                         "cleanup_recall": cleanup_recall,
                                         "governance_prevalence_threshold": config.governance_prevalence_threshold,
+                                        "true_prevalence_decision_remediate": true_prevalence_decision,
                                         "estimated_decision_remediate": estimated_decision,
+                                        "prevalence_decision_error": int(estimated_decision != true_prevalence_decision),
                                         "best_available_decision_remediate": detector_action_better,
                                         "decision_error": int(estimated_decision != detector_action_better) if evaluate_utility else float("nan"),
                                         "policy_utility": policy_utility,
                                         "decision_regret": decision_regret,
                                         "oracle_cleanup_gap": oracle_cleanup_utility - detector_cleanup_utility if np.isfinite(oracle_cleanup_utility) and np.isfinite(detector_cleanup_utility) else float("nan"),
                                         "detectability_harm_quadrant": _quadrant(det_metrics["auroc"], contaminated_delta, config.harm_tolerance),
-                                    }
-                                    rows.append(row)
+                                        }
+                                        rows.append(row)
 
     evidence = pd.DataFrame(rows)
     artifact_frame = pd.DataFrame(artifacts)
@@ -775,7 +948,11 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
         "evidence_rows": len(evidence),
         "protocols": sorted(evidence["protocol"].unique().tolist()),
         "detectors": sorted(evidence["detector"].unique().tolist()),
+        "calibration_policies": sorted(evidence["calibration_policy"].unique().tolist()),
         "quantifiers": sorted(evidence["quantifier"].unique().tolist()),
+        "max_absolute_error_decomposition_residual": finite_or_none(
+            np.abs(evidence["error_decomposition_residual"].to_numpy(float)).max()
+        ),
         "low_prevalence_rows": int(evidence["true_prevalence"].isin([.05, .10]).sum()),
         "artifact_gate_failures": int((~artifact_frame["artifact_gate_passed"]).sum()),
         "valuation_rows": len(valuation_frame),

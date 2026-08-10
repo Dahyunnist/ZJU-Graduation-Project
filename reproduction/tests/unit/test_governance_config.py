@@ -76,6 +76,32 @@ def test_registry_preflight_configuration_can_exist_before_data() -> None:
     assert config.data_mode == "registry"
     assert config.run_type == "formal"
     assert config.device == "cuda"
+    assert set(config.calibration_policies) == {"source_only", "target_real_anchor", "oracle_target"}
+    assert config.primary_calibration_policy == "source_only"
+
+
+def test_formal_contract_requires_all_calibration_transfer_policies() -> None:
+    raw = valid_governance_config()
+    formal = load_governance_config(Path("configs/governance_formal.yaml"))
+    raw.update({
+        "run_type": "formal", "seeds": list(formal.seeds), "protocols": formal.protocols,
+        "contamination_modes": ["replace", "append"], "bags_per_rate": 100,
+        "utility_bags_per_rate": 5,
+        "detectors": ["char3gram", "flat_transformer", "datum_transformer", "datum_ta"],
+        "valuation": {"enabled": True, "methods": ["knn_shapley", "data_oob"], "bags_per_rate": 1,
+                      "sample_limit": 1000, "oob_estimators": 80},
+        "resources": {"device": "cuda", "max_cpu_threads": 2},
+        "calibration": {"policies": ["source_only"], "primary_policy": "source_only",
+                        "target_real_anchor_size": 500},
+        "deep_training": {
+            "dim": 192, "heads": 6, "layers": 6, "max_len": 1024,
+            "max_datum": 96, "max_columns": 64, "epochs": 20, "batch_size": 16,
+            "learning_rate": .0002, "weight_decay": .01, "gradient_clip_norm": 1.,
+            "early_stopping_patience": 5, "min_epochs": 5,
+        },
+    })
+    with pytest.raises(GovernanceConfigError, match="require source_only"):
+        validate_governance_config(raw)
 
 
 def test_pilot_and_formal_freeze_the_same_protocol_matrix() -> None:

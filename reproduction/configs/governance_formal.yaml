@@ -1,4 +1,4 @@
-experiment_id: governance-formal-v1
+experiment_id: governance-formal-v2-calibration
 run_type: formal
 seeds: [2026, 2027, 2028, 2029, 2030]
 
@@ -36,6 +36,13 @@ detectors:
    datum_transformer, datum_ta]
 quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
 primary_quantifier: pacc
+calibration:
+  # source_only is the deployable no-target-data baseline. target_real_anchor
+  # uses only clean, unlabeled-as-to-synthetic target-table records. The oracle
+  # policy uses labeled target validation data and is a diagnostic upper bound.
+  policies: [source_only, target_real_anchor, oracle_target]
+  primary_policy: source_only
+  target_real_anchor_size: 500
 valuation:
   enabled: true
   methods: [knn_shapley, data_oob]
@@ -53,7 +60,7 @@ thresholds:
   governance_prevalence: 0.10
   harm_tolerance: 0.005
 
-output_dir: ../runs/governance-formal-v1
+output_dir: ../runs/governance-formal-v2-calibration
 resources:
   device: cuda
   max_cpu_threads: 4

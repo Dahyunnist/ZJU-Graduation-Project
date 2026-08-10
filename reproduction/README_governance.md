@@ -47,6 +47,8 @@ runs/governance-smoke-v1/
 
 正式配置为 `configs/governance_formal.yaml`。正式运行前必须准备：
 
+该配置已冻结为 `governance-formal-v2-calibration`，同时比较源域校准、无目标来源标签的干净真实锚点校准，以及仅用于诊断的目标域 oracle 校准。三种策略共享检测器与测试 bag；详细信息边界、阈值迁移指标和逐 bag 误差恒等分解见 `docs/跨表校准阈值迁移与误差分解方案.md`。
+
 1. Adult、Abalone和Credit的冻结真实数据；其中Abalone以冻结阈值 `rings > 9` 定义二分类任务，避免在评测结果产生后调整标签；
 2. CTGAN和TVAE独立合成池；P3/P4使用Adult与Abalone作为训练表，使table adaptation具有可识别的表域信号；
 3. `data/governance/pool_registry.csv`；

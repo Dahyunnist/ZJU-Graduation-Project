@@ -27,6 +27,10 @@ def test_unified_governance_pipeline_emits_linked_evidence(tmp_path: Path) -> No
         "detectors": ["char3gram"],
         "quantifiers": ["pacc"],
         "primary_quantifier": "pacc",
+        "calibration": {
+            "policies": ["source_only", "target_real_anchor", "oracle_target"],
+            "primary_policy": "source_only", "target_real_anchor_size": 60,
+        },
         "valuation": {"enabled": True, "methods": ["knn_shapley", "data_oob"], "bags_per_rate": 1, "sample_limit": 60, "oob_estimators": 20},
         "data": {"mode": "synthetic_fixture", "rows_per_table": 450},
         "thresholds": {
@@ -52,7 +56,13 @@ def test_unified_governance_pipeline_emits_linked_evidence(tmp_path: Path) -> No
         "contaminated_utility_delta", "decision_error", "decision_regret",
     ]).issubset(evidence.columns)
     assert set(evidence["true_prevalence"]) == {0, .05, .10, .25}
+    assert set(evidence["calibration_policy"]) == {"source_only", "target_real_anchor", "oracle_target"}
+    assert not evidence.loc[evidence["calibration_policy"] == "target_real_anchor", "calibration_uses_target_labels"].any()
+    assert evidence.loc[evidence["calibration_policy"] == "oracle_target", "calibration_uses_target_labels"].all()
+    assert evidence["error_decomposition_residual"].abs().max() < 1e-10
     assert (tmp_path / "run" / "finding_3_low_prevalence.csv").is_file()
+    assert (tmp_path / "run" / "finding_7_calibration_threshold_transfer.csv").is_file()
+    assert (tmp_path / "run" / "finding_8_error_decomposition.csv").is_file()
     valuation = pd.read_csv(tmp_path / "run" / "record_valuation.csv")
     assert set(valuation["valuation_method"]) == {"knn_shapley", "data_oob"}
     assert (tmp_path / "run" / "finding_6_source_task_value.csv").is_file()

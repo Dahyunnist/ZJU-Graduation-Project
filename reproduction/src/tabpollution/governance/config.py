@@ -18,6 +18,7 @@ QUANTIFIERS = ("cc", "pcc", "acc", "pacc", "emq", "hdy", "dys", "median_sweep", 
 CONTAMINATION_MODES = ("replace", "append")
 VALUATION_METHODS = ("knn_shapley", "data_oob")
 DATA_MODES = ("synthetic_fixture", "registry")
+CALIBRATION_POLICIES = ("source_only", "target_real_anchor", "oracle_target")
 
 
 class GovernanceConfigError(ValueError):
@@ -46,6 +47,9 @@ class GovernanceConfig:
     detectors: tuple[str, ...]
     quantifiers: tuple[str, ...]
     primary_quantifier: str
+    calibration_policies: tuple[str, ...]
+    primary_calibration_policy: str
+    target_real_anchor_size: int
     valuation_enabled: bool
     valuation_methods: tuple[str, ...]
     valuation_bags_per_rate: int
@@ -163,6 +167,27 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     if primary not in quantifiers:
         raise GovernanceConfigError("primary_quantifier must be listed in quantifiers")
 
+    # Optional for backward compatibility with completed pilot runs. Formal
+    # configurations must state the full frozen policy comparison explicitly.
+    calibration = raw.get("calibration", {
+        "policies": ["source_only"],
+        "primary_policy": "source_only",
+        "target_real_anchor_size": 500,
+    })
+    calibration_fields = {"policies", "primary_policy", "target_real_anchor_size"}
+    if not isinstance(calibration, dict) or set(calibration) != calibration_fields:
+        raise GovernanceConfigError(f"calibration must contain exactly {sorted(calibration_fields)}")
+    calibration_policies = _unique_tuple(calibration["policies"], "calibration.policies", str)
+    unknown_policies = sorted(set(calibration_policies) - set(CALIBRATION_POLICIES))
+    if unknown_policies:
+        raise GovernanceConfigError(f"Unknown calibration policies: {unknown_policies}")
+    primary_calibration_policy = str(calibration["primary_policy"])
+    if primary_calibration_policy not in calibration_policies:
+        raise GovernanceConfigError("calibration.primary_policy must be listed in calibration.policies")
+    target_real_anchor_size = int(calibration["target_real_anchor_size"])
+    if target_real_anchor_size < 40:
+        raise GovernanceConfigError("calibration.target_real_anchor_size must be at least 40")
+
     valuation = raw["valuation"]
     valuation_fields = {"enabled", "methods", "bags_per_rate", "sample_limit", "oob_estimators"}
     if not isinstance(valuation, dict) or set(valuation) != valuation_fields:
@@ -275,6 +300,8 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
             raise GovernanceConfigError("formal deep-detector runs require resources.device=cuda")
         if deep_dim != 192 or deep_heads != 6 or deep_layers != 6 or deep_epochs < 20:
             raise GovernanceConfigError("formal runs require the frozen 192d/6-head/6-layer/20-epoch deep architecture")
+        if set(calibration_policies) != set(CALIBRATION_POLICIES):
+            raise GovernanceConfigError("formal runs require source_only, target_real_anchor, and oracle_target calibration policies")
 
     return GovernanceConfig(
         experiment_id=str(raw["experiment_id"]), run_type=run_type, seeds=seeds,
@@ -283,6 +310,9 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
         bags_per_rate=bags, utility_bags_per_rate=utility_bags,
         bag_size=bag_size, detectors=detectors,
         quantifiers=quantifiers, primary_quantifier=primary,
+        calibration_policies=calibration_policies,
+        primary_calibration_policy=primary_calibration_policy,
+        target_real_anchor_size=target_real_anchor_size,
         valuation_enabled=valuation_enabled, valuation_methods=valuation_methods,
         valuation_bags_per_rate=valuation_bags, valuation_sample_limit=valuation_sample_limit,
         valuation_oob_estimators=valuation_oob_estimators, data_mode=mode,
