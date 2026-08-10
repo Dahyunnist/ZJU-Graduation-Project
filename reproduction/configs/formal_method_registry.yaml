@@ -24,29 +24,29 @@ detectors:
     role: direct_cross_table_baseline
     source: Kindji et al., COLING GenAIDetect 2025 / IDA 2025
     implementation: paper_aligned_self_implementation
-    formal_ready: false
-    reason: governance-pilot-v1 produced constant scores; stability rerun required
+    formal_ready: true
+    validation: governance-pilot-v1 stability rerun completed across P1-P4 with finite non-constant scores and zero quantifier failures
     fidelity: character tokens, CLS pooling, global positional encoding, 192 dimensions, 6 heads, 6 layers
   column_positional_ablation:
     role: architecture_ablation
     source: local controlled ablation against Datum-wise permutation invariance
     implementation: local
-    formal_ready: false
-    reason: governance-pilot-v1 produced constant scores; stability rerun required
+    formal_ready: true
+    validation: governance-pilot-v1 stability rerun completed across P1-P4 with finite non-constant scores and zero quantifier failures
     fidelity: datum encoding with row-level positional embeddings; not claimed as the IDA column preprocessing baseline
   datum_transformer:
     role: sota_direct_method
     source: Kindji et al., AAAI 2026
     implementation: paper_aligned_self_implementation
-    formal_ready: false
-    reason: governance-pilot-v1 produced constant scores; stability rerun required
+    formal_ready: true
+    validation: governance-pilot-v1 stability rerun completed across P1-P4 with finite non-constant scores and zero quantifier failures
     fidelity: character datums, CLS-Datum pooling, CLS-Target pooling, local-only positional encoding, row padding mask, 192 dimensions
   datum_ta:
     role: sota_direct_method
     source: Kindji et al., AAAI 2026
     implementation: paper_aligned_self_implementation
-    formal_ready: false
-    reason: governance-pilot-v1 produced constant scores; stability rerun required
+    formal_ready: true
+    validation: governance-pilot-v1 stability rerun completed for the identifiable multi-table protocols P3-P4 with finite non-constant scores and zero quantifier failures
     fidelity: Datum-wise backbone plus gradient-reversal table-identity head; only meaningful with at least two training tables
   table_transformer:
     role: legacy_runthrough_only
