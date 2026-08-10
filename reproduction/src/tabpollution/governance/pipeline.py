@@ -248,23 +248,18 @@ def _calibration_policies(
                 source, spec.test_tables, seed, config.target_real_anchor_size,
             )
             raw_anchor = detector.predict_score(anchor)
-            positive = raw_source_val[source_val_labels == 1]
-            n = min(len(raw_anchor), len(positive), config.target_real_anchor_size)
-            if n < 1:
-                raise RuntimeError("target_real_anchor requires clean target records and source positives")
-            rng = np.random.default_rng(seed + 9119)
-            positive = positive[rng.choice(len(positive), size=n, replace=False)]
-            raw_anchor = raw_anchor[rng.choice(len(raw_anchor), size=n, replace=False)]
-            fit_scores = np.concatenate([raw_anchor, positive])
-            fit_labels = np.concatenate([np.zeros(n, dtype=int), np.ones(n, dtype=int)])
-            calibrator = _PlattCalibrator(seed + 1).fit(fit_scores, fit_labels)
-            quantifier_scores = calibrator.predict(fit_scores)
+            # Clean target negatives identify an operating-point shift, but
+            # without target positives they cannot identify a full target
+            # probability map. Preserve the source-fitted monotone calibration
+            # and use the target anchor only to transport the FPR threshold.
+            calibrator = _PlattCalibrator(seed).fit(raw_source_val, source_val_labels)
+            quantifier_scores = calibrator.predict(raw_source_val)
             calibrated_anchor = calibrator.predict(raw_anchor)
             threshold_info = select_negative_anchor_threshold(calibrated_anchor, config.detector_fpr_target)
             policies[name] = _CalibrationPolicy(
-                name, calibrator, threshold_info["threshold"], quantifier_scores, fit_labels,
+                name, calibrator, threshold_info["threshold"], quantifier_scores, source_val_labels,
                 threshold_info["validation_fpr"], float("nan"),
-                True, False, "deployable_with_clean_target_anchor",
+                True, False, "deployable_with_clean_target_threshold_anchor",
             )
             continue
 

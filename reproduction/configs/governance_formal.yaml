@@ -38,8 +38,9 @@ quantifiers: [cc, pcc, acc, pacc, emq, hdy, dys, median_sweep, kdey]
 primary_quantifier: pacc
 calibration:
   # source_only is the deployable no-target-data baseline. target_real_anchor
-  # uses only clean, unlabeled-as-to-synthetic target-table records. The oracle
-  # policy uses labeled target validation data and is a diagnostic upper bound.
+  # uses clean target-table records only to transport the FPR threshold while
+  # retaining source calibration. The oracle uses labeled target validation
+  # data and is a diagnostic upper bound.
   policies: [source_only, target_real_anchor, oracle_target]
   primary_policy: source_only
   target_real_anchor_size: 500
