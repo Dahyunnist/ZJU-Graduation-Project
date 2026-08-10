@@ -24,9 +24,13 @@ def test_deep_detector_cpu_roundtrip(tmp_path: Path) -> None:
     )
     detector.fit(records, labels, table_labels=tables)
     before = detector.predict_score(records)
+    assert np.ptp(before) > 1e-8
+    assert detector.best_epoch == 1
+    assert np.isfinite(detector.best_validation_score_ptp) or np.isnan(detector.best_validation_score_ptp)
     path = tmp_path / "detector.pt"
     detector.save(path)
     restored = DeepTextDetector.load(path)
     after = restored.predict_score(records)
     assert restored.get_provenance()["device"] == "cpu"
     assert np.allclose(before, after)
+    assert restored.best_epoch == detector.best_epoch

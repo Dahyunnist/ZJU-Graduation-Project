@@ -55,3 +55,18 @@ output_dir: ../runs/governance-smoke-v1
 resources:
   device: cpu
   max_cpu_threads: 2
+
+deep_training:
+  dim: 24
+  heads: 4
+  layers: 1
+  max_len: 192
+  max_datum: 32
+  max_columns: 24
+  epochs: 2
+  batch_size: 32
+  learning_rate: 0.002
+  weight_decay: 0.01
+  gradient_clip_norm: 1.0
+  early_stopping_patience: 2
+  min_epochs: 1

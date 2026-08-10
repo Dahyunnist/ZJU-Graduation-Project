@@ -42,6 +42,12 @@ def _raw_config(output: Path) -> dict:
         },
         "output_dir": str(output),
         "resources": {"device": "cpu", "max_cpu_threads": 1},
+        "deep_training": {
+            "dim": 24, "heads": 4, "layers": 1, "max_len": 192,
+            "max_datum": 32, "max_columns": 24, "epochs": 2, "batch_size": 32,
+            "learning_rate": .002, "weight_decay": .01, "gradient_clip_norm": 1.,
+            "early_stopping_patience": 2, "min_epochs": 1,
+        },
     }
 
 
@@ -71,6 +77,13 @@ def test_sharded_run_resumes_without_repeating_valuation(tmp_path: Path) -> None
     valuation = pd.read_csv(tmp_path / "run" / "record_valuation.csv")
     assert set(valuation["valuation_method"]) == {"knn_shapley"}
     assert not valuation.duplicated().any()
+
+    # Changing only deep-training hyperparameters must not invalidate completed
+    # classical shards; the deep shards are the only ones that require reruns.
+    revised = _raw_config(tmp_path / "run")
+    revised["deep_training"]["learning_rate"] = .0002
+    config_path.write_text(yaml.safe_dump(revised), encoding="utf-8")
+    assert shard_status(config_path)["completed_count"] == 2
 
 
 def test_formal_plan_preserves_full_contract(tmp_path: Path) -> None:

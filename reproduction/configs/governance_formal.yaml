@@ -57,3 +57,18 @@ output_dir: ../runs/governance-formal-v1
 resources:
   device: cuda
   max_cpu_threads: 4
+
+deep_training:
+  dim: 192
+  heads: 6
+  layers: 6
+  max_len: 1024
+  max_datum: 96
+  max_columns: 64
+  epochs: 20
+  batch_size: 16
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  gradient_clip_norm: 1.0
+  early_stopping_patience: 5
+  min_epochs: 5

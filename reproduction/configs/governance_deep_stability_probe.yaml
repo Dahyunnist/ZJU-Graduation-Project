@@ -1,9 +1,7 @@
-experiment_id: governance-resource-probe-v1
+experiment_id: governance-deep-stability-probe-v1
 run_type: pilot
 seeds: [2026]
 
-# One paper-sized deep detector is sufficient to measure wall time and peak
-# memory before scheduling the multi-protocol governance pilot.
 protocols:
   P1:
     train_tables: [adult]
@@ -11,13 +9,13 @@ protocols:
     train_generators: [CTGAN]
     test_generators: [CTGAN]
 
-prevalence_rates: [0.0, 0.05, 0.10]
+prevalence_rates: [0.05, 0.10]
 contamination_modes: [replace]
 bags_per_rate: 1
 utility_bags_per_rate: 1
 bag_size: 1000
 detectors: [flat_transformer]
-quantifiers: [pacc]
+quantifiers: [pacc, pcc]
 primary_quantifier: pacc
 valuation:
   enabled: false
@@ -36,7 +34,7 @@ thresholds:
   governance_prevalence: 0.10
   harm_tolerance: 0.005
 
-output_dir: ../runs/governance-resource-probe-v1
+output_dir: ../runs/governance-deep-stability-probe-v1
 resources:
   device: cuda
   max_cpu_threads: 4
@@ -48,10 +46,10 @@ deep_training:
   max_len: 1024
   max_datum: 96
   max_columns: 64
-  epochs: 20
+  epochs: 8
   batch_size: 16
-  learning_rate: 0.002
+  learning_rate: 0.0002
   weight_decay: 0.01
   gradient_clip_norm: 1.0
-  early_stopping_patience: 20
-  min_epochs: 20
+  early_stopping_patience: 3
+  min_epochs: 4

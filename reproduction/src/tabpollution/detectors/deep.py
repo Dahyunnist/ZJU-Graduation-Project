@@ -19,6 +19,7 @@ import pandas as pd
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
+from sklearn.metrics import roc_auc_score
 
 from .base import Detector, feature_frame, normalize_scalar, record_feature_items, serialize_record
 
@@ -115,7 +116,10 @@ class DeepTextDetector(Detector):
     def __init__(self, mode: str = "flat", seed: int = 2026, dim: int = 24,
                  heads: int = 4, layers: int = 1, max_len: int = 192,
                  max_datum: int = 32, max_columns: int = 24, epochs: int = 2,
-                 batch_size: int = 32, device: str = "auto", table_classes: int = 8):
+                 batch_size: int = 32, device: str = "auto", table_classes: int = 8,
+                 learning_rate: float = 2e-3, weight_decay: float = 1e-2,
+                 gradient_clip_norm: float = 1.0, early_stopping_patience: int = 5,
+                 min_epochs: int = 1):
         if mode not in {"flat", "table", "datum", "datum_ta"}:
             raise ValueError(mode)
         self.mode, self.seed = mode, seed
@@ -126,7 +130,11 @@ class DeepTextDetector(Detector):
         self.device = torch.device("cuda" if (device == "cuda" or (device == "auto" and torch.cuda.is_available())) else "cpu")
         self.config = dict(dim=dim, heads=heads, layers=layers, max_len=max_len,
                            max_datum=max_datum, max_columns=max_columns, epochs=epochs,
-                           batch_size=batch_size, device=device, table_classes=table_classes)
+                           batch_size=batch_size, device=device, table_classes=table_classes,
+                           learning_rate=learning_rate, weight_decay=weight_decay,
+                           gradient_clip_norm=gradient_clip_norm,
+                           early_stopping_patience=early_stopping_patience,
+                           min_epochs=min_epochs)
         torch.manual_seed(seed); np.random.seed(seed)
         self.model = (FlatNet(dim, heads, layers, max_len) if mode == "flat" else
                       DatumNet(dim, heads, layers, max_datum,
@@ -136,6 +144,10 @@ class DeepTextDetector(Detector):
         self.loss_history: list[dict[str, float]] = []
         self.truncation_rate = 0.
         self.columns_seen: list[int] = []
+        self.best_epoch: int | None = None
+        self.best_validation_auroc = float("nan")
+        self.best_validation_score_ptp = float("nan")
+        self.stopped_early = False
 
     def _tensorize(self, records: pd.DataFrame) -> torch.Tensor:
         if self.mode == "flat":
@@ -161,15 +173,26 @@ class DeepTextDetector(Detector):
             **context: Any) -> "DeepTextDetector":
         x = self._tensorize(train_records)
         y = torch.tensor(train_labels, dtype=torch.float32)
+        val_x = self._tensorize(val_records) if val_records is not None else None
+        val_y = np.asarray(val_labels, dtype=int) if val_labels is not None else None
         table = torch.tensor(np.asarray(context.get("table_labels", np.zeros(len(y)))), dtype=torch.long)
         loader = DataLoader(TensorDataset(x, y, table), batch_size=self.config["batch_size"], shuffle=True,
                             generator=torch.Generator().manual_seed(self.seed))
-        optimizer = torch.optim.AdamW(self.model.parameters(), lr=2e-3)
+        optimizer = torch.optim.AdamW(
+            self.model.parameters(), lr=self.config["learning_rate"],
+            weight_decay=self.config["weight_decay"],
+        )
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=.5, patience=1, min_lr=self.config["learning_rate"] / 32,
+        )
         bce, ce = nn.BCEWithLogitsLoss(), nn.CrossEntropyLoss()
         self.model.train()
         total_steps = max(1, self.config["epochs"] * len(loader)); step = 0
+        best_state: dict[str, torch.Tensor] | None = None
+        best_quality = (-1, float("-inf"), float("-inf"))
+        epochs_without_improvement = 0
         for epoch in range(self.config["epochs"]):
-            det_sum = tab_sum = 0.
+            det_sum = tab_sum = grad_sum = 0.
             for xb, yb, tb in loader:
                 xb, yb, tb = xb.to(self.device), yb.to(self.device), tb.to(self.device)
                 weight = .5 * (1 - np.cos(np.pi * step / total_steps)) if self.mode == "datum_ta" else 0.
@@ -181,27 +204,87 @@ class DeepTextDetector(Detector):
                 det_loss = bce(logits, yb)
                 table_loss = ce(table_logits, tb) if self.mode == "datum_ta" else torch.tensor(0., device=self.device)
                 loss = det_loss + (table_loss if self.mode == "datum_ta" else 0.)
-                loss.backward(); optimizer.step(); step += 1
+                if not torch.isfinite(loss):
+                    raise RuntimeError("nonfinite_deep_training_loss")
+                loss.backward()
+                grad_norm = nn.utils.clip_grad_norm_(
+                    self.model.parameters(), self.config["gradient_clip_norm"],
+                )
+                optimizer.step(); step += 1
                 det_sum += float(det_loss.detach()); tab_sum += float(table_loss.detach())
-            self.loss_history.append({"epoch": epoch + 1, "detection_loss": det_sum / len(loader),
-                                      "table_loss": tab_sum / len(loader),
-                                      "adaptation_weight": float(weight)})
+                grad_sum += float(grad_norm.detach())
+            train_loss = det_sum / len(loader)
+            validation_loss = train_loss
+            validation_auroc = float("nan")
+            validation_ptp = float("nan")
+            if val_x is not None and val_y is not None:
+                validation_scores = self._predict_tensor(val_x)
+                validation_ptp = float(np.ptp(validation_scores))
+                validation_auroc = float(roc_auc_score(val_y, validation_scores))
+                clipped = np.clip(validation_scores, 1e-7, 1 - 1e-7)
+                validation_loss = float(-np.mean(
+                    val_y * np.log(clipped) + (1 - val_y) * np.log(1 - clipped)
+                ))
+            quality = (
+                int(np.isfinite(validation_ptp) and validation_ptp >= 1e-8),
+                validation_auroc if np.isfinite(validation_auroc) else -validation_loss,
+                -validation_loss,
+            )
+            improved = quality > best_quality
+            if improved:
+                best_quality = quality
+                best_state = {name: value.detach().cpu().clone() for name, value in self.model.state_dict().items()}
+                self.best_epoch = epoch + 1
+                self.best_validation_auroc = validation_auroc
+                self.best_validation_score_ptp = validation_ptp
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+            self.loss_history.append({
+                "epoch": epoch + 1, "detection_loss": train_loss,
+                "table_loss": tab_sum / len(loader), "adaptation_weight": float(weight),
+                "learning_rate": float(optimizer.param_groups[0]["lr"]),
+                "mean_gradient_norm": grad_sum / len(loader),
+                "validation_loss": validation_loss,
+                "validation_auroc": validation_auroc,
+                "validation_score_ptp": validation_ptp,
+                "selected": improved,
+            })
+            scheduler.step(validation_loss)
+            self.model.train()
+            if (
+                epoch + 1 >= self.config["min_epochs"]
+                and epochs_without_improvement >= self.config["early_stopping_patience"]
+            ):
+                self.stopped_early = True
+                break
+        if best_state is not None:
+            self.model.load_state_dict(best_state)
         return self
 
-    def predict_score(self, records: pd.DataFrame, **context: Any) -> np.ndarray:
-        x = self._tensorize(records); self.model.eval(); out = []
+    def _predict_tensor(self, tensor: torch.Tensor) -> np.ndarray:
+        was_training = self.model.training
+        self.model.eval()
+        out = []
         with torch.no_grad():
-            for (xb,) in DataLoader(TensorDataset(x), batch_size=self.config["batch_size"]):
-                xb = xb.to(self.device)
-                logits = self.model(xb)[0]
+            for (xb,) in DataLoader(TensorDataset(tensor), batch_size=self.config["batch_size"]):
+                logits = self.model(xb.to(self.device))[0]
                 out.extend(torch.sigmoid(logits).cpu().numpy().tolist())
+        if was_training:
+            self.model.train()
         return np.asarray(out)
+
+    def predict_score(self, records: pd.DataFrame, **context: Any) -> np.ndarray:
+        return self._predict_tensor(self._tensorize(records))
 
     def save(self, path: str | Path) -> None:
         path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
         torch.save({"mode": self.mode, "seed": self.seed, "config": self.config,
                     "state_dict": self.model.state_dict(), "loss_history": self.loss_history,
-                    "truncation_rate": self.truncation_rate}, path)
+                    "truncation_rate": self.truncation_rate, "best_epoch": self.best_epoch,
+                    "best_validation_auroc": self.best_validation_auroc,
+                    "best_validation_score_ptp": self.best_validation_score_ptp,
+                    "stopped_early": self.stopped_early}, path)
 
     @classmethod
     def load(cls, path: str | Path) -> "DeepTextDetector":
@@ -211,6 +294,10 @@ class DeepTextDetector(Detector):
         obj = cls(state["mode"], state["seed"], **state["config"])
         obj.model.load_state_dict(state["state_dict"]); obj.loss_history = state["loss_history"]
         obj.truncation_rate = state["truncation_rate"]
+        obj.best_epoch = state.get("best_epoch")
+        obj.best_validation_auroc = state.get("best_validation_auroc", float("nan"))
+        obj.best_validation_score_ptp = state.get("best_validation_score_ptp", float("nan"))
+        obj.stopped_early = state.get("stopped_early", False)
         return obj
 
     def get_provenance(self) -> dict[str, Any]:
@@ -224,7 +311,11 @@ class DeepTextDetector(Detector):
                 "device": str(self.device),
                 "cpu_tiny_runthrough": self.config["dim"] <= 24 and self.config["epochs"] <= 2,
                 "config": self.config, "parameter_count": sum(p.numel() for p in self.model.parameters()),
-                "truncation_rate": self.truncation_rate, "loss_history": self.loss_history}
+                "truncation_rate": self.truncation_rate, "loss_history": self.loss_history,
+                "best_epoch": self.best_epoch,
+                "best_validation_auroc": self.best_validation_auroc,
+                "best_validation_score_ptp": self.best_validation_score_ptp,
+                "stopped_early": self.stopped_early}
 
     def permutation_max_delta(self, records: pd.DataFrame, repeats: int = 4) -> float:
         if self.mode not in {"datum", "datum_ta"}: return float("nan")

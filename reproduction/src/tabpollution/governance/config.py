@@ -61,6 +61,19 @@ class GovernanceConfig:
     output_dir: Path
     max_cpu_threads: int
     device: str
+    deep_dim: int
+    deep_heads: int
+    deep_layers: int
+    deep_max_len: int
+    deep_max_datum: int
+    deep_max_columns: int
+    deep_epochs: int
+    deep_batch_size: int
+    deep_learning_rate: float
+    deep_weight_decay: float
+    deep_gradient_clip_norm: float
+    deep_early_stopping_patience: int
+    deep_min_epochs: int
 
 
 def _unique_tuple(value: Any, field: str, item_type: type) -> tuple[Any, ...]:
@@ -120,7 +133,7 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     required = {
         "experiment_id", "run_type", "seeds", "protocols", "prevalence_rates", "contamination_modes",
         "bags_per_rate", "utility_bags_per_rate", "bag_size", "detectors", "quantifiers", "primary_quantifier",
-        "valuation", "data", "thresholds", "output_dir", "resources",
+        "valuation", "data", "thresholds", "output_dir", "resources", "deep_training",
     }
     missing = sorted(required - set(raw))
     if missing:
@@ -201,6 +214,36 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
     if threads < 1 or threads > 16:
         raise GovernanceConfigError("resources.max_cpu_threads must be in [1, 16]")
 
+    deep = raw["deep_training"]
+    deep_fields = {
+        "dim", "heads", "layers", "max_len", "max_datum", "max_columns",
+        "epochs", "batch_size", "learning_rate", "weight_decay",
+        "gradient_clip_norm", "early_stopping_patience", "min_epochs",
+    }
+    if not isinstance(deep, dict) or set(deep) != deep_fields:
+        raise GovernanceConfigError(f"deep_training must contain exactly {sorted(deep_fields)}")
+    deep_dim = int(deep["dim"])
+    deep_heads = int(deep["heads"])
+    deep_layers = int(deep["layers"])
+    deep_max_len = int(deep["max_len"])
+    deep_max_datum = int(deep["max_datum"])
+    deep_max_columns = int(deep["max_columns"])
+    deep_epochs = int(deep["epochs"])
+    deep_batch_size = int(deep["batch_size"])
+    deep_learning_rate = float(deep["learning_rate"])
+    deep_weight_decay = float(deep["weight_decay"])
+    deep_gradient_clip_norm = float(deep["gradient_clip_norm"])
+    deep_patience = int(deep["early_stopping_patience"])
+    deep_min_epochs = int(deep["min_epochs"])
+    if deep_dim < 8 or deep_heads < 1 or deep_dim % deep_heads:
+        raise GovernanceConfigError("deep_training dim must be >=8 and divisible by heads")
+    if min(deep_layers, deep_max_len, deep_max_datum, deep_max_columns, deep_epochs, deep_batch_size) < 1:
+        raise GovernanceConfigError("deep_training integer fields must be positive")
+    if not 0 < deep_learning_rate <= .01 or not 0 <= deep_weight_decay <= 1:
+        raise GovernanceConfigError("deep_training learning_rate/weight_decay are out of range")
+    if deep_gradient_clip_norm <= 0 or deep_patience < 1 or not 1 <= deep_min_epochs <= deep_epochs:
+        raise GovernanceConfigError("deep_training clipping/early-stopping settings are invalid")
+
     bags = int(raw["bags_per_rate"])
     utility_bags = int(raw["utility_bags_per_rate"])
     bag_size = int(raw["bag_size"])
@@ -230,6 +273,8 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
             )
         if device != "cuda":
             raise GovernanceConfigError("formal deep-detector runs require resources.device=cuda")
+        if deep_dim != 192 or deep_heads != 6 or deep_layers != 6 or deep_epochs < 20:
+            raise GovernanceConfigError("formal runs require the frozen 192d/6-head/6-layer/20-epoch deep architecture")
 
     return GovernanceConfig(
         experiment_id=str(raw["experiment_id"]), run_type=run_type, seeds=seeds,
@@ -248,6 +293,13 @@ def validate_governance_config(raw: dict[str, Any], base_dir: Path = Path(".")) 
         harm_tolerance=_bounded_number(thresholds["harm_tolerance"], "harm_tolerance", 0, 1),
         output_dir=(base_dir / str(raw["output_dir"])).resolve(),
         max_cpu_threads=threads, device=device,
+        deep_dim=deep_dim, deep_heads=deep_heads, deep_layers=deep_layers,
+        deep_max_len=deep_max_len, deep_max_datum=deep_max_datum,
+        deep_max_columns=deep_max_columns, deep_epochs=deep_epochs,
+        deep_batch_size=deep_batch_size, deep_learning_rate=deep_learning_rate,
+        deep_weight_decay=deep_weight_decay,
+        deep_gradient_clip_norm=deep_gradient_clip_norm,
+        deep_early_stopping_patience=deep_patience, deep_min_epochs=deep_min_epochs,
     )
 
 

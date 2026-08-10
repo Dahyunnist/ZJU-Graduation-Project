@@ -42,6 +42,12 @@ def valid_governance_config() -> dict:
         },
         "output_dir": "runs/test",
         "resources": {"device": "cpu", "max_cpu_threads": 2},
+        "deep_training": {
+            "dim": 24, "heads": 4, "layers": 1, "max_len": 192,
+            "max_datum": 32, "max_columns": 24, "epochs": 2, "batch_size": 32,
+            "learning_rate": .002, "weight_decay": .01, "gradient_clip_norm": 1.,
+            "early_stopping_patience": 2, "min_epochs": 1,
+        },
     }
 
 
@@ -90,6 +96,14 @@ def test_resource_probe_uses_one_formal_size_deep_detector_and_is_not_formal() -
     assert probe.bags_per_rate == 1
     assert not probe.valuation_enabled
     assert probe.device == "cuda"
+
+
+def test_deep_stability_probe_uses_lower_learning_rate_and_validation_selection() -> None:
+    probe = load_governance_config(Path("configs/governance_deep_stability_probe.yaml"))
+    assert probe.detectors == ("flat_transformer",)
+    assert probe.deep_dim == 192 and probe.deep_layers == 6
+    assert probe.deep_learning_rate == .0002
+    assert probe.deep_min_epochs == 4
 
 
 def test_formal_contract_rejects_legacy_approximation() -> None:

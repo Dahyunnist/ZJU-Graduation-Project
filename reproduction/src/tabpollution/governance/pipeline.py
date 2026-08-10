@@ -156,18 +156,19 @@ def _detector(name: str, seed: int, config: GovernanceConfig):
         "datum_ta": "datum_ta",
     }
     if name in modes:
-        formal = config.run_type in {"pilot", "formal"}
         return DeepTextDetector(
             mode=modes[name], seed=seed,
-            dim=192 if formal else 24,
-            heads=6 if formal else 4, layers=6 if formal else 1,
-            max_len=1024 if formal else 192,
-            max_datum=96 if formal else 32,
-            max_columns=64 if formal else 24,
-            epochs=20 if formal else 2,
-            batch_size=16 if formal else 32,
+            dim=config.deep_dim, heads=config.deep_heads, layers=config.deep_layers,
+            max_len=config.deep_max_len, max_datum=config.deep_max_datum,
+            max_columns=config.deep_max_columns, epochs=config.deep_epochs,
+            batch_size=config.deep_batch_size,
             device=config.device,
             table_classes=32,
+            learning_rate=config.deep_learning_rate,
+            weight_decay=config.deep_weight_decay,
+            gradient_clip_norm=config.deep_gradient_clip_norm,
+            early_stopping_patience=config.deep_early_stopping_patience,
+            min_epochs=config.deep_min_epochs,
         )
     raise ValueError(name)
 
@@ -519,6 +520,7 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
     valuation_records: list[dict[str, Any]] = []
     valuation_seen: set[tuple[Any, ...]] = set()
     protocol_manifests: dict[str, Any] = {}
+    detector_diagnostics: dict[str, Any] = {}
 
     for seed in config.seeds:
         source = _source(config, seed)
@@ -563,11 +565,44 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
                     table_labels=table_labels,
                 )
                 raw_val = detector.predict_score(detector_val)
+                raw_test = detector.predict_score(detector_test)
+                diagnostic_key = f"{seed}:{protocol}:{detector_name}"
+                detector_diagnostics[diagnostic_key] = {
+                    "seed": seed, "protocol": protocol, "detector": detector_name,
+                    "raw_validation_score_min": finite_or_none(np.min(raw_val)),
+                    "raw_validation_score_max": finite_or_none(np.max(raw_val)),
+                    "raw_validation_score_ptp": finite_or_none(np.ptp(raw_val)),
+                    "raw_test_score_min": finite_or_none(np.min(raw_test)),
+                    "raw_test_score_max": finite_or_none(np.max(raw_test)),
+                    "raw_test_score_ptp": finite_or_none(np.ptp(raw_test)),
+                    "provenance": detector.get_provenance(),
+                }
+                write_json(detector_diagnostics, output / "detector_diagnostics.json")
+                if isinstance(detector, DeepTextDetector):
+                    raw_validation_auroc = float(roc_auc_score(val_labels, raw_val))
+                    detector_diagnostics[diagnostic_key]["raw_validation_auroc"] = raw_validation_auroc
+                    write_json(detector_diagnostics, output / "detector_diagnostics.json")
+                    if (
+                        not np.isfinite(raw_val).all()
+                        or np.ptp(raw_val) < 1e-8
+                        or raw_validation_auroc < .52
+                    ):
+                        raise RuntimeError(
+                            "degenerate_deep_detector_scores:"
+                            f"{diagnostic_key}:ptp={np.ptp(raw_val):.3e}:"
+                            f"auroc={raw_validation_auroc:.4f}"
+                        )
                 calibrator = _PlattCalibrator(seed).fit(raw_val, val_labels)
                 val_scores = calibrator.predict(raw_val)
                 threshold_info = select_fpr_threshold(val_labels, val_scores, config.detector_fpr_target)
                 threshold = threshold_info["threshold"]
-                test_scores = calibrator.predict(detector.predict_score(detector_test))
+                test_scores = calibrator.predict(raw_test)
+                detector_diagnostics[diagnostic_key].update({
+                    "calibrated_validation_score_ptp": finite_or_none(np.ptp(val_scores)),
+                    "calibrated_test_score_ptp": finite_or_none(np.ptp(test_scores)),
+                    "selected_threshold": finite_or_none(threshold),
+                })
+                write_json(detector_diagnostics, output / "detector_diagnostics.json")
                 det_metrics = detection_metrics(test_labels, test_scores, threshold)
                 quantifiers: dict[str, ScoreQuantifier] = {}
                 for method in config.quantifiers:
@@ -726,11 +761,15 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
     _write_findings(evidence, artifact_frame, valuation_frame, output, config.primary_quantifier)
     _write_statistical_inference(evidence, output, config.primary_quantifier)
     write_json(protocol_manifests, output / "protocol_manifests.json")
+    quantifier_failures = evidence["quantifier_status"].astype(str).ne("ok")
+    primary_failures = quantifier_failures & evidence["quantifier"].eq(config.primary_quantifier)
+    analysis_ready = not bool(primary_failures.any())
     summary = {
         "experiment_id": config.experiment_id,
         "run_type": config.run_type,
-        "status": "complete",
-        "formal_inclusion": config.run_type == "formal",
+        "status": "complete" if analysis_ready else "complete_with_method_failures",
+        "analysis_ready": analysis_ready,
+        "formal_inclusion": config.run_type == "formal" and analysis_ready,
         "created_at": _utc_now(),
         "seconds": time.perf_counter() - started,
         "evidence_rows": len(evidence),
@@ -740,6 +779,8 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
         "low_prevalence_rows": int(evidence["true_prevalence"].isin([.05, .10]).sum()),
         "artifact_gate_failures": int((~artifact_frame["artifact_gate_passed"]).sum()),
         "valuation_rows": len(valuation_frame),
+        "quantifier_failure_rows": int(quantifier_failures.sum()),
+        "primary_quantifier_failure_rows": int(primary_failures.sum()),
         "mean_prevalence_mae": finite_or_none(evidence["prevalence_absolute_error"].mean()),
         "mean_decision_regret": finite_or_none(evidence["decision_regret"].mean()),
         "outputs": {
@@ -749,6 +790,7 @@ def run_governance_benchmark(config_or_path: GovernanceConfig | str | Path) -> d
             "statistical_summary": str(output / "statistical_summary_ci95.csv"),
             "paired_tests": str(output / "paired_detector_tests.csv"),
             "method_registry": str(output / "method_registry_snapshot.json"),
+            "detector_diagnostics": str(output / "detector_diagnostics.json"),
         },
     }
     write_json(summary, output / "summary.json")

@@ -27,6 +27,12 @@ from tabpollution.governance.pipeline import (
 from tabpollution.utils import read_json, sha256_file, write_json
 
 
+DEEP_DETECTORS = {
+    "flat_transformer", "table_transformer", "column_positional_ablation",
+    "datum_transformer", "datum_ta",
+}
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -95,9 +101,27 @@ def _completion(config: GovernanceConfig, shard: dict[str, Any], config_hash: st
         return None
     value = read_json(marker)
     if value.get("base_config_sha256") != config_hash:
-        raise ValueError(
-            f"Stale completion marker for {shard['shard_id']}; use a new output_dir after changing config"
-        )
+        # The stability revision adds deep-training fields to the same frozen
+        # research contract.  Classical shards are reusable when every field
+        # recorded by the legacy attempt still matches; deep shards must run
+        # again under the new optimizer and validation-selection contract.
+        if shard["detector"] in DEEP_DETECTORS:
+            return None
+        attempt_value = Path(value.get("attempt_dir", ""))
+        shard_config_path = attempt_value / "shard_config.json"
+        if not shard_config_path.is_file():
+            raise ValueError(f"Cannot validate legacy completion marker for {shard['shard_id']}")
+        old_resolved = read_json(shard_config_path).get("resolved_config", {})
+        expected = _serializable(asdict(_shard_config(config, shard, attempt_value)))
+        if any(
+            expected.get(key) != old_value
+            for key, old_value in old_resolved.items()
+            if not key.startswith("deep_")
+        ):
+            raise ValueError(
+                f"Stale completion marker for {shard['shard_id']}; use a new output_dir after changing config"
+            )
+        value = {**value, "legacy_compatible": True}
     if value.get("shard") != shard:
         raise ValueError(f"Completion marker metadata mismatch for {shard['shard_id']}")
     attempt = Path(value["attempt_dir"])
@@ -265,6 +289,16 @@ def aggregate_governance_shards(config_path: str | Path) -> dict[str, Any]:
     write_json(_serializable(asdict(config)), output / "resolved_config.json")
     first_registry = attempts[0] / "method_registry_snapshot.json"
     write_json(read_json(first_registry), output / "method_registry_snapshot.json")
+    diagnostics: dict[str, Any] = {}
+    for attempt in attempts:
+        path = attempt / "detector_diagnostics.json"
+        if not path.is_file():
+            continue
+        for key, value in read_json(path).items():
+            if key in diagnostics and diagnostics[key] != value:
+                raise ValueError(f"Detector diagnostic differs across shards: {key}")
+            diagnostics[key] = value
+    write_json(diagnostics, output / "detector_diagnostics.json")
     _write_findings(evidence, artifacts, valuation, output, config.primary_quantifier)
     _write_statistical_inference(evidence, output, config.primary_quantifier)
     write_json({
@@ -273,11 +307,20 @@ def aggregate_governance_shards(config_path: str | Path) -> dict[str, Any]:
         "completed_shards": [row["shard"]["shard_id"] for row in markers],
         "attempts": [row["attempt_dir"] for row in markers],
     }, output / "completed_shards_manifest.json")
+    quantifier_failures = evidence["quantifier_status"].astype(str).ne("ok")
+    primary_failures = quantifier_failures & evidence["quantifier"].eq(config.primary_quantifier)
+    failed_combinations = (
+        evidence.loc[quantifier_failures, ["protocol", "detector", "quantifier", "quantifier_status"]]
+        .drop_duplicates().sort_values(["protocol", "detector", "quantifier"])
+        .to_dict(orient="records")
+    )
+    analysis_ready = not bool(primary_failures.any())
     summary = {
         "experiment_id": config.experiment_id,
         "run_type": config.run_type,
-        "status": "complete",
-        "formal_inclusion": config.run_type == "formal",
+        "status": "complete" if analysis_ready else "complete_with_method_failures",
+        "analysis_ready": analysis_ready,
+        "formal_inclusion": config.run_type == "formal" and analysis_ready,
         "created_at": _utc_now(),
         "aggregation_seconds": time.perf_counter() - started,
         "shard_count": len(markers),
@@ -288,6 +331,9 @@ def aggregate_governance_shards(config_path: str | Path) -> dict[str, Any]:
         "low_prevalence_rows": int(evidence["true_prevalence"].isin([.05, .10]).sum()),
         "artifact_gate_failures": int((~artifacts["artifact_gate_passed"].astype(bool)).sum()),
         "valuation_rows": len(valuation),
+        "quantifier_failure_rows": int(quantifier_failures.sum()),
+        "primary_quantifier_failure_rows": int(primary_failures.sum()),
+        "failed_quantifier_combinations": failed_combinations,
         "mean_prevalence_mae": finite_or_none(evidence["prevalence_absolute_error"].mean()),
         "mean_decision_regret": finite_or_none(evidence["decision_regret"].mean()),
         "outputs": {
@@ -297,6 +343,7 @@ def aggregate_governance_shards(config_path: str | Path) -> dict[str, Any]:
             "statistical_summary": str(output / "statistical_summary_ci95.csv"),
             "paired_tests": str(output / "paired_detector_tests.csv"),
             "shards": str(output / "completed_shards_manifest.json"),
+            "detector_diagnostics": str(output / "detector_diagnostics.json"),
         },
     }
     write_json(summary, output / "summary.json")

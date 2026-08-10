@@ -35,6 +35,12 @@ def test_unified_governance_pipeline_emits_linked_evidence(tmp_path: Path) -> No
         },
         "output_dir": str(tmp_path / "run"),
         "resources": {"device": "cpu", "max_cpu_threads": 1},
+        "deep_training": {
+            "dim": 24, "heads": 4, "layers": 1, "max_len": 192,
+            "max_datum": 32, "max_columns": 24, "epochs": 2, "batch_size": 32,
+            "learning_rate": .002, "weight_decay": .01, "gradient_clip_norm": 1.,
+            "early_stopping_patience": 2, "min_epochs": 1,
+        },
     }
     config = validate_governance_config(raw)
     assert validate_governance_setup(config)["passed"]
