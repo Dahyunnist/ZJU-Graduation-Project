@@ -21,6 +21,8 @@ source "$CONDA_INIT"
 conda activate tabular-benchmark
 cd "$PROJECT_ROOT"
 
+(cd configs && sha256sum -c governance_formal.sha256)
+
 export OMP_NUM_THREADS=4
 export MKL_NUM_THREADS=4
 export OPENBLAS_NUM_THREADS=4
@@ -40,8 +42,8 @@ if [[ -n "$(nvidia-smi -i "$GPU_INDEX" --query-compute-apps=pid --format=csv,noh
 fi
 export CUDA_VISIBLE_DEVICES="$GPU_INDEX"
 
-mkdir -p runs/governance-formal-v1
-python -m tabpollution environment capture --output runs/governance-formal-v1/environment.txt
+mkdir -p runs/governance-formal-v2-calibration
+python -m tabpollution environment capture --output runs/governance-formal-v2-calibration/environment.txt
 python -m tabpollution governance preflight --config configs/governance_formal.yaml
 MAX_SHARDS="${MAX_SHARDS:-1}"
 nice -n 10 python -m tabpollution governance sharded-run \
