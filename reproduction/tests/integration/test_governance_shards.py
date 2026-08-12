@@ -98,7 +98,7 @@ def test_formal_plan_preserves_full_contract(tmp_path: Path) -> None:
     assert {row["protocol"] for row in plan["shards"]} == {"P1", "P2", "P3", "P4"}
     cpu = shard_queue(config_path, seed=2026, resource_class="cpu")
     gpu = shard_queue(config_path, seed=2026, resource_class="gpu")
-    assert cpu["pending_count"] == 6
-    assert gpu["pending_count"] == 16
+    assert cpu["pending_count"] == 8
+    assert gpu["pending_count"] == 14
     assert not set(cpu["pending_shards"]) & set(gpu["pending_shards"])
     assert all("__c2st_" in shard or "__char3gram" in shard for shard in cpu["pending_shards"])
