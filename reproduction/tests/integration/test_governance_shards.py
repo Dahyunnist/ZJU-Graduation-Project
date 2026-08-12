@@ -8,6 +8,7 @@ import yaml
 from tabpollution.governance.shards import (
     build_shard_plan,
     run_governance_sharded,
+    shard_queue,
     shard_status,
 )
 
@@ -95,3 +96,9 @@ def test_formal_plan_preserves_full_contract(tmp_path: Path) -> None:
     assert plan["run_type"] == "formal"
     assert plan["shard_count"] == 110
     assert {row["protocol"] for row in plan["shards"]} == {"P1", "P2", "P3", "P4"}
+    cpu = shard_queue(config_path, seed=2026, resource_class="cpu")
+    gpu = shard_queue(config_path, seed=2026, resource_class="gpu")
+    assert cpu["pending_count"] == 6
+    assert gpu["pending_count"] == 16
+    assert not set(cpu["pending_shards"]) & set(gpu["pending_shards"])
+    assert all("__c2st_" in shard or "__char3gram" in shard for shard in cpu["pending_shards"])

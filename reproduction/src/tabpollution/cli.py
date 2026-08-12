@@ -30,6 +30,7 @@ from tabpollution.governance import (
     run_governance_benchmark,
     run_governance_shard,
     run_governance_sharded,
+    shard_queue,
     shard_status,
     validate_governance_setup,
 )
@@ -145,6 +146,10 @@ def build_parser() -> argparse.ArgumentParser:
     shard_plan.add_argument("--config", type=Path, required=True)
     shard_status_parser = governance_commands.add_parser("shard-status")
     shard_status_parser.add_argument("--config", type=Path, required=True)
+    shard_queue_parser = governance_commands.add_parser("shard-queue")
+    shard_queue_parser.add_argument("--config", type=Path, required=True)
+    shard_queue_parser.add_argument("--seed", type=int, required=True)
+    shard_queue_parser.add_argument("--resource-class", choices=["cpu", "gpu"], required=True)
     shard_run = governance_commands.add_parser("shard-run")
     shard_run.add_argument("--config", type=Path, required=True)
     shard_run.add_argument("--shard-id", required=True)
@@ -231,6 +236,10 @@ def main(argv: list[str] | None = None) -> None:
         result = build_shard_plan(args.config)
     elif args.command == "governance" and args.governance_command == "shard-status":
         result = shard_status(args.config)
+    elif args.command == "governance" and args.governance_command == "shard-queue":
+        result = shard_queue(
+            args.config, seed=args.seed, resource_class=args.resource_class,
+        )
     elif args.command == "governance" and args.governance_command == "shard-run":
         result = run_governance_shard(args.config, args.shard_id, resume=args.resume)
     elif args.command == "governance" and args.governance_command == "sharded-run":

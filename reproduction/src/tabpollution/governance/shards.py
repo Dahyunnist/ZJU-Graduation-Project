@@ -87,8 +87,45 @@ def build_shard_plan(config_path: str | Path) -> dict[str, Any]:
         "shard_count": len(shards),
         "shards": shards,
     }
-    write_json(plan, config.output_dir / "shard_plan.json")
+    _write_json_atomic(plan, config.output_dir / "shard_plan.json")
     return plan
+
+
+def shard_queue(
+    config_path: str | Path,
+    *,
+    seed: int,
+    resource_class: str,
+) -> dict[str, Any]:
+    """Return a disjoint pending queue for a seed and CPU/GPU worker.
+
+    Queue selection changes only execution order.  The immutable shard metadata
+    and the base research contract remain untouched.
+    """
+    if resource_class not in {"cpu", "gpu"}:
+        raise ValueError("resource_class must be cpu or gpu")
+    plan = build_shard_plan(config_path)
+    config = load_governance_config(config_path)
+    selected: list[str] = []
+    completed: list[str] = []
+    for shard in plan["shards"]:
+        if int(shard["seed"]) != int(seed):
+            continue
+        shard_resource = "gpu" if shard["detector"] in DEEP_DETECTORS else "cpu"
+        if shard_resource != resource_class:
+            continue
+        if _completion(config, shard, plan["base_config_sha256"]):
+            completed.append(shard["shard_id"])
+        else:
+            selected.append(shard["shard_id"])
+    return {
+        "experiment_id": config.experiment_id,
+        "seed": int(seed),
+        "resource_class": resource_class,
+        "completed_shards": completed,
+        "pending_shards": selected,
+        "pending_count": len(selected),
+    }
 
 
 def _completion_path(config: GovernanceConfig, shard_id: str) -> Path:

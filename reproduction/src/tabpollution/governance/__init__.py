@@ -7,6 +7,7 @@ from .shards import (
     build_shard_plan,
     run_governance_shard,
     run_governance_sharded,
+    shard_queue,
     shard_status,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "build_shard_plan",
     "run_governance_shard",
     "run_governance_sharded",
+    "shard_queue",
     "shard_status",
 ]

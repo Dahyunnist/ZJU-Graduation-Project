@@ -43,6 +43,13 @@ fi
 export CUDA_VISIBLE_DEVICES="$GPU_INDEX"
 
 mkdir -p runs/governance-formal-v2-calibration
+OUTPUT_DIR="$(python -c 'from tabpollution.governance.config import load_governance_config; print(load_governance_config("configs/governance_formal.yaml").output_dir)')"
+mkdir -p "$OUTPUT_DIR/scheduler"
+exec 9>"$OUTPUT_DIR/scheduler/formal_scheduler.lock"
+if ! flock -n 9; then
+  echo "Another formal scheduler is active; refusing overlapping execution." >&2
+  exit 5
+fi
 python -m tabpollution environment capture --output runs/governance-formal-v2-calibration/environment.txt
 python -m tabpollution governance preflight --config configs/governance_formal.yaml
 MAX_SHARDS="${MAX_SHARDS:-1}"
