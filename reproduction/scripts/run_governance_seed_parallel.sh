@@ -55,7 +55,7 @@ run_cpu_queue() {
     [[ -n "$shard" ]] || continue
     echo "CPU_START $shard $(date --iso-8601=seconds)"
     nice -n 15 python -m tabpollution governance shard-run \
-      --config "$CONFIG" --shard-id "$shard" --resume
+      --config "$CONFIG" --shard-id "$shard" --resume --execution-device cpu
     echo "CPU_DONE $shard $(date --iso-8601=seconds)"
   done
 }

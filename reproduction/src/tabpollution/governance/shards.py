@@ -190,6 +190,7 @@ def run_governance_shard(
     shard_id: str,
     *,
     resume: bool = True,
+    execution_device: str | None = None,
 ) -> dict[str, Any]:
     """Run one immutable shard and publish its completion marker last."""
     plan = build_shard_plan(config_path)
@@ -209,6 +210,12 @@ def run_governance_shard(
     attempt_dir = shard_root / "attempts" / attempt_id
     attempt_dir.mkdir(parents=True, exist_ok=False)
     derived = _shard_config(base, shard, attempt_dir)
+    if execution_device is not None:
+        if execution_device not in {"cpu", "cuda"}:
+            raise ValueError("execution_device must be cpu or cuda")
+        if execution_device == "cpu" and shard["detector"] in DEEP_DETECTORS:
+            raise ValueError("Deep formal shards cannot override execution_device to cpu")
+        derived = replace(derived, device=execution_device)
     write_json({
         "base_config_sha256": plan["base_config_sha256"],
         "shard": shard,

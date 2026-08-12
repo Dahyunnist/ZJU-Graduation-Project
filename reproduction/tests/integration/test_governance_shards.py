@@ -7,6 +7,7 @@ import yaml
 
 from tabpollution.governance.shards import (
     build_shard_plan,
+    run_governance_shard,
     run_governance_sharded,
     shard_queue,
     shard_status,
@@ -102,3 +103,16 @@ def test_formal_plan_preserves_full_contract(tmp_path: Path) -> None:
     assert gpu["pending_count"] == 14
     assert not set(cpu["pending_shards"]) & set(gpu["pending_shards"])
     assert all("__c2st_" in shard or "__char3gram" in shard for shard in cpu["pending_shards"])
+
+
+def test_classical_shard_allows_cpu_execution_override(tmp_path: Path) -> None:
+    raw = _raw_config(tmp_path / "run")
+    raw["resources"]["device"] = "cuda"
+    config_path = tmp_path / "governance.yaml"
+    config_path.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    result = run_governance_shard(
+        config_path, "s2026__P1__char3gram", execution_device="cpu",
+    )
+    assert result["status"] == "complete"
+    resolved = Path(result["attempt_dir"], "resolved_config.json")
+    assert yaml.safe_load(resolved.read_text(encoding="utf-8"))["device"] == "cpu"

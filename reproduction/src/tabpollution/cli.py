@@ -154,6 +154,7 @@ def build_parser() -> argparse.ArgumentParser:
     shard_run.add_argument("--config", type=Path, required=True)
     shard_run.add_argument("--shard-id", required=True)
     shard_run.add_argument("--resume", action="store_true")
+    shard_run.add_argument("--execution-device", choices=["cpu", "cuda"])
     sharded_run = governance_commands.add_parser("sharded-run")
     sharded_run.add_argument("--config", type=Path, required=True)
     sharded_run.add_argument("--resume", action="store_true")
@@ -241,7 +242,10 @@ def main(argv: list[str] | None = None) -> None:
             args.config, seed=args.seed, resource_class=args.resource_class,
         )
     elif args.command == "governance" and args.governance_command == "shard-run":
-        result = run_governance_shard(args.config, args.shard_id, resume=args.resume)
+        result = run_governance_shard(
+            args.config, args.shard_id, resume=args.resume,
+            execution_device=args.execution_device,
+        )
     elif args.command == "governance" and args.governance_command == "sharded-run":
         result = run_governance_sharded(
             args.config, resume=args.resume, max_shards=args.max_shards,
