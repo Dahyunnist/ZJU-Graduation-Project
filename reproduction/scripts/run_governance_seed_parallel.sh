@@ -41,7 +41,7 @@ python -m tabpollution governance preflight --config "$CONFIG"
 
 queue() {
   local resource_class="$1"
-  python -c 'from tabpollution.governance.shards import shard_queue; import sys; print("\n".join(shard_queue(sys.argv[1], seed=int(sys.argv[2]), resource_class=sys.argv[3])["pending_shards"]))' "$CONFIG" "$SEED" "$resource_class"
+  python -c 'from tabpollution.governance.shards import shard_queue; import sys; sys.stdout.write("\n".join(shard_queue(sys.argv[1], seed=int(sys.argv[2]), resource_class=sys.argv[3])["pending_shards"]))' "$CONFIG" "$SEED" "$resource_class"
 }
 
 mapfile -t CPU_SHARDS < <(queue cpu)
