@@ -283,11 +283,17 @@ def _calibration_policies(
     return policies
 
 
-def _target_xy(frame: pd.DataFrame, target: str) -> tuple[pd.DataFrame, np.ndarray]:
+def _target_xy(
+    frame: pd.DataFrame,
+    target: str,
+    *,
+    allow_single_class: bool = False,
+) -> tuple[pd.DataFrame, np.ndarray]:
     features = frame.drop(columns=[target, *[c for c in META_COLUMNS if c in frame]], errors="ignore")
     labels = pd.Series(frame[target]).astype(str)
     classes = sorted(labels.unique())
-    if len(classes) != 2:
+    valid_class_counts = {1, 2} if allow_single_class else {2}
+    if len(classes) not in valid_class_counts:
         raise ValueError(f"Downstream target {target!r} must be binary, got {classes}")
     return features, (labels == classes[-1]).astype(int).to_numpy()
 
@@ -319,7 +325,10 @@ def _target_model(features: pd.DataFrame, seed: int, threads: int) -> Pipeline:
 def _utility(train: pd.DataFrame, test: pd.DataFrame, target: str, seed: int, threads: int) -> float:
     if len(train) < 10:
         return float("nan")
-    x_train, y_train = _target_xy(train, target)
+    # Detector cleanup may legitimately remove every example of one target
+    # class.  That is a governance failure represented by undefined utility,
+    # not a malformed source table and not a reason to abort the shard.
+    x_train, y_train = _target_xy(train, target, allow_single_class=True)
     x_test, y_test = _target_xy(test, target)
     if len(np.unique(y_train)) < 2 or len(np.unique(y_test)) < 2:
         return float("nan")
