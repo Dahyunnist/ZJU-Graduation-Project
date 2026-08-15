@@ -1,0 +1,43 @@
+{
+  "base_config_sha256": "c0ac6528d617ba029e6c5db5f827275c10edda9fe0350fbae13135e777dbdf64",
+  "checks": {
+    "all_expected_policies_present": true,
+    "all_expected_protocols_present": true,
+    "all_expected_quantifiers_present": true,
+    "all_expected_seeds_present": true,
+    "all_shards_have_expected_evidence_rows": true,
+    "artifact_gate_has_no_failures": true,
+    "artifact_rows_are_seed_by_protocol": true,
+    "completion_marker_count_matches_plan": true,
+    "error_decomposition_residual_within_1e_10": true,
+    "estimates_are_in_unit_interval": true,
+    "evidence_primary_key_unique": true,
+    "failed_quantifier_rows_do_not_carry_estimates": true,
+    "no_attempt_failures_in_selected_results": true,
+    "no_root_failed_markers": true,
+    "ok_quantifier_rows_have_finite_estimates": true,
+    "shard_plan_count_is_110": true,
+    "valuation_primary_key_unique": true
+  },
+  "counts": {
+    "artifact_rows": 20,
+    "completion_markers": 110,
+    "duplicate_evidence_keys": 0,
+    "duplicate_valuation_keys": 0,
+    "estimate_out_of_range": 0,
+    "evidence_rows": 3861000,
+    "failed_rows_with_estimates": 0,
+    "ok_nonfinite_estimates": 0,
+    "planned_shards": 110,
+    "quantifier_failure_rows": 118300,
+    "retained_historical_failed_attempts": 3,
+    "row_count_violations": 0,
+    "selected_attempt_failure_markers": 0,
+    "valuation_rows": 520000
+  },
+  "created_at": "2026-08-15T08:39:24.466403+00:00",
+  "expected_rows_per_shard": 35100,
+  "experiment_id": "governance-formal-v2-calibration",
+  "max_absolute_error_decomposition_residual": 2.220446049250313e-16,
+  "passed": true
+}

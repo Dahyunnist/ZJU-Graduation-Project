@@ -1,0 +1,382 @@
+{
+  "artifacts": [
+    {
+      "bytes": 18961,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_1_detection_transfer.pdf",
+      "sha256": "21846ee006390aece794877866fad9b42c1d97c29aa63ce5f1923a602af5c775"
+    },
+    {
+      "bytes": 117219,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_1_detection_transfer.png",
+      "sha256": "d796b53235d4126c5c1d4940dd4acbc53292cbea47450557952561da94fdaf09"
+    },
+    {
+      "bytes": 13888,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_2_format_artifacts.pdf",
+      "sha256": "63b55aa1fda6571f7e0fbd1f96463fddf1dcff48e23ba309818f200d47b6276d"
+    },
+    {
+      "bytes": 65531,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_2_format_artifacts.png",
+      "sha256": "7e17291103dc9bb43f95de736032f2b3242e1278fb45e3c0482418f828bfb297"
+    },
+    {
+      "bytes": 20974,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_3_low_prevalence.pdf",
+      "sha256": "3eaf30b611b8f829b2804668c264b5cf7318b0d0fd7567012982672236a384ec"
+    },
+    {
+      "bytes": 267157,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_3_low_prevalence.png",
+      "sha256": "9226c9ea61d2fd7c848ca71cd8f22e9dc00bb7ed01babb146ddac29f946e037b"
+    },
+    {
+      "bytes": 37268,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_4_quantifier_shift.pdf",
+      "sha256": "82033baba629f411a9a19eab5d40be65b40697de476b5569ef0b57832b951528"
+    },
+    {
+      "bytes": 81970,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_4_quantifier_shift.png",
+      "sha256": "54d2a94955eb5923bbc887d5a537385952b6490bd47075a1ddab761005f48ab0"
+    },
+    {
+      "bytes": 26774,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_5_utility_curve.pdf",
+      "sha256": "6443b1c1b2929935ae36271f8770e1bacdfbe886bb52f8f531241cbbc911e8a8"
+    },
+    {
+      "bytes": 386977,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_5_utility_curve.png",
+      "sha256": "bd04feb99fb70bbf5830403df949db78e879b7d9e8f0c2663e2de1cc91971d46"
+    },
+    {
+      "bytes": 20219,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_6_detectability_vs_harm.pdf",
+      "sha256": "5a605534e85017ce32f46c75b252f0c374efadff5fe42c5edb0f26b90d5c0858"
+    },
+    {
+      "bytes": 210446,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_6_detectability_vs_harm.png",
+      "sha256": "42f444b6538d7982602a4d93960a7f6159eade127b0d3a3b69bf7469cad34e72"
+    },
+    {
+      "bytes": 17719,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_7_calibration_threshold_transfer.pdf",
+      "sha256": "6278fb09556e5c1e8f89b9d20973ea957373fcd338f00c9a20ebbbfdf81e1e64"
+    },
+    {
+      "bytes": 177659,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_7_calibration_threshold_transfer.png",
+      "sha256": "a8265e22d883ab6df4d9ac775013670e00052738aafa887f359fd04dbb71a734"
+    },
+    {
+      "bytes": 16722,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_8_error_decomposition.pdf",
+      "sha256": "5808bf0bd630de517af6c67f42023e105153f2e42e86910d03b6999f90ebb5ca"
+    },
+    {
+      "bytes": 95782,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_8_error_decomposition.png",
+      "sha256": "e0eed44eda27a98c7ba1b7b65c576b0138132a864e334df7e0f82f01ec0b9bfa"
+    },
+    {
+      "bytes": 42459,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_1_transfer_formal.csv",
+      "sha256": "1b5126e75888201e20d27494dde3e2cd7c094c18a06a2b21d833df4743855773"
+    },
+    {
+      "bytes": 42054,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_1_transfer_formal_seed_level.csv",
+      "sha256": "3b79c9f410cf96f613e316b9d3a1443cf58a0da1d7d1dbc393ec4c36febfbddc"
+    },
+    {
+      "bytes": 441,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_2_format_artifacts_formal.csv",
+      "sha256": "a397ab6a6495b1805e09b9c807867d162e64dab9acca1202ad352f8f3e73ff78"
+    },
+    {
+      "bytes": 566,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_2_format_artifacts_formal_seed_level.csv",
+      "sha256": "5e6e0407011ff34740101669ccdb0fcb8b1e68cfd8bd32201ea603152e30cb5a"
+    },
+    {
+      "bytes": 853029,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_3_low_prevalence_formal.csv",
+      "sha256": "885bc5a22e0f8aedbb0352e5a6793bc338d116f0b85f6ae690dd7a180661cdaa"
+    },
+    {
+      "bytes": 759247,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_3_low_prevalence_formal_seed_level.csv",
+      "sha256": "48f0c84b4b84c9b63ce58f4069a93a7d8f3075918f16fb5c0266cb44d31713eb"
+    },
+    {
+      "bytes": 521127,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_4_quantifier_shift_formal.csv",
+      "sha256": "e6f88f2b5ba0fe6dab0fd5ad1c5d272b0be3591559634ae3d53a4de87db1054a"
+    },
+    {
+      "bytes": 635918,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_4_quantifier_shift_formal_seed_level.csv",
+      "sha256": "ac21505908613c11584ed47ae6a871f28ea222ee52c440ced1e2fe3b823c1185"
+    },
+    {
+      "bytes": 531819,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_5_utility_curve_formal.csv",
+      "sha256": "8441977305e33c49d62d5b0c164f38bbfbd6c9ec32a1d73168d8b53f9e4f368b"
+    },
+    {
+      "bytes": 540579,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_5_utility_curve_formal_seed_level.csv",
+      "sha256": "485c4e229902d0f4c48a43383ca13e80795b13b89561f60eefe06cab1d4757b0"
+    },
+    {
+      "bytes": 523991,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_6_detectability_vs_harm_formal.csv",
+      "sha256": "358fd0db518ff67f0ef00831fc569f8f035c4f2e06cbf70055a93c94bfae27ac"
+    },
+    {
+      "bytes": 536551,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_6_detectability_vs_harm_formal_seed_level.csv",
+      "sha256": "cd8fb9536c2b185665a7a6132e03da9a0769df5f19513ea3d24c61f41cf3eb74"
+    },
+    {
+      "bytes": 53604,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_6_source_task_value_formal.csv",
+      "sha256": "8607ccbe2a77b164194ff0054bccf839ce53de35e426ecdff0702a3dd3ac4f38"
+    },
+    {
+      "bytes": 55286,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_6_source_task_value_seed_level.csv",
+      "sha256": "d6fa10b0ab174843b44500be8d9dd6447e6bfede1f5065357d6740ccce972cb4"
+    },
+    {
+      "bytes": 105352,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_7_calibration_threshold_transfer_formal.csv",
+      "sha256": "82aa9badb7c41d2fe2a8bb5c44a8beba309967c1e200c1edda7ea51ee0b86ce3"
+    },
+    {
+      "bytes": 83428,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_7_calibration_threshold_transfer_seed_level.csv",
+      "sha256": "c86d675ad45d6987c9ce0ee200daaea1a33d3bdc0e906ef620b629637e86f456"
+    },
+    {
+      "bytes": 6101255,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_8_error_decomposition_formal.csv",
+      "sha256": "a662233b85088a4b068d40e5cd29783965eff5c4f70501552aad7a75cbcc2f2a"
+    },
+    {
+      "bytes": 5448579,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/finding_8_error_decomposition_formal_seed_level.csv",
+      "sha256": "8d78689719f07aaaa7b2ea2999a139fe8880ad1c8576151b57397cfb3e166556"
+    },
+    {
+      "bytes": 2395,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/formal_findings_report.md",
+      "sha256": "200e3ddafe37e4915217f5165fda1d5841de4fd781bf83a4d9808bb9ca850f29"
+    },
+    {
+      "bytes": 505979,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/formal_paired_tests_holm.csv",
+      "sha256": "80c38ed8bc6ba843a69eaf349466366798ffaa50f2ca32acb8f60f9d8fd30cd2"
+    },
+    {
+      "bytes": 1622,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/integrity_audit.json",
+      "sha256": "e702ef667f46056ea09ac6063625f0cda747177b46833be568fc0fdec1fcd128"
+    },
+    {
+      "bytes": 1373,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/integrity_audit.md",
+      "sha256": "1b0e7f77561b3099de180b27b26d84cddcc5b9e4d27768418ccc40ecd687e161"
+    },
+    {
+      "bytes": 27731,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/method_failure_audit.csv",
+      "sha256": "1cffcd5d86e3a21446057ef69f84ce0352fd380306fc4ffe23737f5949f92c34"
+    },
+    {
+      "bytes": 1003,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/method_failure_inclusion_policy.md",
+      "sha256": "7d4ae554d203b5fa7180450d93cf15f8fcefd1ca3344511a6290e2eaeda38053"
+    },
+    {
+      "bytes": 1500,
+      "path": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/supplementary_experiment_decision.md",
+      "sha256": "0e1c3792464b84d5596b95c308a21e981c7779fb73f85cae811522e9887e6dde"
+    }
+  ],
+  "config": {
+    "artifact_auc_gate": 0.65,
+    "bag_size": 1000,
+    "bags_per_rate": 100,
+    "calibration_policies": [
+      "source_only",
+      "target_real_anchor",
+      "oracle_target"
+    ],
+    "contamination_modes": [
+      "replace",
+      "append"
+    ],
+    "data_mode": "registry",
+    "deep_batch_size": 16,
+    "deep_dim": 192,
+    "deep_early_stopping_patience": 5,
+    "deep_epochs": 20,
+    "deep_gradient_clip_norm": 1.0,
+    "deep_heads": 6,
+    "deep_layers": 6,
+    "deep_learning_rate": 0.0002,
+    "deep_max_columns": 64,
+    "deep_max_datum": 96,
+    "deep_max_len": 1024,
+    "deep_min_epochs": 5,
+    "deep_weight_decay": 0.01,
+    "detector_fpr_target": 0.05,
+    "detectors": [
+      "char3gram",
+      "c2st_lr",
+      "c2st_xgb",
+      "flat_transformer",
+      "column_positional_ablation",
+      "datum_transformer",
+      "datum_ta"
+    ],
+    "device": "cuda",
+    "experiment_id": "governance-formal-v2-calibration",
+    "fixture_rows_per_table": 1000,
+    "governance_prevalence_threshold": 0.1,
+    "harm_tolerance": 0.005,
+    "max_cpu_threads": 4,
+    "output_dir": "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration",
+    "prevalence_rates": [
+      0.0,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "primary_calibration_policy": "source_only",
+    "primary_quantifier": "pacc",
+    "protocols": {
+      "P1": {
+        "test_generators": [
+          "CTGAN"
+        ],
+        "test_tables": [
+          "adult"
+        ],
+        "train_generators": [
+          "CTGAN"
+        ],
+        "train_tables": [
+          "adult"
+        ]
+      },
+      "P2": {
+        "test_generators": [
+          "TVAE"
+        ],
+        "test_tables": [
+          "adult"
+        ],
+        "train_generators": [
+          "CTGAN"
+        ],
+        "train_tables": [
+          "adult"
+        ]
+      },
+      "P3": {
+        "test_generators": [
+          "CTGAN"
+        ],
+        "test_tables": [
+          "credit"
+        ],
+        "train_generators": [
+          "CTGAN"
+        ],
+        "train_tables": [
+          "adult",
+          "abalone"
+        ]
+      },
+      "P4": {
+        "test_generators": [
+          "TVAE"
+        ],
+        "test_tables": [
+          "credit"
+        ],
+        "train_generators": [
+          "CTGAN"
+        ],
+        "train_tables": [
+          "adult",
+          "abalone"
+        ]
+      }
+    },
+    "quantifiers": [
+      "cc",
+      "pcc",
+      "acc",
+      "pacc",
+      "emq",
+      "hdy",
+      "dys",
+      "median_sweep",
+      "kdey"
+    ],
+    "registry_path": "/mnt/nfs/bkbs/datasets/ZJU-Graduation-Project/governance/pool_registry.csv",
+    "run_type": "formal",
+    "seeds": [
+      2026,
+      2027,
+      2028,
+      2029,
+      2030
+    ],
+    "target_real_anchor_size": 500,
+    "utility_bags_per_rate": 5,
+    "valuation_bags_per_rate": 1,
+    "valuation_enabled": true,
+    "valuation_methods": [
+      "knn_shapley",
+      "data_oob"
+    ],
+    "valuation_oob_estimators": 80,
+    "valuation_sample_limit": 1000
+  },
+  "created_at": "2026-08-15T08:39:52.177757+00:00",
+  "evidence_rows": 3861000,
+  "experiment_id": "governance-formal-v2-calibration",
+  "failed_method_cells": 91,
+  "figures": [
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_1_detection_transfer.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_1_detection_transfer.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_2_format_artifacts.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_2_format_artifacts.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_3_low_prevalence.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_3_low_prevalence.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_4_quantifier_shift.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_4_quantifier_shift.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_5_utility_curve.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_5_utility_curve.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_6_detectability_vs_harm.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_6_detectability_vs_harm.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_7_calibration_threshold_transfer.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_7_calibration_threshold_transfer.pdf",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_8_error_decomposition.png",
+    "/mnt/nfs/bkbs/results/ZJU-Graduation-Project/runs/governance-formal-v2-calibration/formal_analysis/figures/finding_8_error_decomposition.pdf"
+  ],
+  "holm_significant_tests": 373,
+  "integrity_passed": true,
+  "paired_tests": 1950,
+  "rerun_required_cells": 0,
+  "valuation_rows": 520000
+}

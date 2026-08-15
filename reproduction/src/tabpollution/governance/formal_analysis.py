@@ -435,8 +435,8 @@ def _plot_tables(tables: dict[str, pd.DataFrame], output: Path, primary: str) ->
     figures.mkdir(parents=True, exist_ok=True)
     created: list[Path] = []
 
-    def save(fig: Any, name: str) -> None:
-        fig.tight_layout()
+    def save(fig: Any, name: str, *, tight_rect: tuple[float, float, float, float] | None = None) -> None:
+        fig.tight_layout(rect=tight_rect)
         for suffix in ("png", "pdf"):
             path = figures / f"{name}.{suffix}"
             fig.savefig(path, dpi=300, bbox_inches="tight")
@@ -451,6 +451,18 @@ def _plot_tables(tables: dict[str, pd.DataFrame], output: Path, primary: str) ->
     x = np.arange(len(pivot.index)); width = .18
     for idx, protocol in enumerate([p for p in ["P1", "P2", "P3", "P4"] if p in pivot.columns]):
         ax.bar(x + (idx - 1.5) * width, pivot[protocol], width, label=protocol, color=colors[protocol])
+        for detector_idx, value in enumerate(pivot[protocol]):
+            if pd.isna(value):
+                ax.text(
+                    detector_idx + (idx - 1.5) * width,
+                    .025,
+                    "N/A",
+                    ha="center",
+                    va="bottom",
+                    rotation=90,
+                    fontsize=7,
+                    color="#6B7280",
+                )
     ax.set_xticks(x, [x.replace("_", "\n") for x in pivot.index], rotation=0)
     ax.set_ylim(0, 1); ax.set_ylabel("Target AUROC"); ax.set_title("Finding 1: Detection transfer under P1-P4 (source-only)")
     ax.axhline(.5, color="#6B7280", linestyle="--", linewidth=1); ax.legend(ncol=4)
@@ -473,10 +485,17 @@ def _plot_tables(tables: dict[str, pd.DataFrame], output: Path, primary: str) ->
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True)
     for ax, rate in zip(axes, [.05, .10]):
         block = f3.loc[np.isclose(f3["true_prevalence"], rate)]
-        for protocol, group in block.groupby("protocol"):
-            ax.plot(group["detector"], group["mean"], marker="o", label=protocol, color=colors[protocol])
+        detector_order = sorted(block["detector"].unique())
+        x = np.arange(len(detector_order)); width = .18
+        for idx, protocol in enumerate(["P1", "P2", "P3", "P4"]):
+            values = block.loc[block["protocol"].eq(protocol)].set_index("detector")["mean"].reindex(detector_order)
+            positions = x + (idx - 1.5) * width
+            ax.bar(positions, values, width, label=protocol, color=colors[protocol])
+            for detector_idx, value in enumerate(values):
+                if pd.isna(value):
+                    ax.text(positions[detector_idx], .015, "N/A", ha="center", va="bottom", rotation=90, fontsize=6, color="#6B7280")
         ax.set_title(f"True prevalence = {int(rate*100)}%")
-        ax.tick_params(axis="x", rotation=55); ax.set_ylabel("PACC MAE")
+        ax.set_xticks(x, detector_order, rotation=55, ha="right"); ax.set_ylabel("PACC MAE")
     axes[1].legend(); fig.suptitle("Finding 3: Low-prevalence estimation error (source-only, replace)")
     save(fig, "finding_3_low_prevalence")
 
@@ -512,9 +531,10 @@ def _plot_tables(tables: dict[str, pd.DataFrame], output: Path, primary: str) ->
                 line = line.groupby("true_prevalence", as_index=False)["mean"].mean()
                 ax.plot(line["true_prevalence"], line["mean"], linestyle=style, marker="o", color=color, label=f"{label}/{mode}")
         ax.axhline(0, color="#9CA3AF", linewidth=1); ax.set_title(protocol); ax.set_xlabel("True prevalence"); ax.set_ylabel("Utility delta")
-    handles, labels = axes[0, 0].get_legend_handles_labels(); fig.legend(handles, labels, loc="lower center", ncol=3)
-    fig.suptitle("Finding 5: Utility consequences of keep and cleanup", y=1.01)
-    fig.subplots_adjust(bottom=.18); save(fig, "finding_5_utility_curve")
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(.5, .005), ncol=3)
+    fig.suptitle("Finding 5: Utility consequences of keep and cleanup", y=.995)
+    save(fig, "finding_5_utility_curve", tight_rect=(0, .12, 1, .96))
 
     f6 = tables["finding_6"]
     auroc = f6.loc[f6["metric"].eq("detection_auroc"), ["protocol", "detector", "calibration_policy", "contamination_mode", "true_prevalence", "mean"]].rename(columns={"mean": "auroc"})
@@ -551,12 +571,12 @@ def _plot_tables(tables: dict[str, pd.DataFrame], output: Path, primary: str) ->
     parts = ["detection_error_contribution", "bag_sampling_error_contribution", "quantifier_adjustment_contribution"]
     summary = f8.loc[f8["metric"].isin(parts)].groupby(["protocol", "metric"], as_index=False)["mean"].mean().pivot(index="protocol", columns="metric", values="mean")
     fig, ax = plt.subplots(figsize=(8, 5))
-    bottom = np.zeros(len(summary))
+    x = np.arange(len(summary.index)); width = .24
     palette = ["#DC2626", "#D97706", "#2563EB"]
-    for part, color in zip(parts, palette):
+    for idx, (part, color) in enumerate(zip(parts, palette)):
         values = summary.get(part, pd.Series(0, index=summary.index)).to_numpy(float)
-        ax.bar(summary.index, values, bottom=bottom, label=part.replace("_contribution", ""), color=color)
-        bottom += values
+        ax.bar(x + (idx - 1) * width, values, width, label=part.replace("_contribution", ""), color=color)
+    ax.set_xticks(x, summary.index)
     ax.axhline(0, color="#111827", linewidth=1); ax.set_ylabel("Mean signed prevalence error contribution")
     ax.set_title("Finding 8: Error decomposition at 5%-10% prevalence"); ax.legend()
     save(fig, "finding_8_error_decomposition")
