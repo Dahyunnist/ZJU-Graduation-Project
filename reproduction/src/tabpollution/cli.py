@@ -34,6 +34,7 @@ from tabpollution.governance import (
     shard_status,
     validate_governance_setup,
 )
+from tabpollution.governance.formal_analysis import run_formal_analysis
 from tabpollution.governance.pools import (
     build_governance_pools,
     preflight_pool_build,
@@ -161,6 +162,8 @@ def build_parser() -> argparse.ArgumentParser:
     sharded_run.add_argument("--max-shards", type=int)
     shard_aggregate = governance_commands.add_parser("shard-aggregate")
     shard_aggregate.add_argument("--config", type=Path, required=True)
+    formal_analyze = governance_commands.add_parser("formal-analyze")
+    formal_analyze.add_argument("--config", type=Path, required=True)
     source_prepare = governance_commands.add_parser("source-prepare")
     source_prepare.add_argument("--config", type=Path, required=True)
     pool_preflight = governance_commands.add_parser("pool-preflight")
@@ -252,6 +255,8 @@ def main(argv: list[str] | None = None) -> None:
         )
     elif args.command == "governance" and args.governance_command == "shard-aggregate":
         result = aggregate_governance_shards(args.config)
+    elif args.command == "governance" and args.governance_command == "formal-analyze":
+        result = run_formal_analysis(args.config)
     elif args.command == "governance" and args.governance_command == "source-prepare":
         result = prepare_governance_sources(args.config)
     elif args.command == "governance" and args.governance_command == "pool-preflight":
