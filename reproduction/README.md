@@ -1,5 +1,7 @@
 # 复现实验代码与结果
 
+> 当前入口见[项目主页](../README.md)。以下为早期复现说明；当前研究方向及历史结果解释边界见 [2026-10-02 审计](docs/research/2026-10-02_全面审视与证据边界.md)。不应把本文的阶段一运行方式误认为当前正式矩阵入口。
+
 > 说明：根目录的 `run_minimal_loop.py`、`run_adult_baseline.py` 与原有 `outputs/` 是阶段一 legacy smoke，保留用于历史追踪，不属于 benchmark v1 正式结果。正式基准基础设施位于 `src/tabpollution`、`configs`、`data`、`manifests`、`tests` 和 `reports`。
 
 这个文件夹集中存放已经完成的复现工作，避免把脚本、依赖和实验输出散落在毕设根目录。
