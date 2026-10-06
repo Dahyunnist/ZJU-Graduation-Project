@@ -1,0 +1,24 @@
+{
+  "checks": {
+    "exact_planned_shard_set": true,
+    "each_quantifier_cell_has_100_bags": true,
+    "each_cell_has_5_scheduled_utilities": true,
+    "all_nominal_rates_valid": true,
+    "all_quantifiers_present": true,
+    "all_policies_present": true,
+    "base_bag_key_unique": true,
+    "action_key_unique": true,
+    "reconstruction_covers_scheduled_bags": true,
+    "reconstructed_real_test_overlap_zero": true,
+    "zero_append_replace_utilities_match": true,
+    "zero_append_replace_pair_count": true
+  },
+  "all_checks_passed": true,
+  "failed_method_cells": 1183,
+  "selected_action_invalid_policy_rows": 19143,
+  "quantifier_failure_on_utility_rows": 5915,
+  "zero_regret_with_invalid_cleanup_policy_rows": 0,
+  "script_sha256": "0e2e39f6080021ff8a297cabbf9ece0c7dadb9ebff55e921c2e11f978c146883",
+  "historical_shard_plan_sha256": "dcfc4660f9f8e41e842fc4b4dc4739145a2b02f926edd7b8b5cb383d94e7c99d",
+  "scope": "descriptive E0 only; success-only means retain explicit coverage; no causal or significance claim"
+}

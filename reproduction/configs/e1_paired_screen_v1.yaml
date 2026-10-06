@@ -1,0 +1,15 @@
+experiment_id: e1-paired-screen-v1
+registry_path: ../data/governance/pool_registry.csv
+tables: [adult, credit, abalone]
+generators: [CTGAN, TVAE]
+seeds: [2026, 2027, 2028]
+train_size: 1000
+test_fraction: 0.25
+prevalences: [0.0, 0.1, 0.5]
+models: [lr, rf]
+interventions: [natural, class_shuffle, label_permute, tail_undercoverage]
+tail_features:
+  adult: age
+  credit: LIMIT_BAL
+  abalone: length
+tail_quantile: 0.90
