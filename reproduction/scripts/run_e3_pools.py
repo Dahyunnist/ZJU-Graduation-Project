@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from tabpollution.studies.e3_pools import build, preflight
@@ -17,6 +18,8 @@ if __name__ == "__main__":
     parser.add_argument("--run", action="store_true", help="Fit GPU generators; default only checks inputs")
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
+    if args.run and os.environ.get("E3_GPU_TRAINING_APPROVED") != "1":
+        parser.error("--run requires explicit shared-GPU preflight via E3_GPU_TRAINING_APPROVED=1")
     result = (build(args.config, args.base_root, args.output_root, args.checkpoint_root,
                     resume=args.resume) if args.run else
               preflight(args.config, args.base_root, args.output_root, args.checkpoint_root))

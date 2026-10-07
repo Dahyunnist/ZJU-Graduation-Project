@@ -15,6 +15,16 @@ base=$2
 output=$3
 models=$4
 gpu=$5
+base="$(realpath -m "$base")"
+output="$(realpath -m "$output")"
+models="$(realpath -m "$models")"
+if [[ "$base" != "/mnt/nfs/bkbs/datasets/ZJU-Graduation-Project/governance" ||
+      "$output" != /mnt/nfs/bkbs/datasets/ZJU-Graduation-Project/governance-e3-* ||
+      "$models" != /mnt/nfs/bkbs/checkpoints/ZJU-Graduation-Project/e3-* ||
+      ! "$gpu" =~ ^[0-9]+$ ]]; then
+  echo "E3 path/GPU boundary check failed; no training." >&2
+  exit 2
+fi
 python=/home/bkbs/miniforge3/envs/tabular-benchmark/bin/python
 config="$repo/reproduction/configs/e3_independent_pools_v1.yaml"
 
@@ -52,6 +62,7 @@ if [[ -n "$(nvidia-smi -i "$gpu" --query-compute-apps=pid --format=csv,noheader,
 fi
 
 export CUDA_VISIBLE_DEVICES="$gpu"
+export E3_GPU_TRAINING_APPROVED=1
 record_status "running pid=$$"
 nice -n 10 "$python" "$repo/reproduction/scripts/run_e3_pools.py" \
   --config "$config" --base-root "$base" --output-root "$output" \
