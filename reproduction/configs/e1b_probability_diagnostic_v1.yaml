@@ -1,0 +1,25 @@
+experiment_id: e1b-probability-diagnostic-v1
+registry_path: ../data/governance/pool_registry.csv
+cases:
+  - {table: abalone, generator: TVAE}
+  - {table: credit, generator: TVAE}
+  - {table: adult, generator: CTGAN}
+seeds: [2026, 2027, 2028]
+train_size: 1000
+test_fraction: 0.25
+prevalence: 0.5
+calibration_size: 500
+real_donor_size: 500
+conditions: [real_reference, independent_real_donor, natural, label_permute]
+learners:
+  lr: [null]
+  rf: [3, 10, 30]
+calibration:
+  method: sigmoid_on_clipped_logit
+  input_clip: 0.000001
+  regularization_C: 1000.0
+tail_features:
+  adult: age
+  credit: LIMIT_BAL
+  abalone: length
+tail_quantile: 0.90
