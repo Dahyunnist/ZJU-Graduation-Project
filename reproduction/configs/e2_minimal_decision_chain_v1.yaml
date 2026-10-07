@@ -1,0 +1,23 @@
+experiment_id: e2-minimal-decision-chain-v1
+registry_path: ../data/governance/pool_registry.csv
+table: adult
+source_generator: CTGAN
+target_generator: TVAE
+seeds: [2026, 2027, 2028]
+bag_size: 1000
+prevalences: [0.05, 0.10, 0.25]
+bags_per_rate: 2
+detector: c2st_lr
+source_calibration: platt
+target_real_anchor_size: 500
+task_calibration_size: 500
+target_fpr: 0.05
+quantifiers: [pacc, pcc]
+primary_quantifier: pacc
+decision_prevalence_threshold: 0.10
+fixed_delete_count: 50
+downstream_model: lr
+task_probability_clip: 0.000001
+task_calibration_C: 1000.0
+tail_feature: age
+tail_quantile: 0.90
