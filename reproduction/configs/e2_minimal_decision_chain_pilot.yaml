@@ -9,6 +9,7 @@ prevalences: [0.10]
 bags_per_rate: 1
 detector: c2st_lr
 source_calibration: platt
+calibration_policies: [source_only, target_real_anchor, oracle_target, oracle_target_reoriented]
 target_real_anchor_size: 500
 task_calibration_size: 500
 target_fpr: 0.05

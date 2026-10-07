@@ -85,13 +85,13 @@ def _fit_task(train: pd.DataFrame, validation: pd.DataFrame, test: pd.DataFrame,
 def _policy(name: str, raw_source: np.ndarray, source_labels: np.ndarray,
             raw_target: np.ndarray, target_labels: np.ndarray,
             raw_anchor: np.ndarray, seed: int, target_fpr: float) -> dict[str, Any]:
-    if name == "oracle_target":
+    if name in {"oracle_target", "oracle_target_reoriented"}:
         calibrator = _PlattCalibrator(seed + 2).fit(raw_target, target_labels)
         reference_raw, reference_labels = raw_target, target_labels
     else:
         calibrator = _PlattCalibrator(seed).fit(raw_source, source_labels)
         reference_raw, reference_labels = raw_source, source_labels
-    if calibrator.constant is not None or calibrator.model.coef_[0, 0] <= 0:
+    if calibrator.constant is not None or (name != "oracle_target_reoriented" and calibrator.model.coef_[0, 0] <= 0):
         raise ValueError(f"Non-increasing {name} calibration; rank-invariance unavailable")
     reference_scores = calibrator.predict(reference_raw)
     if name == "target_real_anchor":
@@ -105,7 +105,7 @@ def _policy(name: str, raw_source: np.ndarray, source_labels: np.ndarray,
             "threshold": float(selected["threshold"]),
             "reference_fpr": float(selected["validation_fpr"]),
             "quantifiers": quantifiers,
-            "uses_target_synthetic_labels": name == "oracle_target"}
+            "uses_target_synthetic_labels": name in {"oracle_target", "oracle_target_reoriented"}}
 
 
 def run_seed(config_path: Path, registry_path: Path | None, output_root: Path,
@@ -184,7 +184,7 @@ def run_seed(config_path: Path, registry_path: Path | None, output_root: Path,
     raw_anchor = detector.predict_score(anchor)
     policies = {}
     policy_failures = {}
-    for name in ["source_only", "target_real_anchor", "oracle_target"]:
+    for name in cfg["calibration_policies"]:
         try:
             policies[name] = _policy(name, raw_source, val_labels[cal_idx], raw_target, target_labels,
                                      raw_anchor, seed, float(cfg["target_fpr"]))
@@ -286,7 +286,7 @@ def run_seed(config_path: Path, registry_path: Path | None, output_root: Path,
                 calibrated_scores = policy["calibrator"].predict(raw_bag)
                 score_rows[f"score_{name}"] = calibrated_scores
                 calibrated_top = top_k(calibrated_scores, fixed_n)
-                if not np.array_equal(calibrated_top, raw_top):
+                if policy["calibrator"].model.coef_[0, 0] > 0 and not np.array_equal(calibrated_top, raw_top):
                     raise AssertionError(f"Fixed top-k rank invariance failed for {name}: {bag_id}")
                 record_action(name, "calibrated_fixed_k", calibrated_top, None, None)
                 estimates = {}

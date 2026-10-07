@@ -25,6 +25,8 @@ def analyze(source: Path, destination: Path, expected_bags: int) -> dict:
         scores = pd.read_csv(bag_dir / "bag_scores.csv.gz")
         diagnostics = json.loads((bag_dir.parent / "calibration_diagnostics.json").read_text(encoding="utf-8"))
         available_policies = diagnostics["available_policies"]
+        monotone_policies = [name for name in available_policies
+                             if diagnostics["policy_slopes"][name] > 0]
         if len(scores) != complete["bag_size"] or len(action_frame) != complete["action_rows"]:
             raise AssertionError(f"Bag size/action mismatch {bag_dir}")
         if len(quant_frame) != complete["quantifier_rows"]:
@@ -41,8 +43,11 @@ def analyze(source: Path, destination: Path, expected_bags: int) -> dict:
         calibrated_fixed = action_frame.loc[action_frame.action == "calibrated_fixed_k"]
         if len(calibrated_fixed) != len(available_policies) or any(
                 json.loads(row.removed_positions) != reference_selection
-                                             for row in calibrated_fixed.itertuples()):
+                for row in calibrated_fixed.itertuples() if row.policy in monotone_policies):
             raise AssertionError(f"Fixed-budget rank invariance failed {bag_dir}")
+        reversed_rows = calibrated_fixed.loc[~calibrated_fixed.policy.isin(monotone_policies)]
+        reversed_overlap = (len(set(json.loads(reversed_rows.iloc[0].removed_positions))
+                                & set(reference_selection)) if len(reversed_rows) else None)
         keep_all = action_frame.loc[action_frame.action == "keep_all"]
         if len(keep_all) != 1 or int(keep_all.iloc[0].removed_n) != 0:
             raise AssertionError(f"Missing keep-all control {bag_dir}")
@@ -76,6 +81,7 @@ def analyze(source: Path, destination: Path, expected_bags: int) -> dict:
                            "true_prevalence": complete["true_prevalence"],
                            "available_policies": ",".join(available_policies),
                            "target_raw_auroc": diagnostics["target_raw_auroc"],
+                           "reoriented_fixed_k_overlap_with_raw": reversed_overlap,
                            "action_rows": len(action_frame),
                            "quantifier_rows": len(quant_frame),
                            "unique_task_fits": complete["unique_task_fits"],

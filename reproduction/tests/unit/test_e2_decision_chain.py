@@ -21,6 +21,10 @@ def test_reversed_target_oracle_is_not_silently_flipped():
     import pytest
     with pytest.raises(ValueError, match="Non-increasing oracle_target"):
         _policy("oracle_target", source, labels, target, labels, source[:2], 11, .05)
+    diagnostic = _policy("oracle_target_reoriented", source, labels, target, labels,
+                         source[:2], 11, .05)
+    assert diagnostic["calibrator"].model.coef_[0, 0] < 0
+    assert diagnostic["uses_target_synthetic_labels"]
 
 
 def test_e2_toy_preflight(tmp_path: Path):
