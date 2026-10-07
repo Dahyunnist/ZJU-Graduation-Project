@@ -63,6 +63,7 @@ def test_independent_generator_repeat_keeps_real_split_and_resumes(tmp_path, mon
     assert plan["runs"][0]["source_train_sha256"] == sha256_file(source)
     result = e3_pools.build(config, base, output, models)
     assert result["status"] == "complete" and FakeGenerator.fits == 1
+    assert (output / "case_checkpoints" / "adult" / "CTGAN.json").is_file()
     registry = pd.read_csv(output / "pool_registry.csv")
     assert (output / registry.real_path.iloc[0]).resolve() == real.resolve()
     assert e3_pools.build(config, base, output, models, resume=True)["status"] == "complete"

@@ -123,7 +123,8 @@ def build(config_path: Path, base_root: Path, output_root: Path,
             raise ValueError("E3 plan or base data changed; use a new output root")
         completed = {(r["table_id"], r["generator"]): r for r in previous["runs"]}
     else:
-        launch_files = {"worker.lock", "preflight.json", "worker.log", "job-status.txt"}
+        launch_files = {"worker.lock", "preflight.json", "worker.log",
+                        "job-status.txt", "job-status.txt.partial"}
         if output_root.exists() and any(path.name not in launch_files for path in output_root.iterdir()):
             raise FileExistsError("Nonempty E3 output has no manifest; refusing to overwrite")
         completed = {}
@@ -134,12 +135,19 @@ def build(config_path: Path, base_root: Path, output_root: Path,
         table, generator_name = case["table_id"], case["generator"]
         synthetic_path = output_root / "synthetic" / table / f"{generator_name}.csv"
         model_path = checkpoint_root / table / f"{generator_name}.pkl"
+        case_checkpoint = output_root / "case_checkpoints" / table / f"{generator_name}.json"
         old = completed.get((table, generator_name))
+        if old is None and resume and case_checkpoint.is_file():
+            old = json.loads(case_checkpoint.read_text(encoding="utf-8"))
         if old is not None:
             if old["status"] != "complete" or not synthetic_path.is_file() or not model_path.is_file():
                 raise ValueError(f"Incomplete E3 resume checkpoint for {table}/{generator_name}")
             if old["synthetic_sha256"] != sha256_file(synthetic_path) or old["model_sha256"] != sha256_file(model_path):
                 raise ValueError(f"E3 checkpoint hash mismatch for {table}/{generator_name}")
+            if any(old[key] != case[key] for key in
+                   ("generator_seed", "sample_seed", "source_train_sha256",
+                    "real_sha256", "generator_config_sha256")):
+                raise ValueError(f"E3 case checkpoint belongs to another plan: {table}/{generator_name}")
             result = old
         else:
             if synthetic_path.exists() or model_path.exists():
@@ -175,6 +183,7 @@ def build(config_path: Path, base_root: Path, output_root: Path,
                       "real_sha256": case["real_sha256"],
                       "generator_config_sha256": case["generator_config_sha256"],
                       "provenance": generator.get_provenance()}
+            _write_json(case_checkpoint, result)
             del generator
             gc.collect()
             try:
