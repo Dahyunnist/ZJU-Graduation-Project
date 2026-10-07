@@ -1,0 +1,13 @@
+study_id: e3-direction-confirm-v1
+tables: [adult, abalone]
+source_generator: CTGAN
+target_generator: TVAE
+seeds: [2026, 2027, 2028]
+detector: c2st_lr
+target_real_anchor_size: 500
+target_fpr: 0.05
+bag_size: 400
+prevalences: [0.05, 0.10, 0.25]
+bags_per_rate: 2
+primary_quantifier: pacc
+decision_prevalence_threshold: 0.10
