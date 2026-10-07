@@ -74,7 +74,32 @@ while true; do
     set -e
     child_pid=""
     if (( result == 0 )); then
-      record_status "complete gpu=$gpu"
+      record_status "pool_complete_e3a_running gpu=$gpu"
+      python=/home/bkbs/miniforge3/envs/tabular-benchmark/bin/python
+      direction_output=/mnt/nfs/bkbs/results/ZJU-Graduation-Project/e3-direction-confirm-v1
+      audit_output=/mnt/nfs/bkbs/results/ZJU-Graduation-Project/e3-direction-audit-v1
+      export PYTHONPATH="$repo/reproduction/src"
+      export CUDA_VISIBLE_DEVICES=""
+      export OMP_NUM_THREADS=1
+      export OPENBLAS_NUM_THREADS=1
+      export MKL_NUM_THREADS=1
+      export NUMEXPR_NUM_THREADS=1
+      nice -n 10 "$python" "$repo/reproduction/scripts/run_e3_direction.py" \
+        --config "$repo/reproduction/configs/e3_direction_confirm_v1.yaml" \
+        --registry "$output/pool_registry.csv" \
+        --replica-manifest "$output/replica_manifest.json" \
+        --output "$direction_output" >> "$control/e3a.log" 2>&1 || {
+          record_status "failed stage=e3a_run"
+          exit 5
+        }
+      record_status "e3a_complete_auditing gpu=$gpu"
+      nice -n 10 "$python" "$repo/reproduction/scripts/analyze_e3_direction.py" \
+        --input "$direction_output" --output "$audit_output" --expected-cases 6 \
+        >> "$control/e3a.log" 2>&1 || {
+          record_status "failed stage=e3a_audit"
+          exit 6
+        }
+      record_status "complete gpu=$gpu e3a_audited=6"
       exit 0
     fi
     if (( result == 4 )); then
