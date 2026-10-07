@@ -1,0 +1,18 @@
+experiment_id: e1c-structure-learner-v1
+registry_path: ../data/governance/pool_registry.csv
+table: credit
+generators: [CTGAN, TVAE]
+seeds: [2026, 2027, 2028]
+train_size: 1000
+test_fraction: 0.25
+prevalence: 0.5
+calibration_size: 500
+real_donor_size: 500
+conditions: [natural, class_shuffle, independent_real_donor, real_donor_class_shuffle]
+learners: [lr, rf]
+calibration:
+  method: sigmoid_on_clipped_logit
+  input_clip: 0.000001
+  regularization_C: 1000.0
+tail_feature: LIMIT_BAL
+tail_quantile: 0.90
