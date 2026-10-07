@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from tabpollution.studies.e2 import oracle_top_k, run_seed, top_k
+from tabpollution.studies.e2 import _policy, oracle_top_k, run_seed, top_k
 
 
 def test_fixed_budget_order_and_source_oracle():
@@ -12,6 +12,15 @@ def test_fixed_budget_order_and_source_oracle():
     assert top_k(scores, 2).tolist() == [1, 2]
     assert top_k(scores * .5 + .1, 2).tolist() == [1, 2]
     assert oracle_top_k(np.array([0, 1, 0, 1]), 2).tolist() == [1, 3]
+
+
+def test_reversed_target_oracle_is_not_silently_flipped():
+    source = np.array([.1, .2, .8, .9])
+    labels = np.array([0, 0, 1, 1])
+    target = 1-source
+    import pytest
+    with pytest.raises(ValueError, match="Non-increasing oracle_target"):
+        _policy("oracle_target", source, labels, target, labels, source[:2], 11, .05)
 
 
 def test_e2_toy_preflight(tmp_path: Path):

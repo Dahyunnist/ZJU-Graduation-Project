@@ -182,9 +182,26 @@ def run_seed(config_path: Path, registry_path: Path | None, output_root: Path,
     raw_source = detector.predict_score(detector_val.iloc[cal_idx])
     raw_target = detector.predict_score(target_val)
     raw_anchor = detector.predict_score(anchor)
-    policies = {name: _policy(name, raw_source, val_labels[cal_idx], raw_target, target_labels,
-                              raw_anchor, seed, float(cfg["target_fpr"]))
-                for name in ["source_only", "target_real_anchor", "oracle_target"]}
+    policies = {}
+    policy_failures = {}
+    for name in ["source_only", "target_real_anchor", "oracle_target"]:
+        try:
+            policies[name] = _policy(name, raw_source, val_labels[cal_idx], raw_target, target_labels,
+                                     raw_anchor, seed, float(cfg["target_fpr"]))
+        except ValueError as exc:
+            if name != "oracle_target":
+                raise
+            # A reversed target relation is a scientific failure of a
+            # rank-preserving oracle calibration, not a reason to flip scores.
+            policy_failures[name] = str(exc)
+    _write_json(root / "calibration_diagnostics.json", {
+        "source_raw_auroc": float(roc_auc_score(val_labels[cal_idx], raw_source)),
+        "target_raw_auroc": float(roc_auc_score(target_labels, raw_target)),
+        "policy_slopes": {name: float(policy["calibrator"].model.coef_[0, 0])
+                          for name, policy in policies.items()},
+        "policy_failures": policy_failures,
+        "available_policies": list(policies),
+    })
     detector.save(root / "detector.pkl")
     joblib.dump({name: {"calibrator": policy["calibrator"], "threshold": policy["threshold"],
                         "quantifiers": policy["quantifiers"]} for name, policy in policies.items()},
@@ -300,6 +317,17 @@ def run_seed(config_path: Path, registry_path: Path | None, output_root: Path,
                     count = len(removed)
                     record_action(name, "random_matched_n", random_order[:count], main_estimate, triggered)
                     record_action(name, "source_oracle_matched_n", oracle_order[:count], main_estimate, triggered)
+            for name, reason in policy_failures.items():
+                for method in ["pacc", "pcc"]:
+                    quant_rows.append({"bag_id": bag_id, "policy": name, "quantifier": method,
+                                       "status": f"unavailable:{reason}",
+                                       "estimated_prevalence": float("nan"),
+                                       "true_prevalence": float(source_labels.mean()),
+                                       "uses_target_synthetic_labels": True})
+                actions.append({"bag_id": bag_id, "seed": seed, "prevalence": prevalence,
+                                "bag_index": bag_index, "policy": name,
+                                "action": "decision_policy", "task_status": "unavailable_calibration",
+                                "calibration_failure": reason})
             score_rows.to_csv(temp / "bag_scores.csv.gz", index=False, compression="gzip")
             pd.DataFrame(actions).to_csv(temp / "actions.csv", index=False)
             pd.DataFrame(quant_rows).to_csv(temp / "quantification.csv", index=False)
