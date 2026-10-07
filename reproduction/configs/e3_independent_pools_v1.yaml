@@ -1,0 +1,13 @@
+replicate_id: e3-independent-pools-r3031
+seed: 3031
+tables: [adult, abalone]
+generators:
+  CTGAN:
+    epochs: 300
+    batch_size: 500
+    cuda: true
+    verbose: true
+  TVAE:
+    epochs: 300
+    batch_size: 500
+    cuda: true
