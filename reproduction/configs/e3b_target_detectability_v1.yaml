@@ -1,0 +1,18 @@
+study_id: e3b-target-detectability-v1
+tables: [adult, abalone]
+generators: [CTGAN, TVAE]
+seeds: [2026, 2027, 2028]
+primary_detector: c2st_lr
+capacity_detector: c2st_xgb
+model_direction: high_score_is_synthetic
+train_split: detector_train
+calibration_split: detector_val
+evaluation_split: final_test
+target_fpr: 0.05
+bootstrap_replicates: 1000
+bootstrap_confidence: 0.95
+transfer_min_auroc_gain: 0.10
+near_random_auroc: 0.60
+expected_replicate_id: e3-independent-pools-r3031
+expected_replica_manifest_sha256: 26dc9c3a8616da06bc49809448c0083b6de7d04c40ba13a3be34c5dfb73ed6d6
+expected_registry_sha256: 38fab593000ba35652ec5c52d866c1d1c589543386bebf377117cc620840402c
