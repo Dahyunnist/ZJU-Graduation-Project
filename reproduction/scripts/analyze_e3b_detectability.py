@@ -89,7 +89,9 @@ def _paired(scores: pd.DataFrame, replicates: int, confidence: float, seed: int)
     }
 
 
-def _close(left: float, right: float, tolerance: float = 1e-10) -> bool:
+def _close(left: float, right: float, tolerance: float = 1e-8) -> bool:
+    # XGBoost emits float32 probabilities. CSV round-tripping can move their
+    # aggregate metrics by about 1e-10, so use a strict serialization tolerance.
     return bool(abs(float(left) - float(right)) <= tolerance)
 
 
