@@ -1,0 +1,13 @@
+schema_id: standard-artifacts-v1
+required_common_columns: [study_id, dataset_id, data_version, generator, generator_instance, generator_train_seed, split_seed, config_sha256, code_commit]
+artifacts:
+  resolved_config: {format: yaml, required: [study_id, information_budget, estimand, seeds, inputs]}
+  row_predictions: {format: parquet_or_csv_gzip, required: [record_id, split, true_label, prediction, model_id]}
+  source_scores: {format: parquet_or_csv_gzip, required: [record_id, split, source_label, raw_score, model_direction, detector_id]}
+  structural_metrics: {format: parquet_or_csv, required: [metric, value, reference, scope]}
+  task_metrics: {format: parquet_or_csv, required: [learner, metric, value, risk_direction, split]}
+  governance_actions: {format: parquet_or_csv_gzip, required: [record_id, action, weight, selected, reason, information_budget]}
+  failure: {format: json, required: [status, stage, error_type, message, timestamp]}
+  audit: {format: json, required: [audited, input_hashes, recomputed_outputs, failures]}
+  complete: {format: json, required: [status, files_sha256, row_counts, completed_at]}
+

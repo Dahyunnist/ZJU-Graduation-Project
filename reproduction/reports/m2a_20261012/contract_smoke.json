@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "study_id": "m2a-contract-smoke-v1",
+  "information_budget": "source_only",
+  "variable_categories": [
+    "actions",
+    "independent",
+    "measurements",
+    "mediators",
+    "moderators",
+    "outcomes"
+  ],
+  "dataset_schema_id": "dataset-card-v1",
+  "generator_schema_id": "generator-contract-v1",
+  "artifact_schema_id": "standard-artifacts-v1"
+}

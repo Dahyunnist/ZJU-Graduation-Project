@@ -1,0 +1,12 @@
+schema_id: dataset-card-v1
+required: [dataset_id, source, license, version, raw_sha256, fields, task, splits, preprocessing, exclusion_rules]
+fields:
+  source: [provider, url, retrieved_at]
+  license: [name, url, redistribution]
+  version: [source_version, snapshot_date]
+  fields: [target, numeric, categorical, ordinal, identifiers, protected_or_group]
+  task: [type, target, positive_class, primary_metric, risk_direction]
+  splits: [roles, seed, row_id_rule, hashes]
+  preprocessing: [missing, numeric, categorical, target_construction]
+  exclusion_rules: [pre_split, post_split_forbidden]
+

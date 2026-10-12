@@ -1,0 +1,9 @@
+schema_id: generator-contract-v1
+interface:
+  fit: [real_train, schema, seed, budget]
+  sample: [n, seed]
+  persistence: [save, load]
+  metadata: []
+manifest_required: [generator_name, implementation_version, code_commit, environment, budget, input_sha256, generator_train_seed, model_sha256, sample_seed, output_sha256, fit_seconds, peak_gpu_memory_mb, status]
+failure_statuses: [preflight_failed, training_failed, sampling_failed, interrupted, invalid_output]
+

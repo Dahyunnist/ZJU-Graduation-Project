@@ -1,0 +1,36 @@
+version: 1
+variables:
+  independent:
+    generator: {unit: categorical, direction: none, range: registered_generator, produced_by: generator_config, selection_use: true}
+    generator_train_seed: {unit: integer, direction: none, range: positive_int, produced_by: generator_run, selection_use: false}
+    generator_budget: {unit: structured, direction: none, range: frozen_budget, produced_by: generator_config, selection_use: false}
+    synthetic_fraction: {unit: proportion, direction: increasing_synthetic_share, range: [0.0, 1.0], produced_by: mixture_builder, selection_use: true}
+    mixture_semantics: {unit: categorical, direction: none, range: [replacement, append], produced_by: study_config, selection_use: false}
+    intervention_strength: {unit: proportion, direction: increasing_intervention, range: [0.0, 1.0], produced_by: intervention, selection_use: true}
+  mediators:
+    marginal_bias: {unit: metric_specific, direction: larger_is_worse, range: nonnegative, produced_by: structural_metrics, selection_use: false}
+    joint_dependence_bias: {unit: metric_specific, direction: larger_is_worse, range: nonnegative, produced_by: structural_metrics, selection_use: false}
+    label_relation_bias: {unit: metric_specific, direction: larger_is_worse, range: nonnegative, produced_by: structural_metrics, selection_use: false}
+    local_coverage: {unit: proportion, direction: larger_is_more_coverage, range: [0.0, 1.0], produced_by: coverage_metrics, selection_use: false}
+    retained_composition: {unit: structured, direction: none, range: valid_manifest, produced_by: governance, selection_use: false}
+  moderators:
+    dataset_condition: {unit: categorical, direction: none, range: dataset_card, produced_by: dataset_registry, selection_use: false}
+    task: {unit: categorical, direction: none, range: [binary_classification, multiclass_classification, regression], produced_by: dataset_card, selection_use: false}
+    learner: {unit: categorical, direction: none, range: registered_learner, produced_by: learner_config, selection_use: true}
+    training_protocol: {unit: categorical, direction: none, range: registered_protocol, produced_by: study_config, selection_use: false}
+  measurements:
+    source_score: {unit: score, direction: high_is_synthetic, range: real, produced_by: detector, selection_use: false}
+    source_probability: {unit: probability, direction: high_is_synthetic, range: [0.0, 1.0], produced_by: calibrator, selection_use: false}
+    prevalence_estimate: {unit: proportion, direction: increasing_pollution, range: real_with_raw_and_clipped, produced_by: quantifier, selection_use: false}
+    measurement_failure: {unit: categorical, direction: none, range: registered_failure, produced_by: measurement_layer, selection_use: false}
+  actions:
+    trigger: {unit: boolean, direction: none, range: [false, true], produced_by: governance, selection_use: false}
+    action_type: {unit: categorical, direction: none, range: [keep, random_delete, score_delete, fixed_threshold, downweight, oracle_delete, task_limited, abstain], produced_by: governance, selection_use: true}
+    action_budget: {unit: count_or_proportion, direction: larger_is_more_action, range: nonnegative, produced_by: governance, selection_use: false}
+  outcomes:
+    log_loss: {unit: loss, direction: lower_is_better, range: nonnegative, produced_by: task_evaluation, selection_use: true}
+    brier: {unit: loss, direction: lower_is_better, range: [0.0, 1.0], produced_by: task_evaluation, selection_use: false}
+    auroc: {unit: score, direction: higher_is_better, range: [0.0, 1.0], produced_by: task_evaluation, selection_use: false}
+    auprc: {unit: score, direction: higher_is_better, range: [0.0, 1.0], produced_by: task_evaluation, selection_use: false}
+    decision_cost: {unit: declared_cost, direction: lower_is_better, range: real, produced_by: decision_evaluation, selection_use: true}
+

@@ -91,6 +91,10 @@ class SDVGenerator:
             "sample_times": self.sample_times,
         }
 
+    def metadata(self) -> dict[str, Any]:
+        """Return generator metadata through the M2-A contract name."""
+        return self.get_provenance()
+
 
 def create_generator(generator_name: str, config: dict[str, Any] | None = None) -> SDVGenerator:
     return SDVGenerator(generator_name, config)
