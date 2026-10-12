@@ -1,0 +1,7 @@
+replicate_id: m1r-independent-pools-r7071
+seed: 7071
+tables: [adult, abalone]
+generators:
+  CTGAN: {epochs: 300, batch_size: 500, cuda: true, verbose: true}
+  TVAE: {epochs: 300, batch_size: 500, cuda: true}
+

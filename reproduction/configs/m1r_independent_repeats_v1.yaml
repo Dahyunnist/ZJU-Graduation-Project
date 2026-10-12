@@ -1,0 +1,42 @@
+study_id: m1r-independent-repeats-v1
+tables: [adult, abalone]
+generators: [CTGAN, TVAE]
+split_seeds: [2026, 2027, 2028]
+minimum_complete_instances: 3
+historical_instance:
+  instance_id: e3-independent-pools-r3031
+  pool_dir: governance-e3-r3031
+  checkpoint_dir: e3-r3031
+  historical_e3b_output: e3b-target-detectability-v1
+new_instances:
+  - instance_id: m1r-independent-pools-r5051
+    pool_config: configs/m1r_pools_r5051.yaml
+    pool_dir: governance-m1r-r5051
+    checkpoint_dir: m1r-r5051
+  - instance_id: m1r-independent-pools-r7071
+    pool_config: configs/m1r_pools_r7071.yaml
+    pool_dir: governance-m1r-r7071
+    checkpoint_dir: m1r-r7071
+generator_budget:
+  implementation: sdv-1.37.3
+  epochs: 300
+  batch_size: 500
+  sample_size: match_fixed_real_evaluation_rows
+e3b_protocol:
+  primary_detector: c2st_lr
+  capacity_detector: c2st_xgb
+  model_direction: high_score_is_synthetic
+  train_split: detector_train
+  calibration_split: detector_val
+  evaluation_split: final_test
+  target_fpr: 0.05
+  bootstrap_replicates: 1000
+  bootstrap_confidence: 0.95
+  transfer_min_auroc_gain: 0.10
+  near_random_auroc: 0.60
+replication_rules:
+  adult_required_branch: E3C-Transfer
+  abalone_required_branch: E3C-Capacity
+  require_all_complete_instances: true
+  mixed_branch_result: Conditional-Heterogeneity
+  incomplete_result: Inconclusive
