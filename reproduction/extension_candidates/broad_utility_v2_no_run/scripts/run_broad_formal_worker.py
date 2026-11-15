@@ -21,7 +21,9 @@ from plan_broad_utility import ledger_from_registry
 from tabpollution.governance.broad_batch_registry import identity_sha256, read_registry, register_unit
 from tabpollution.generators.sdv_adapter import create_generator
 from tabpollution.studies.broad_formal_batch import (
-    build_identity_for_unit, build_plan, execute_unit, load_and_validate_all, load_json,
+    build_identity_for_unit, build_plan, calculate_runtime_limits, execute_unit,
+    load_and_validate_all, load_json, require_execution_enabled, resolve_config_path,
+    validate_runtime_limits,
 )
 
 TOTAL_WALL_SECONDS = 28800
@@ -83,6 +85,15 @@ def run(args):
     if runtime_sha != args.runtime_sha256:
         raise RuntimeError("runtime changed between parent and worker")
     _authorize_worker(args.authority, args.package_sha256, args.runtime_sha256)
+    config_path = resolve_config_path(package, args.config)
+    config = load_json(config_path)
+    require_execution_enabled(config)
+    plan = build_plan(config)
+    limits = calculate_runtime_limits(config, plan)
+    validate_runtime_limits(config, plan, total_wall_seconds=args.total_wall_seconds,
+                            per_unit_wall_seconds=args.per_unit_wall_seconds)
+    TOTAL_WALL_SECONDS = limits["total_wall_seconds"]
+    UNIT_WALL_SECONDS = limits["per_unit_wall_seconds"]
     resource.setrlimit(resource.RLIMIT_AS, (RSS_BYTES, RSS_BYTES))
     resource.setrlimit(resource.RLIMIT_CPU, (TOTAL_WALL_SECONDS, TOTAL_WALL_SECONDS))
     resource.setrlimit(resource.RLIMIT_FSIZE, (OUTPUT_BYTES, OUTPUT_BYTES))
@@ -90,9 +101,7 @@ def run(args):
         "MKL_NUM_THREADS": "1", "NUMEXPR_NUM_THREADS": "1", "CUDA_VISIBLE_DEVICES": ""})
     output = Path(args.output).resolve(strict=True)
 
-    config = load_json(package / "broad_utility_formal_candidate_v1.json")
     catalog = load_json(package / "intake_catalog_v2.json")
-    plan = build_plan(config)
     plan_path = output / "broad_formal_plan_resolved.json"
     if not plan_path.is_file():
         raise FileNotFoundError("parent did not stage the resolved plan")
@@ -116,7 +125,7 @@ def run(args):
     accepted_unit_keys = {row["unit_key"] for row in existing if row["status"] == "accepted"}
 
     preflight = {
-        "status": "pass", "dataset_count": 3, "source_rows": {k: v["intake"]["source_rows"] for k, v in prepared.items()},
+        "status": "pass", "dataset_count": len(prepared), "source_rows": {k: v["intake"]["source_rows"] for k, v in prepared.items()},
         "source_sha256": {k: v["source_sha256"] for k, v in prepared.items()},
         "roles_assignment_sha256": {k: v["roles_sha256"] for k, v in prepared.items()},
         "role_counts": {k: v["intake"]["role_counts"] for k, v in prepared.items()},
@@ -176,7 +185,7 @@ def run(args):
                 command = [sys.executable, "-B", str(package / "scripts/audit_broad_formal_unit.py"),
                     "--aggregate", str(aggregate_path), "--identity", str(identity_path),
                     "--output", str(audit_path), "--package-sha256", args.package_sha256,
-                    "--runtime-sha256", args.runtime_sha256, "--config", str(package / "broad_utility_formal_candidate_v1.json"),
+                    "--runtime-sha256", args.runtime_sha256, "--config", str(config_path),
                     "--plan", str(plan_path)]
                 with audit_log.open("xb") as log:
                     auditor = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
@@ -219,8 +228,8 @@ def run(args):
 
     final_rows = read_registry(registry_path)
     accepted_records = [row for row in final_rows if row["status"] == "accepted"]
-    if len(accepted_records) < 9:
-        raise ValueError("not all nine dataset-seed units have accepted audited results")
+    if len(accepted_records) != plan["unit_count"]:
+        raise ValueError("not all planned dataset-seed units have accepted audited results")
     accepted_reports = [load_json(row["aggregate_path"]) for row in accepted_records]
     actual_calls = sum(row["downstream_fit_calls"] for row in accepted_reports)
     invalid_outcomes = sum(row.get("invalid_training_outcomes", 0) for row in accepted_reports)
@@ -234,7 +243,7 @@ def run(args):
         "downstream_fit_budget": budget, "invalid_training_outcomes": invalid_outcomes,
         "accepted_units": len(accepted_records), "package_sha256": args.package_sha256,
         "runtime_sha256": args.runtime_sha256, "elapsed_seconds": time.monotonic()-started,
-        "real_data_reads": 3, "final_test_evaluated": False, "row_outputs": False,
+        "real_data_reads": len(prepared), "final_test_evaluated": False, "row_outputs": False,
         "auditors_reaped": True, "children_reaped": True}
     write_or_verify(output / "batch_summary.json", summary, stable_keys=(
         "status", "formal_inclusion", "plan_jobs_sha256", "unit_count", "generator_fit_calls",
@@ -247,6 +256,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--worker", action="store_true")
     p.add_argument("--package-root", type=Path, required=True)
+    p.add_argument("--config", type=Path, required=True)
+    p.add_argument("--total-wall-seconds", type=int, required=True)
+    p.add_argument("--per-unit-wall-seconds", type=int, required=True)
     p.add_argument("--package-sha256", required=True)
     p.add_argument("--runtime-sha256", required=True)
     p.add_argument("--input-root", type=Path, required=True)

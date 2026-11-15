@@ -20,6 +20,68 @@ def load_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+LEGACY_TOTAL_WALL_SECONDS = 8 * 60 * 60
+DEFAULT_UNIT_WALL_SECONDS = 2700
+
+
+def resolve_config_path(package, requested=None):
+    package = Path(package).resolve()
+    if requested is not None:
+        path = Path(requested)
+        if not path.is_absolute():
+            path = package / path
+        if path.is_symlink():
+            raise PermissionError("config path must not be a symlink")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_relative_to(package):
+            raise PermissionError("config must be inside the verified package")
+        return resolved
+    candidates = (
+        package / "broad_utility_formal_candidate_v1.json",
+        package / "configs" / "broad_utility_formal_candidate_v1.json",
+        package / "broad_utility_future_v2_candidate_NO_RUN.json",
+    )
+    for path in candidates:
+        if path.is_file() and not path.is_symlink():
+            return path.resolve(strict=True)
+    raise FileNotFoundError("no v1 or v2 candidate config found in package")
+
+
+def calculate_runtime_limits(config, plan):
+    budget = config.get("budget", {})
+    units = int(plan["unit_count"])
+    per_unit = int(budget.get("per_unit_wall_seconds", DEFAULT_UNIT_WALL_SECONDS))
+    total = int(budget.get("total_wall_seconds", LEGACY_TOTAL_WALL_SECONDS))
+    if units < 1 or per_unit < 1 or total < 1:
+        raise ValueError("runtime limits must be positive")
+    if total < units * per_unit:
+        raise ValueError("batch wall cap is below unit caps summed serially")
+    return {"per_unit_wall_seconds": per_unit, "total_wall_seconds": total}
+
+
+def validate_runtime_limits(config, plan, *, total_wall_seconds, per_unit_wall_seconds):
+    expected = calculate_runtime_limits(config, plan)
+    actual = {"total_wall_seconds": int(total_wall_seconds),
+              "per_unit_wall_seconds": int(per_unit_wall_seconds)}
+    if actual != expected:
+        raise PermissionError("worker runtime limits differ from the verified candidate budget")
+    return expected
+
+
+def require_execution_enabled(config):
+    if config.get("protocol_id") == "broad-utility-v1-preparation":
+        return
+    execution = config.get("execution", {})
+    if (str(config.get("status", "")).startswith("NO-RUN")
+            or execution.get("enabled") is not True):
+        raise PermissionError("candidate execution is disabled")
+    if execution.get("authorization_required") is True:
+        receipt = execution.get("authorization_receipt_sha256", "")
+        if (not isinstance(receipt, str) or len(receipt) != 64
+                or any(char not in "0123456789abcdef" for char in receipt.lower())):
+            raise PermissionError("candidate requires an authorization receipt SHA-256")
+
+
 def calculate_fit_plan(dataset_count, seeds, generator_count, learner_count, replacement_doses, augmentation_doses):
     """Compute planned outcomes and actual fits after shared-control cache reuse."""
     if min(dataset_count, len(seeds), generator_count, learner_count) < 1:
@@ -66,6 +128,15 @@ def build_plan(config):
     budget = calculate_fit_plan(len(datasets), config["seeds"], len(config["generators"]),
         len(config["learner_names"]), config["utility"]["replacement_doses"],
         config["utility"]["augmentation_doses"])
+    declared_budget = config.get("budget", {})
+    for key, expected in (
+            ("unit_count", budget["unit_count"]),
+            ("learned_generator_fits", budget["generator_fit_calls"]),
+            ("bootstrap_generator_fits", 0),
+            ("downstream_fits", budget["downstream_fit_calls"]),
+            ("planned_outcomes", budget["planned_outcomes"])):
+        if key in declared_budget and declared_budget[key] != expected:
+            raise ValueError(f"declared candidate budget mismatch: {key}")
     if config.get("protocol_id") == "broad-utility-v1-preparation":
         if (plan["downstream_fit_calls"], plan["independent_generator_fit_calls"]) != (756, 27):
             raise ValueError("frozen three-table breadth plan must be 756 downstream / 27 generator fits")

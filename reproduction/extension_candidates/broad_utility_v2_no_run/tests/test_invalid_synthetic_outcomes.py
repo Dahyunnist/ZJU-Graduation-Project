@@ -201,3 +201,70 @@ def test_v2_plan_artifact_is_plan_only_and_preserves_unresolved_hashes():
     assert all(value is None for value in p['source_archive_hashes'].values())
     assert all(value is None for value in p['role_assignment_hashes'].values())
     assert p['jobs_sha256'] != p['frozen_manifest_jobs_sha256']
+
+
+def test_formal_entry_defaults_to_v2_plan_and_keeps_execution_disabled():
+    import os
+    import subprocess
+
+    runner = PACKAGE / "scripts/run_broad_formal_batch.py"
+    env = {**os.environ, "PYTHONPATH": str(PACKAGE / "src") + os.pathsep + str(PACKAGE / "scripts")}
+    result = subprocess.run([sys.executable, str(runner)], cwd=PACKAGE, env=env,
+                            check=True, capture_output=True, text=True)
+    summary = json.loads(result.stdout)
+    frozen = batch.load_json(PACKAGE / "broad_utility_future_v2_plan_ONLY.json")
+    assert summary["config_path"].endswith("broad_utility_future_v2_candidate_NO_RUN.json")
+    assert (summary["dataset_count"], summary["unit_count"]) == (15, 75)
+    assert (summary["generator_fit_calls"], summary["planned_outcomes"],
+            summary["downstream_fit_calls"]) == (225, 9900, 6300)
+    assert summary["jobs_sha256"] == frozen["jobs_sha256"]
+    assert summary["resource_limits"]["per_unit_wall_seconds"] == 2700
+    assert summary["resource_limits"]["total_wall_seconds"] == 202500
+    assert summary["execution_enabled"] is False
+    assert summary["source_rows_read"] == 0
+    blocked = subprocess.run([sys.executable, str(runner), "--execute"], cwd=PACKAGE, env=env,
+                             capture_output=True, text=True)
+    assert blocked.returncode != 0
+    assert "candidate execution is disabled" in blocked.stderr
+
+    legacy = subprocess.run(
+        [sys.executable, str(runner), "--config", "tests/fixtures/v1_synthetic_config.json"],
+        cwd=PACKAGE, env=env, check=True, capture_output=True, text=True)
+    legacy_summary = json.loads(legacy.stdout)
+    assert (legacy_summary["dataset_count"], legacy_summary["unit_count"]) == (3, 9)
+    assert (legacy_summary["generator_fit_calls"], legacy_summary["planned_outcomes"],
+            legacy_summary["downstream_fit_calls"]) == (27, 1188, 756)
+    assert legacy_summary["resource_limits"]["total_wall_seconds"] == 28800
+    assert legacy_summary["source_rows_read"] == 0
+
+
+def test_runtime_limits_follow_v2_budget_and_preserve_v1_fixture():
+    v2 = batch.load_json(PACKAGE / "broad_utility_future_v2_candidate_NO_RUN.json")
+    v2_plan = batch.build_plan(v2)
+    assert batch.calculate_runtime_limits(v2, v2_plan) == {
+        "per_unit_wall_seconds": 2700, "total_wall_seconds": 202500}
+    batch.validate_runtime_limits(v2, v2_plan, total_wall_seconds=202500,
+                                  per_unit_wall_seconds=2700)
+    with pytest.raises(PermissionError, match="differ from the verified candidate budget"):
+        batch.validate_runtime_limits(v2, v2_plan, total_wall_seconds=28800,
+                                      per_unit_wall_seconds=2700)
+
+    v1 = batch.load_json(PACKAGE / "tests/fixtures/v1_synthetic_config.json")
+    v1_plan = batch.build_plan(v1)
+    assert (v1_plan["unit_count"], v1_plan["generator_fit_calls"],
+            v1_plan["downstream_fit_calls"]) == (9, 27, 756)
+    assert batch.calculate_runtime_limits(v1, v1_plan) == {
+        "per_unit_wall_seconds": 2700, "total_wall_seconds": 28800}
+
+
+def test_v2_execution_needs_enabled_candidate_and_authorization_receipt():
+    v2 = batch.load_json(PACKAGE / "broad_utility_future_v2_candidate_NO_RUN.json")
+    with pytest.raises(PermissionError, match="execution is disabled"):
+        batch.require_execution_enabled(v2)
+    approved = copy.deepcopy(v2)
+    approved["status"] = "APPROVED_CANDIDATE"
+    approved["execution"]["enabled"] = True
+    with pytest.raises(PermissionError, match="authorization receipt SHA-256"):
+        batch.require_execution_enabled(approved)
+    approved["execution"]["authorization_receipt_sha256"] = "a" * 64
+    batch.require_execution_enabled(approved)

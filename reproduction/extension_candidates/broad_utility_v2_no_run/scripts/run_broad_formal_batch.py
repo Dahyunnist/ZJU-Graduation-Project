@@ -1,4 +1,4 @@
-"""Public offline runner for the fixed three-table exploratory breadth batch.
+"""Public offline runner for hash-pinned broad-utility candidate batches.
 
 Default behavior is plan-only. Execution reads only already-cached, hash-pinned
 archives and immutable role CSVs; it never downloads sources.
@@ -19,19 +19,21 @@ PACKAGE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PACKAGE / "src"))
 sys.path.insert(0, str(PACKAGE / "scripts"))
 from broad_shared_runtime import canonical, runtime_fingerprint, sha_file, verify_package
-from tabpollution.studies.broad_formal_batch import build_plan, load_json
+from tabpollution.studies.broad_formal_batch import (
+    build_plan, calculate_runtime_limits, load_json, require_execution_enabled, resolve_config_path,
+)
 
 TOTAL_WALL_SECONDS = 8 * 60 * 60
 RSS_BYTES = 8 * 1024**3
 OUTPUT_BYTES = 64 * 1024**2
 
 
-def _load_shared_supervisor():
+def _load_shared_supervisor(total_wall_seconds):
     path = PACKAGE / "scripts" / "run_broad_shared_artificial_gate.py"
     spec = importlib.util.spec_from_file_location("shared_gate_supervisor", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.MAX_SECONDS = TOTAL_WALL_SECONDS
+    module.MAX_SECONDS = total_wall_seconds
     module.MAX_RSS_BYTES = RSS_BYTES
     module.MAX_OUTPUT_BYTES = OUTPUT_BYTES
     return module
@@ -62,28 +64,38 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true", help="run the fixed source-backed exploratory batch")
     parser.add_argument("--resume", action="store_true", help="resume only exact accepted identities in an existing output")
+    parser.add_argument("--config", type=Path, help="candidate config inside the verified package")
     parser.add_argument("--input-root", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--expected-package-sha256")
     parser.add_argument("--expected-runtime-sha256")
     args = parser.parse_args()
-    config_path = PACKAGE / "broad_utility_formal_candidate_v1.json"
-    if not config_path.is_file():
-        config_path = PACKAGE / "configs/broad_utility_formal_candidate_v1.json"
+    config_path = resolve_config_path(PACKAGE, args.config)
     config = load_json(config_path)
     plan = build_plan(config)
-    summary = {"status": "NO-RUN", "phase": plan["phase"], "datasets": [x["dataset_id"] for x in config["datasets"]],
-        "seeds": config["seeds"], "learned_generator_fits": plan["independent_generator_fit_calls"],
-        "bootstrap_generator_fits": 0, "downstream_fits": plan["downstream_fit_calls"],
+    limits = calculate_runtime_limits(config, plan)
+    total_wall_seconds = limits["total_wall_seconds"]
+    per_unit_wall_seconds = limits["per_unit_wall_seconds"]
+    summary = {"status": "NO-RUN", "protocol_id": config["protocol_id"], "config_path": str(config_path),
+        "phase": plan["phase"], "dataset_count": len(config["datasets"]),
+        "datasets": [x["dataset_id"] for x in config["datasets"]], "seeds": config["seeds"],
+        "unit_count": plan["unit_count"], "jobs_sha256": plan["jobs_sha256"],
+        "generator_fit_calls": plan["generator_fit_calls"],
+        "planned_outcomes": plan["planned_outcomes"], "downstream_fit_calls": plan["downstream_fit_calls"],
+        "resource_limits": {**limits, "cpu_cores": config.get("budget", {}).get("cpu_cores", 1),
+            "address_space_bytes": config.get("budget", {}).get("address_space_bytes", RSS_BYTES),
+            "aggregate_output_bytes": config.get("budget", {}).get("aggregate_output_bytes", OUTPUT_BYTES)},
+        "execution_enabled": config.get("execution", {}).get("enabled", False),
         "source_rows_read": 0, "final_test_evaluated": False,
         "input_root_expected": config["source_cache"]["input_root"],
         "role_rebuild": config["source_cache"]["role_algorithm"],
-        "source_role_gate": "all three source hashes, frozen split algorithm and first-assignment role/class gates must pass before the first fit"}
+        "source_role_gate": "all source hashes, approved roles and role/class checks must pass before any fit"}
     if not args.execute:
         if args.resume:
             parser.error("--resume requires --execute")
         print(json.dumps(summary))
         return
+    require_execution_enabled(config)
     import resource
     if args.input_root is None or args.output is None:
         parser.error("--execute requires --input-root and --output")
@@ -115,7 +127,7 @@ def main():
     if args.resume:
         plan = staged
 
-    supervisor = _load_shared_supervisor()
+    supervisor = _load_shared_supervisor(total_wall_seconds)
     start = time.monotonic()
     cpu_start = resource.getrusage(resource.RUSAGE_CHILDREN).ru_utime + resource.getrusage(resource.RUSAGE_CHILDREN).ru_stime
     log_path = output.with_name(output.name + f".formal_worker_{time.time_ns()}.log")
@@ -136,11 +148,13 @@ def main():
         os.sched_setaffinity(0, {min(os.sched_getaffinity(0))})
         code, child_peak, parent_peak = supervisor._run_child(
             [sys.executable, "-B", str(PACKAGE / "scripts/run_broad_formal_worker.py"),
-             "--worker", "--package-root", str(PACKAGE), "--package-sha256", package_sha,
+             "--worker", "--package-root", str(PACKAGE), "--config", str(config_path),
+             "--total-wall-seconds", str(total_wall_seconds),
+             "--per-unit-wall-seconds", str(per_unit_wall_seconds), "--package-sha256", package_sha,
              "--runtime-sha256", runtime_sha, "--input-root", str(args.input_root.resolve(strict=True)),
              "--output", str(output),
              "--authority", str(authority)],
-            output=output, log_path=log_path, env=env, deadline=start + TOTAL_WALL_SECONDS,
+            output=output, log_path=log_path, env=env, deadline=start + total_wall_seconds,
             sidecar_paths=prior_logs)
         if code != 0:
             failure = {"status": "failed_consumed_or_preflight_blocked", "worker_exit_code": code,
@@ -156,7 +170,7 @@ def main():
             "total_output_bytes": _bytes_under(output) + sum(p.stat().st_size for p in (*prior_logs, log_path) if p.exists()),
             "worker_reaped": True, "auditors_reaped": batch.get("auditors_reaped") is True,
             "child_cpu_seconds": cpu_end - cpu_start,
-            "limits": {"wall_seconds": TOTAL_WALL_SECONDS, "per_unit_wall_seconds": 2700,
+            "limits": {"wall_seconds": total_wall_seconds, "per_unit_wall_seconds": per_unit_wall_seconds,
                 "rss_bytes": RSS_BYTES, "output_bytes": OUTPUT_BYTES, "cpu_threads": 1, "gpu": False}}
         if receipt["total_output_bytes"] > OUTPUT_BYTES:
             raise MemoryError("aggregate output and logs exceeded 64 MiB")
