@@ -1,0 +1,38 @@
+{
+  "dataset": "spambase",
+  "rows": 4601,
+  "missing_cells": 0,
+  "groups": 4207,
+  "mixed_label_groups": 3,
+  "mixed_label_rows": 6,
+  "counts": {
+    "evaluation": 671,
+    "train": 2314,
+    "final_test": 952,
+    "tune": 664
+  },
+  "class_support": {
+    "train": {
+      "1": 886,
+      "0": 1428
+    },
+    "tune": {
+      "1": 273,
+      "0": 391
+    },
+    "final_test": {
+      "1": 379,
+      "0": 573
+    },
+    "evaluation": {
+      "1": 275,
+      "0": 396
+    }
+  },
+  "cross_role_exact_groups": 0,
+  "role_sha256": "f8b4b32b4902d124a936fe046ba06679b66132393e71ecb9999331042277407f",
+  "seed": 20261029,
+  "method": "random assignment of whole exact-feature groups, no label stratification; both classes verified in every role",
+  "status": "CANDIDATE_NOT_FROZEN_NO_RUN",
+  "limitations": "Exact feature tuple grouping only; sender/thread identifiers unavailable. Three mixed-label groups cannot support ordinary per-group class stratification."
+}
