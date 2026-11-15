@@ -150,4 +150,11 @@
       "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED"
     }
   ],
-  "runt
+  "runtime": {
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scipy": "1.17.1",
+    "scikit_learn": "1.9.0"
+  }
+}

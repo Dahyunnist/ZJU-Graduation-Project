@@ -235,4 +235,12 @@
       "official_archive_url": "https://archive.ics.uci.edu/static/public/243/yacht%2Bhydrodynamics.zip",
       "archive_sha256_verified_this_pass": "aa52b68f88c4bb552187a53ef4c5753fa178f6a36035a3771c5bc04e078487ac",
       "source_members": {
-        "yacht_hydrodyna
+        "yacht_hydrodynamics.data": "00dfecc0fc01ddd4c90b558a3ac11b246df8ebcfea130724223475a9a67f0ea1"
+      },
+      "processing_mapping": "Headerless 6 predictors: five hull geometry measures plus Froude number; seventh field residuary resistance target.",
+      "anti_leak_split_review": "Blocked pending hull grouping. UCI reports 22 hull forms; keep conditions for a hull together, but no explicit hull ID or role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    }
+  ]
+}
