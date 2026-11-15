@@ -1,0 +1,66 @@
+{
+  "dataset": "optdigits",
+  "rows": 5620,
+  "missing_cells": 0,
+  "counts": {
+    "evaluation": 717,
+    "train": 2389,
+    "tune": 717,
+    "final_test": 1797
+  },
+  "cross_official_boundary_exact_groups": 0,
+  "role_sha256": "f5d335565d4f0de4a2ffde24ad6ba1cb0a4768157d5727b4aef84b29ec1d9570",
+  "class_support": {
+    "evaluation": {
+      "0": 70,
+      "5": 71,
+      "8": 71,
+      "9": 71,
+      "7": 73,
+      "6": 71,
+      "3": 73,
+      "2": 72,
+      "1": 73,
+      "4": 72
+    },
+    "tune": {
+      "0": 71,
+      "6": 70,
+      "1": 73,
+      "3": 73,
+      "9": 72,
+      "2": 71,
+      "7": 72,
+      "5": 70,
+      "8": 72,
+      "4": 73
+    },
+    "train": {
+      "0": 235,
+      "7": 242,
+      "4": 242,
+      "6": 236,
+      "2": 237,
+      "5": 235,
+      "8": 237,
+      "1": 243,
+      "9": 239,
+      "3": 243
+    },
+    "final_test": {
+      "0": 178,
+      "1": 182,
+      "2": 177,
+      "3": 183,
+      "4": 181,
+      "5": 182,
+      "6": 181,
+      "7": 179,
+      "8": 174,
+      "9": 180
+    }
+  },
+  "status": "CANDIDATE_NOT_FROZEN_NO_RUN",
+  "limitation": "Keep official .tes as final_test; split only .tra for development roles. No role hash.",
+  "seed": 20261029
+}
