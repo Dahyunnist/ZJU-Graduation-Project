@@ -149,6 +149,147 @@ def _read_archive_member(
         raise IntakeError("source file is not a valid ZIP archive") from exc
 
 
+def _xlsx_column_index(reference: str) -> int:
+    match = re.fullmatch(r"([A-Za-z]+)[0-9]+", reference)
+    if not match:
+        raise IntakeError("XLSX cell reference is malformed")
+    value = 0
+    for char in match.group(1).upper():
+        value = value * 26 + ord(char) - ord("A") + 1
+    return value - 1
+
+
+def _parse_xlsx_payload(payload: bytes, record: dict[str, Any]) -> pd.DataFrame:
+    """Read literal XLSX cells with the standard library when openpyxl is absent."""
+    import posixpath
+    import xml.etree.ElementTree as ET
+
+    main_ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+    rel_ns = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+    package_rel_ns = "http://schemas.openxmlformats.org/package/2006/relationships"
+    q = lambda name: f"{{{main_ns}}}{name}"
+
+    def read_xml(zf, names, name):
+        info = names.get(name.casefold())
+        if info is None or info.is_dir():
+            raise IntakeError(f"XLSX member is missing: {name}")
+        raw = zf.read(info)
+        if b"<!DOCTYPE" in raw.upper() or b"<!ENTITY" in raw.upper():
+            raise IntakeError("XLSX XML declarations are not allowed")
+        try:
+            return ET.fromstring(raw)
+        except ET.ParseError as exc:
+            raise IntakeError("XLSX XML is malformed") from exc
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload)) as zf:
+            names = _validate_zip_members(zf, 64 * 1024 * 1024)
+            workbook = read_xml(zf, names, "xl/workbook.xml")
+            relationships = read_xml(zf, names, "xl/_rels/workbook.xml.rels")
+            relation_map = {
+                item.attrib.get("Id"): item for item in relationships.findall(
+                    f"{{{package_rel_ns}}}Relationship")
+            }
+            sheets = workbook.findall(f"{q('sheets')}/{q('sheet')}")
+            if not sheets:
+                raise IntakeError("XLSX workbook has no worksheets")
+            selected = record.get("sheet_name")
+            if selected is None:
+                selected = 0
+            if isinstance(selected, int):
+                if selected < 0 or selected >= len(sheets):
+                    raise IntakeError("XLSX worksheet index is out of range")
+                sheet = sheets[selected]
+            else:
+                matches = [item for item in sheets if item.attrib.get("name") == str(selected)]
+                if len(matches) != 1:
+                    raise IntakeError("XLSX worksheet name is missing or ambiguous")
+                sheet = matches[0]
+            relation_id = sheet.attrib.get(f"{{{rel_ns}}}id")
+            relation = relation_map.get(relation_id)
+            if relation is None or relation.attrib.get("TargetMode") == "External":
+                raise IntakeError("XLSX worksheet relationship is invalid")
+            target = relation.attrib.get("Target", "")
+            if target.startswith("/"):
+                sheet_path = target.lstrip("/")
+            else:
+                sheet_path = posixpath.normpath(posixpath.join("xl", target))
+            if not sheet_path.startswith("xl/") or ".." in sheet_path.split("/"):
+                raise IntakeError("XLSX worksheet relationship escapes workbook")
+            _safe_member_name(sheet_path)
+
+            shared_strings = []
+            if "xl/sharedstrings.xml" in names:
+                shared_root = read_xml(zf, names, "xl/sharedstrings.xml")
+                for item in shared_root.findall(q("si")):
+                    shared_strings.append("".join(t.text or "" for t in item.iter(q("t"))))
+
+            worksheet = read_xml(zf, names, sheet_path)
+            sheet_data = worksheet.find(q("sheetData"))
+            if sheet_data is None:
+                raise IntakeError("XLSX worksheet has no sheet data")
+            rows = []
+            max_column = 0
+            for row in sheet_data.findall(q("row")):
+                values = {}
+                for cell in row.findall(q("c")):
+                    if cell.find(q("f")) is not None:
+                        raise IntakeError("XLSX formulas are not allowed in source tables")
+                    index = _xlsx_column_index(cell.attrib.get("r", ""))
+                    kind = cell.attrib.get("t")
+                    value_node = cell.find(q("v"))
+                    value = value_node.text if value_node is not None else None
+                    if kind == "s" and value not in (None, ""):
+                        try:
+                            value = shared_strings[int(value)]
+                        except (ValueError, IndexError) as exc:
+                            raise IntakeError("XLSX shared-string index is invalid") from exc
+                    elif kind == "inlineStr":
+                        inline = cell.find(q("is"))
+                        value = "".join(t.text or "" for t in inline.iter(q("t"))) if inline is not None else ""
+                    elif kind == "b" and value is not None:
+                        if value not in {"0", "1"}:
+                            raise IntakeError("XLSX boolean cell is malformed")
+                        value = value == "1"
+                    elif kind == "e":
+                        raise IntakeError("XLSX error cells are not allowed")
+                    elif kind not in (None, "n", "str"):
+                        raise IntakeError(f"unsupported XLSX cell type: {kind!r}")
+                    if value not in (None, ""):
+                        values[index] = value
+                        max_column = max(max_column, index + 1)
+                if values:
+                    rows.append(values)
+            if not rows or max_column < 1:
+                raise IntakeError("XLSX worksheet contains no table rows")
+            materialized = [
+                [values.get(i) for i in range(max_column)]
+                for values in rows
+            ]
+            header = record.get("header", 0)
+            if header is not None and header is not False:
+                header_index = 0 if header is True else int(header)
+                if header_index < 0 or header_index >= len(materialized):
+                    raise IntakeError("XLSX header row is out of range")
+                columns = ["" if value is None else str(value).strip()
+                           for value in materialized[header_index]]
+                if any(not value for value in columns):
+                    raise IntakeError("XLSX header contains empty column names")
+                data = materialized[header_index + 1:]
+            else:
+                columns = record.get("source_column_order")
+                if not isinstance(columns, list) or len(columns) != max_column:
+                    raise IntakeError("XLSX headerless source column order is invalid")
+                data = materialized
+            if any(len(row) != len(columns) for row in data):
+                raise IntakeError("XLSX row width differs from header")
+            return pd.DataFrame(data, columns=columns, dtype=object)
+    except IntakeError:
+        raise
+    except (OSError, ValueError, KeyError, zipfile.BadZipFile) as exc:
+        raise IntakeError("XLSX archive is malformed or unsafe") from exc
+
+
 def _parse_payload(record: dict[str, Any], payload: bytes) -> pd.DataFrame:
     fmt = record.get("source_format")
     if fmt == "csv":
@@ -166,9 +307,11 @@ def _parse_payload(record: dict[str, Any], payload: bytes) -> pd.DataFrame:
                 io.BytesIO(payload), sheet_name=record.get("sheet_name") or 0,
                 header=record.get("header", 0), dtype=object,
             )
+            frame.columns = [str(c).strip() for c in frame.columns]
         except ImportError as exc:
-            raise IntakeError("required Excel engine is unavailable") from exc
-        frame.columns = [str(c).strip() for c in frame.columns]
+            if not zipfile.is_zipfile(io.BytesIO(payload)):
+                raise IntakeError("required Excel engine is unavailable for this workbook format") from exc
+            frame = _parse_xlsx_payload(payload, record)
     elif fmt == "arff":
         from scipy.io import arff
         try:
@@ -188,8 +331,9 @@ def _parse_payload(record: dict[str, Any], payload: bytes) -> pd.DataFrame:
     source_renames = record.get("source_column_renames", record.get("rename_columns", {})) or {}
     if not isinstance(source_renames, dict) or not set(source_renames) <= set(expected):
         raise IntakeError("catalog source-column aliases are malformed")
-    if len(set(source_renames.values())) != len(source_renames.values()):
-        raise IntakeError("catalog source-column aliases are not unique")
+    renamed_columns = [source_renames.get(column, column) for column in expected]
+    if len(set(renamed_columns)) != len(renamed_columns):
+        raise IntakeError("catalog source-column aliases are not one-to-one")
     frame = frame.rename(columns=source_renames)
     permitted = set(frame.columns) - set(record.get("exclude_columns", []))
     features = record.get("features")
