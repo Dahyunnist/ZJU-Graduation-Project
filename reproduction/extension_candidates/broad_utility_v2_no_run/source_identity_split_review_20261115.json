@@ -86,7 +86,7 @@
         "spambase.data": "b1ef93de71f97714d3d7d4f58fc9f718da7bbc8ac8a150eff2778616a8097b12",
         "spambase.names": "df418fab7923f929237b81efa0987ddfaf2d68cf61291243625aadc684d5ab6a"
       },
-      "processing_mapping": "Headerless 57 numeric predictors; final column spam label; names/types in spambase.names.",
+      "processing_mapping": "Headerless 57 numeric predictors; final column spam label; names/types in spambase.names. UCI metadata flags missing values; exact cell-level missing-value handling remains unresolved.",
       "anti_leak_split_review": "Candidate label-stratified split; keep exact feature duplicates together. Sender/thread IDs absent, so sender-heldout claim unknown; no role hash.",
       "role_assignment_sha256_verified": null,
       "historical_unverified_identity": null
