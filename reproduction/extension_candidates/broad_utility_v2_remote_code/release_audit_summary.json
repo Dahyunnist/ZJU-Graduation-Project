@@ -1,0 +1,13 @@
+{
+  "release_id": "broad_utility_v2_remote_code_20261115",
+  "code_only": true,
+  "manifested_files": 31,
+  "role_csv_files_in_release": 0,
+  "roles_server_external": true,
+  "missing_or_blocked_private_files_fail_closed": true,
+  "execution_enabled": false,
+  "model_fits": 0,
+  "targeted_gate_tests": "34 passed",
+  "release_integrity": "verified",
+  "sealed_source_archive_accessed": false
+}

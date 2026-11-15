@@ -1,0 +1,90 @@
+{
+  "catalog_id": "broad_utility_v2_15_table_code_release",
+  "version": 2,
+  "default_run_mode": "NO-RUN",
+  "metadata_only_source_review": true,
+  "source_catalog_external": true,
+  "safety": {
+    "automatic_download": false,
+    "default_real_data_read": false,
+    "requires_explicit_source_path": true,
+    "requires_approved_sha256": true
+  },
+  "records": [
+    {
+      "dataset_id": "rice_cammeo_osmancik",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "bank_marketing",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "online_shoppers",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "magic_gamma",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "spambase",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "dry_bean",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "pendigits",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "letter_recognition",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "optdigits",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "wine_quality_white",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "energy_efficiency_y1",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "concrete_strength",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "airfoil_self_noise",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "bike_hourly",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    },
+    {
+      "dataset_id": "yacht_hydrodynamics",
+      "status": "blocked",
+      "blocked_reason": "Source mapping is server external and not part of code-only release."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "manifest_id": "broad_utility_v2_external_role_dependency_declaration",
+  "schema_version": 1,
+  "execution_enabled": false,
+  "policy": "server_external_only_fail_closed",
+  "private_manifest_env": "TABPOLLUTION_PRIVATE_ROLE_MANIFEST",
+  "required_datasets": [
+    "rice_cammeo_osmancik",
+    "bank_marketing",
+    "online_shoppers",
+    "magic_gamma",
+    "spambase",
+    "dry_bean",
+    "optdigits",
+    "wine_quality_white",
+    "energy_efficiency_y1",
+    "concrete_strength",
+    "airfoil_self_noise",
+    "bike_hourly",
+    "yacht_hydrodynamics"
+  ],
+  "blocked_datasets": [
+    "pendigits",
+    "letter_recognition"
+  ],
+  "note": "Role assignments are external server dependencies. This release contains no role CSV files or role assignment hashes."
+}

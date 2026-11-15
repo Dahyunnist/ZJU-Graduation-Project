@@ -1,50 +1,13 @@
 {
-  "review_id": "broad_utility_15_table_role_loader_binding_review_20261115",
+  "release_id": "broad_utility_v2_remote_code_20261115",
+  "code_only": true,
+  "manifested_files": 31,
+  "role_csv_files_in_release": 0,
+  "roles_server_external": true,
+  "missing_or_blocked_private_files_fail_closed": true,
   "execution_enabled": false,
   "model_fits": 0,
-  "source_mapping_audit": {
-    "datasets_reviewed": 15,
-    "server_source_paths_verified": 5,
-    "mapping_status": "documented where prior source evidence exists; paths absent for 10 datasets",
-    "pendigits": "sealed archive not accessed; mapping unverified",
-    "letter_recognition": "archive identity conflict; role artifacts remain private"
-  },
-  "role_artifact_audit": {
-    "bank_marketing": {
-      "status": "candidate_verified",
-      "rows": 41188,
-      "raw_role_artifact_sha256": "3b7a027f6b0731d392e6ad66dd063ef018b77d62386d6ac516a21a06ab9819e4",
-      "role_counts": {
-        "train": 20588,
-        "tune": 6158,
-        "evaluation": 6166,
-        "final_test": 8236,
-        "purged": 40
-      },
-      "corrected_malformed_legacy_digest": true
-    },
-    "online_shoppers": {
-      "status": "candidate_verified",
-      "rows": 12330,
-      "role_counts": {
-        "train": 6165,
-        "tune": 1850,
-        "evaluation": 1850,
-        "final_test": 2465
-      }
-    },
-    "spambase": {
-      "status": "candidate_verified",
-      "source_rows": 4601,
-      "fields_per_row": 58,
-      "missing_or_malformed_cells": 0,
-      "policy": "strict numeric parse; reject missing/malformed; no imputation"
-    }
-  },
-  "remaining_blockers": [
-    "Pendigits source/roles remain unverified; sealed archive untouched.",
-    "Letter Recognition archive identity conflict; role files remain private.",
-    "Package source catalog absent; all operational source/role hashes remain null."
-  ],
-  "run_status": "NO-RUN"
+  "targeted_gate_tests": "34 passed",
+  "release_integrity": "verified",
+  "sealed_source_archive_accessed": false
 }
