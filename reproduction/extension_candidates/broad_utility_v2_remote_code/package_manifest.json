@@ -1,6 +1,5 @@
 {
   "manifest_type": "code_only_external_roles",
-  "schema_version": 1,
   "files": {
     "README.md": "2bc34385a8b91876b426d6833085c26b355b53afdf7d68eec4f4988c3c21c572",
     "broad_utility_future_v2_candidate_NO_RUN.json": "3a965aaa7565ba292338f218da090aafd4b5a8f4c9577cb733700c680248e547",
@@ -8,7 +7,7 @@
     "intake_catalog_v2.json": "fe2a2908d420a5c9eb838ca128d20e63929eebf47363a5fadb8665e2919fa0e8",
     "pytest.ini": "d6e3e89cc6aab7944c11e4a14fb0a4db51c9ae36606bf263f47b7a9378f6de65",
     "release_audit_summary.json": "d8791d2f7995d6970726a577228c6dfb8561efd8db80b2f8e55e5bc2b3cca1ad",
-    "required_runtime.json": "734c5771e5807cb2fc6dbdabb91a7c965bf00eda51f13f6359b36e624a4353c3",
+    "required_runtime.json": "66a407de198aa8e7391df8d1293aa61118a8d710321d27e2682fa7642e58310d",
     "scripts/audit_broad_formal_unit.py": "005ec29f06c24989af511e086c07a94645ee26da79770a45ab87008316a30335",
     "scripts/audit_broad_shared_artificial.py": "b627ab36e0f8a69f45851307868a3a3797ee224e2e5cc094d7a2ef95d8b64ccb",
     "scripts/broad_shared_runtime.py": "47cc176e92affc69670c3ceaa5f2ea42dfd82e0b05e88389a09f03de26f1ac92",
@@ -28,10 +27,11 @@
     "src/tabpollution/generators/sdv_adapter.py": "008980ed7bde708303f0584f7341a1c9d628e5c67bf8ed3d84d580fc42ffe9df",
     "src/tabpollution/governance/__init__.py": "9eaaf799c0ea11b7f535c78f9ea6c54394141617228f7c0f774286a70336284f",
     "src/tabpollution/governance/broad_batch_registry.py": "bec3033c1dae5d4bff88442c8305ee87f97bd79abe0869c66c9a1ef6b1493bd7",
-    "src/tabpollution/intake.py": "d16970a2634d568b73c8ef89c309df5d83df8db08777c3a2de336a79aa191211",
+    "src/tabpollution/intake.py": "f05d7ba07a013396f40915ae6748fa611a2b9a1b8304b6c03853b5a6dd553844",
     "src/tabpollution/studies/__init__.py": "41c889d812c45977b0947d5a652387748657d03d671b7558b60a740ef068b118",
     "src/tabpollution/studies/broad_formal_batch.py": "bf60f653db1adb69f76486f261ce565e2c99aebd7dae13f12136c969bd66f15d",
     "src/tabpollution/studies/broad_utility.py": "2e3dd62cc642b2c3c667f2e22b03ae22ba6ea5a2fbcfd750535b93211a151a97",
-    "tests/test_external_role_dependencies.py": "9fd3a59641dbd4c5e8e620d7cac4f8505719e9fe082ecd834b1e96534c018deb"
+    "tests/test_external_role_dependencies.py": "9fd3a59641dbd4c5e8e620d7cac4f8505719e9fe082ecd834b1e96534c018deb",
+    "tests/test_xlsx_intake_fallback.py": "4fb7c1b7e6900675644a786c781863988915debdd752657bbfd951c89e3912c2"
   }
 }
