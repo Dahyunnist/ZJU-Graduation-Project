@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-15",
+  "status": "candidate_no_run_not_authorized_not_frozen",
+  "scope": "server_only_synthetic_validation_and_plan_budget_repair",
+  "budget": {
+    "dataset_count": 15,
+    "seed_count": 5,
+    "unit_count": 75,
+    "generator_fit_calls": 225,
+    "downstream_fit_calls": 6300,
+    "planned_outcomes": 9900,
+    "max_downstream_per_unit": 84
+  },
+  "budget_repair": {
+    "file": "reproduction/extension_candidates/broad_utility_v2_no_run/broad_utility_future_v2_candidate_NO_RUN.json",
+    "old_fields_were_stale": true,
+    "legacy_v1_fixture_and_756_fit_semantics_preserved": true
+  },
+  "evaluation": {
+    "same_evaluation_rows_for_each_arm": true,
+    "paired_bootstrap_replicates_candidate": 2000,
+    "shared_control_cache_entries_expected_per_unit": 24,
+    "focused_test": "tests/test_invalid_synthetic_outcomes.py",
+    "focused_test_result": "14 passed"
+  },
+  "light_artificial_check": {
+    "status": "artificial_complete",
+    "cases": 3,
+    "artificial_model_calls": 84,
+    "learned_generator_fit_calls": 0,
+    "real_data_reads": 0,
+    "aggregate_sha256": "390976b9f16b7aad39f8b44dfa44d4f2497f2eaaff3d943fa75b9a3f743fd76c"
+  },
+  "fixed_real_adapter_smoke": {
+    "status": "artificial_real_adapter_smoke_accepted",
+    "formal_inclusion": false,
+    "generator_fit_calls": 12,
+    "learned_generator_fit_calls": 9,
+    "bootstrap_generator_fit_calls": 3,
+    "downstream_fit_calls": 312,
+    "elapsed_seconds": 49.045269842,
+    "peak_combined_rss_bytes": 1062969344,
+    "max_output_bytes_observed": 4874003,
+    "real_data_reads": 0,
+    "final_test_evaluated": false,
+    "cpu_threads": 1,
+    "gpu": false,
+    "package_sha256": "8f4b39c9dfd0bc97f2ebb36d3645ca974c03d3f0ba378f5fe30a1d88a8c7e933",
+    "runtime_sha256": "275182e41993a96d9c6a5b3d5c8e7cf1ff06046c63e40bece9fa5d452a695ef8",
+    "aggregate_sha256": "a80fc7bf0e6e9cffa31f6d8e7b6452ee77bc6892720d66c49145d85ea4d9e3a6",
+    "independent_audit_sha256": "403d59b9326ba1610b1294cf2b7f71810c8822db34992b41d860d33fbf337f8f",
+    "gate_receipt_sha256": "be00a774086deeea59b5bfaa927448aa3198eebadb0156731ddfe467e1601a07"
+  },
+  "limits": [
+    "Artificial smoke used 240 rows per task, one analysis seed, and tiny SDV configs; not formal performance evidence for 15 real tables.",
+    "No real dataset was read, no final test evaluated, and no formal candidate experiment was launched.",
+    "Runtime fingerprint describes current server runtime; full-scale runtime and storage estimates remain unvalidated.",
+    "First gate launch used a relative script path and failed worker authentication before model fits; corrected absolute-path run passed."
+  ],
+  "formal_blockers": [
+    "approval and candidate freeze",
+    "source and role identity completion/approval",
+    "class mapping and secondary metric selection",
+    "seed adequacy for inference",
+    "full-scale runtime/storage evidence",
+    "business/privacy owner decisions"
+  ]
+}

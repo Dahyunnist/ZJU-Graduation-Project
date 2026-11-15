@@ -1,0 +1,9 @@
+{
+  "python": ">=3.11,<3.12",
+  "required_distributions": {
+    "sdv": "==1.37.3",
+    "numpy": "==2.4.4",
+    "pandas": "==2.3.3",
+    "scikit-learn": "==1.9.0"
+  }
+}

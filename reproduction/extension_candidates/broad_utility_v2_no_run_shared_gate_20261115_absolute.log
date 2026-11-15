@@ -1,0 +1,39 @@
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 2: out of memory (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:183: FutureWarning: The 'SingleTableMetadata' is deprecated. Please use the new 'Metadata' class for synthesizers.
+  warnings.warn(DEPRECATION_MSG, FutureWarning)
+/home/bkbs/miniforge3/envs/tabular-benchmark/lib/python3.11/site-packages/sdv/single_table/base.py:139: UserWarning: We strongly recommend saving the metadata using 'save_to_json' for replicability in future SDV versions.
+  warnings.warn(
+{"status": "worker_complete", "aggregate_sha256": "a80fc7bf0e6e9cffa31f6d8e7b6452ee77bc6892720d66c49145d85ea4d9e3a6", "learned_generator_fits": 9, "bootstrap_generator_fits": 3, "downstream_fits": 312}

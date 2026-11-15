@@ -251,11 +251,11 @@
     "dose_rounding": "floor"
   },
   "budget": {
-    "unit_count": 9,
-    "learned_generator_fits": 27,
+    "unit_count": 75,
+    "learned_generator_fits": 225,
     "bootstrap_generator_fits": 0,
-    "downstream_fits": 756,
-    "downstream_formula": "9 dataset-seed units * (6 shared controls + 3 generators * 5 arms) * 4 learners",
+    "downstream_fits": 6300,
+    "downstream_formula": "75 dataset-seed units * (6 shared controls + 3 generators * 5 arms) * 4 learners",
     "cpu_cores": 1,
     "native_threads": 1,
     "gpu": false,
@@ -263,7 +263,8 @@
     "total_wall_seconds": 28800,
     "address_space_bytes": 8589934592,
     "aggregate_output_bytes": 67108864,
-    "resource_estimate_basis": "conservative planning estimate only: recovery02 1-GC 132-learner run took 130.7s; artificial real-adapter gate completed all 12 generator and 312 learner fits in 48.2s with only 2 epochs and 240 artificial rows. Full 300-epoch CPU fits require a separately bounded up-to-8h run; these smoke timings are not formal performance evidence."
+    "resource_estimate_basis": "conservative planning estimate only: recovery02 1-GC 132-learner run took 130.7s; artificial real-adapter gate completed all 12 generator and 312 learner fits in 48.2s with only 2 epochs and 240 artificial rows. Full 300-epoch CPU fits require a separately bounded up-to-8h run; these smoke timings are not formal performance evidence.",
+    "planned_outcomes": 9900
   },
   "execution": {
     "enabled": false,
