@@ -1,0 +1,242 @@
+{
+  "review_id": "broad-utility-v2-source-identity-split-review-20261115",
+  "status": "EVIDENCE_ONLY_NO_RUN_NOT_FROZEN",
+  "execution_enabled": false,
+  "archive_hash_method": "SHA-256 over complete official UCI archive bytes; individual member hashes over exact ZIP member bytes.",
+  "scope_note": "14 official UCI archives downloaded to server temporary storage, hashed and member-listed, then deleted. Pendigits archive was never accessed. No model fit, training, or experiment run.",
+  "plan_hashes": {
+    "candidate_manifest_jobs_sha256": "c631a93d03ff8f7720b5cea5fc982091f8bd5ad086bbfd9bc8d517c5ba9f7385",
+    "current_plan_jobs_sha256": "b19acb2b73f91d868a673a61fe9821df6a6ab6c930e7eb04d5ab879c5ad3fda8",
+    "relationship": "different schedule artifacts; not mutually comparable; preserve both values"
+  },
+  "role_evidence_summary": {
+    "verified_existing_roles": 2,
+    "bank_marketing": "role CSV SHA matched candidate metadata; rows and source-order IDs aligned; exact model-feature duplicates do not cross roles",
+    "online_shoppers": "role CSV SHA matched candidate metadata; rows and source-order IDs aligned; exact retained-feature duplicates do not cross roles",
+    "other_roles": "no verified role assignment hash in current evidence; Pendigits historical hash remains unverified",
+    "bank_role_hash_note": "M3A uses a distinct 47ef... role hash; do not substitute it for the verified broad-candidate 3b7a... assignment."
+  },
+  "datasets": [
+    {
+      "dataset_id": "rice_cammeo_osmancik",
+      "task": "binary",
+      "uci_dataset_id": 545,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/545/rice%2Bcammeo%2Band%2Bosmancik.zip",
+      "archive_sha256_verified_this_pass": "fe94e42046b829de21b92b0ffb6a22774fde021328cae799faa802a14e8dbed9",
+      "source_members": {
+        "Rice_Cammeo_Osmancik.arff": "1af97883100c89de2ea2972f7a28d428f4f1c14711a61defc0b0569e9eb65665"
+      },
+      "processing_mapping": "ARFF; features Area, Perimeter, Major_Axis_Length, Minor_Axis_Length, Eccentricity, Convex_Area, Extent; target Class.",
+      "anti_leak_split_review": "Candidate class-stratified roles; keep exact duplicate feature rows together. No role file/hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "bank_marketing",
+      "task": "binary",
+      "uci_dataset_id": 222,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/222/bank%2Bmarketing.zip",
+      "archive_sha256_verified_this_pass": "e0bf5f5de5b846e2f18e9d90606637267d46dfa260e0f17bb12e605db5efbeb4",
+      "source_members": {
+        "bank-additional.zip": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd",
+        "bank-additional/bank-additional-full.csv": "74adfc578bf77a7ff4bb1ba4a9f8709d9e3c6907342959c2c8416847e0afb4d8"
+      },
+      "processing_mapping": "Use bank-additional-full.csv; target y; drop duration; 19 listed model features.",
+      "anti_leak_split_review": "Existing source-order split verified against UCI date-ordered member. 40 purged; exact model-feature duplicates do not cross roles. Counts: train 20588, tune 6158, evaluation 6166, final_test 8236.",
+      "role_assignment_sha256_verified": "3b7a027f6b0731d392e6ad66dd063ef018b77d62386d6ac516a21a06ab9819e",
+      "historical_unverified_identity": null,
+      "other_protocol_role_hash": "47ef2d62aa2f7c03e27dda92277ad76e713a35ca8b779e0d612fd4f657984236"
+    },
+    {
+      "dataset_id": "online_shoppers",
+      "task": "binary",
+      "uci_dataset_id": 468,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/468/online%2Bshoppers%2Bpurchasing%2Bintention%2Bdataset.zip",
+      "archive_sha256_verified_this_pass": "2972e6184d3ad7beaaa831d9fc2b059dc3ee29df69d1ec593c466a5cd8485d14",
+      "source_members": {
+        "online_shoppers_intention.csv": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9"
+      },
+      "processing_mapping": "CSV; target Revenue; drop PageValues; retain 16 listed features.",
+      "anti_leak_split_review": "Existing label/month-stratified roles verified; exact retained-feature duplicates do not cross roles. UCI says each session is a different user; no date field supports chronology. Counts: train 6165, tune 1850, evaluation 1850, final_test 2465.",
+      "role_assignment_sha256_verified": "3bc84060ca4b77387d905ac3075e99e8122490633058cf6444efd8dbda2bbe8d",
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "magic_gamma",
+      "task": "binary",
+      "uci_dataset_id": 159,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/159/magic%2Bgamma%2Btelescope.zip",
+      "archive_sha256_verified_this_pass": "252e0a78333c108d0ea54537b61154aa781e95a15675e65ddf9b76993617191d",
+      "source_members": {
+        "magic04.data": "e9314b7ebd4b4b59a3b3d65f7316663963777b16a46786877651dbbaa640b36a",
+        "magic04.names": "6b74a329008ea6d062d0c0acf34f0a4aa0e7ce7d1aaeebce4ae5995c06a7abc2"
+      },
+      "processing_mapping": "Headerless 10 numeric fields; class is final field; names from magic04.names.",
+      "anti_leak_split_review": "Candidate label-stratified IID roles with exact duplicate rows grouped. No role file/hash; grouping semantics not otherwise identified.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "spambase",
+      "task": "binary",
+      "uci_dataset_id": 94,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/94/spambase.zip",
+      "archive_sha256_verified_this_pass": "813ac1df8effac70463c09c9c4b11e8803eefcab54771af66150852bcdcd1636",
+      "source_members": {
+        "spambase.data": "b1ef93de71f97714d3d7d4f58fc9f718da7bbc8ac8a150eff2778616a8097b12",
+        "spambase.names": "df418fab7923f929237b81efa0987ddfaf2d68cf61291243625aadc684d5ab6a"
+      },
+      "processing_mapping": "Headerless 57 numeric predictors; final column spam label; names/types in spambase.names.",
+      "anti_leak_split_review": "Candidate label-stratified split; keep exact feature duplicates together. Sender/thread IDs absent, so sender-heldout claim unknown; no role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "dry_bean",
+      "task": "multiclass",
+      "uci_dataset_id": 602,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/602/dry%2Bbean%2Bdataset.zip",
+      "archive_sha256_verified_this_pass": "0a64eff5be87f48c3dbbfc0a12a56c5d5b5167ef8e61cd45d69b3e7c7130c06f",
+      "source_members": {
+        "DryBeanDataset/Dry_Bean_Dataset.arff": "b2a4a76a2aedfb8ed415adfc1bfc70b5f202cb00cb72e500766e364c14834014"
+      },
+      "processing_mapping": "ARFF; target Class; map source AspectRation to canonical AspectRatio; 16 predictors.",
+      "anti_leak_split_review": "Candidate class-stratified split; keep exact feature duplicates together. Image/batch identity unavailable; no role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "pendigits",
+      "task": "multiclass",
+      "uci_dataset_id": 81,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/81/pen%2Bbased%2Brecognition%2Bof%2Bhandwritten%2Bdigits.zip",
+      "archive_sha256_verified_this_pass": null,
+      "source_members": {
+        "development": "pendigits.tra (not accessed)",
+        "sealed_test": "pendigits.tes (not accessed)"
+      },
+      "processing_mapping": "16 numeric attributes plus class, from historical candidate metadata only.",
+      "anti_leak_split_review": "Preserve historical official-member holdout as unverified; no archive or role file accessed this pass.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": {
+        "archive_sha256": "1e02bea023613c2b11c9492f6f34caf975420455934f3527d270cee9a1f03b64",
+        "role_assignment_sha256": "fd7a825fef69bc02c1624aac76ef180abb60c808d59c58a634d00780bce77d9f"
+      }
+    },
+    {
+      "dataset_id": "letter_recognition",
+      "task": "multiclass",
+      "uci_dataset_id": 59,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/59/letter%2Brecognition.zip",
+      "archive_sha256_verified_this_pass": "3b5f07a334697b6cace4fbae22940393a18fee596e73f68d97ce5973d52dc60d",
+      "source_members": {
+        "letter-recognition.data": "2b89f3602cf768d3c8355267d2f13f2417809e101fc2b5ceee10db19a60de6e2",
+        "letter-recognition.names": "128b85adc32bd58a93ed6e1df136b1d7c636f85f290ba3db655ccaa19c86d324"
+      },
+      "processing_mapping": "CSV; target lettr is first column; 16 integer features follow.",
+      "anti_leak_split_review": "UCI recommends first 16000 for training and remaining 4000 for prediction. Candidate preserve order holdout; font ID absent, so font-disjoint leakage control cannot be proven. No role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "optdigits",
+      "task": "multiclass",
+      "uci_dataset_id": 80,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/80/optical%2Brecognition%2Bof%2Bhandwritten%2Bdigits.zip",
+      "archive_sha256_verified_this_pass": "0d7b054fea010270e9b3f06411c654c5e59547732ad626381980baffe0a23fb0",
+      "source_members": {
+        "optdigits.tra": "e1b683cc211604fe8fd8c4417e6a69f31380e0c61d4af22e93cc21e9257ffedd",
+        "optdigits.tes": "6ebb3d2fee246a4e99363262ddf8a00a3c41bee6014c373ed9d9216ba7f651b8"
+      },
+      "processing_mapping": "Headerless 64 pixel values plus final digit label.",
+      "anti_leak_split_review": "Keep official .tes as final_test; split only .tra for development roles. No role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "wine_quality_white",
+      "task": "regression",
+      "uci_dataset_id": 186,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/186/wine%2Bquality.zip",
+      "archive_sha256_verified_this_pass": "3ed56667f4b828242bd732d7d1dd7f2861e54432239d7fa63877014cbb0304d4",
+      "source_members": {
+        "winequality-white.csv": "76c3f809815c17c07212622f776311faeb31e87610d52c26d87d6e361b169836"
+      },
+      "processing_mapping": "Semicolon CSV; use white member only; 11 physicochemical features; target quality.",
+      "anti_leak_split_review": "Candidate regression split; keep exact predictor duplicates together and balance quality bins. No sample identity or role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "energy_efficiency_y1",
+      "task": "regression",
+      "uci_dataset_id": 242,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/242/energy%2Befficiency.zip",
+      "archive_sha256_verified_this_pass": "499441eee27929a4b00417f58fd8c63c9cc14b8a71520cd0dd27fcb626738351",
+      "source_members": {
+        "ENB2012_data.xlsx": "0089fcffc1415e41e2ff63730cca5280efe54fc43d722dfde1b0aaa808e35dc4"
+      },
+      "processing_mapping": "Excel; X1-X8 predictors; target Y1; exclude Y2.",
+      "anti_leak_split_review": "Blocked pending design-group contract: UCI describes 12 building shapes and 768 simulated rows; no role identity/hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "concrete_strength",
+      "task": "regression",
+      "uci_dataset_id": 165,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/165/concrete%2Bcompressive%2Bstrength.zip",
+      "archive_sha256_verified_this_pass": "dad85d14de8aee4e07479daa774e6b569a313715b71a3b92c95a07cf91c2c9a7",
+      "source_members": {
+        "Concrete_Data.xls": "710076c66b9ca3f8050e7942f3dcbdbe04013534daeb0077ffd3079a52d8e0c4"
+      },
+      "processing_mapping": "Excel; 8 predictors including Age; target Concrete compressive strength.",
+      "anti_leak_split_review": "Candidate group split by seven mixture ingredients; keep ages for one recipe together. Needs role generation and hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "airfoil_self_noise",
+      "task": "regression",
+      "uci_dataset_id": 291,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/291/airfoil%2Bself%2Bnoise.zip",
+      "archive_sha256_verified_this_pass": "5c7767ba53ad827d3f48ba1eb9434117f4892df8f10bc4c99e118a9e8a7ae07c",
+      "source_members": {
+        "airfoil_self_noise.dat": "74c75fd71783f1e6b71f8a622b993dc592897a97cd689c5090a07147a1b097b3"
+      },
+      "processing_mapping": "Headerless tab data; five predictors in catalog order; target scaled-sound-pressure.",
+      "anti_leak_split_review": "Blocked pending grouping of repeated physical airfoil/measurement conditions; no explicit airfoil ID or role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "bike_hourly",
+      "task": "regression",
+      "uci_dataset_id": 275,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/275/bike%2Bsharing%2Bdataset.zip",
+      "archive_sha256_verified_this_pass": "b70182d0d0508e9abbb79306ce5c0cec34869000f8220175ac83d11dbe845401",
+      "source_members": {
+        "hour.csv": "e03de4ee4ef4dc376ac6e04bf829673c6269e8eba5c60fa121640fa2f829504f",
+        "day.csv": null
+      },
+      "processing_mapping": "Use hour.csv; target cnt; predictors season, yr, mnth, hr, holiday, weekday, workingday, weathersit, temp, atemp, hum, windspeed; exclude instant, dteday, casual, registered.",
+      "anti_leak_split_review": "Candidate chronological split by dteday/hr; never randomize time order. No role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    },
+    {
+      "dataset_id": "yacht_hydrodynamics",
+      "task": "regression",
+      "uci_dataset_id": 243,
+      "official_archive_url": "https://archive.ics.uci.edu/static/public/243/yacht%2Bhydrodynamics.zip",
+      "archive_sha256_verified_this_pass": "aa52b68f88c4bb552187a53ef4c5753fa178f6a36035a3771c5bc04e078487ac",
+      "source_members": {
+        "yacht_hydrodynamics.data": "00dfecc0fc01ddd4c90b558a3ac11b246df8ebcfea130724223475a9a67f0ea1"
+      },
+      "processing_mapping": "Headerless 6 predictors: five hull geometry measures plus Froude number; seventh field residuary resistance target.",
+      "anti_leak_split_review": "Blocked pending hull grouping. UCI reports 22 hull forms; keep conditions for a hull together, but no explicit hull ID or role hash.",
+      "role_assignment_sha256_verified": null,
+      "historical_unverified_identity": null
+    }
+  ]
+}
