@@ -32,7 +32,7 @@ def verify_package(package, expected_sha):
         if not path.is_relative_to(package) or not path.is_file() or sha_file(path) != digest:
             raise PermissionError(f"package file mismatch: {rel}")
     actual = {p.relative_to(package).as_posix() for p in package.rglob("*")
-              if p.is_file() and "__pycache__" not in p.parts}
+              if p.is_file() and "__pycache__" not in p.parts and ".pytest_cache" not in p.parts}
     if actual != set(manifest["files"]) | {"package_manifest.json"}:
         raise PermissionError("unlisted package content")
 
