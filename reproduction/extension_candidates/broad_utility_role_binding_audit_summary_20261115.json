@@ -2,6 +2,13 @@
   "review_id": "broad_utility_15_table_role_loader_binding_review_20261115",
   "execution_enabled": false,
   "model_fits": 0,
+  "source_mapping_audit": {
+    "datasets_reviewed": 15,
+    "server_source_paths_verified": 5,
+    "mapping_status": "documented where prior source evidence exists; paths absent for 10 datasets",
+    "pendigits": "sealed archive not accessed; mapping unverified",
+    "letter_recognition": "archive identity conflict; role artifacts remain private"
+  },
   "role_artifact_audit": {
     "bank_marketing": {
       "status": "candidate_verified",
