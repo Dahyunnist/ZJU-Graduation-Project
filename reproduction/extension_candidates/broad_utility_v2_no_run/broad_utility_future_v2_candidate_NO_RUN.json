@@ -1,0 +1,276 @@
+{
+  "protocol_id": "broad-utility-future-v2-candidate-20261110",
+  "batch_id": "broad-utility-future-v2-candidate-20261110",
+  "phase": "exploratory_breadth_screen",
+  "status": "NO-RUN_CANDIDATE_NOT_AUTHORIZED_NOT_FROZEN",
+  "source_cache": {
+    "input_root": "inputs/broad_utility_public_sources_extension_20261031",
+    "download": false,
+    "reader": "tabpollution.intake.read_allowlisted_table",
+    "record_id_rule": "public:{dataset_id}:{zero_based_source_row}",
+    "source_row_count_check": "exact approved development member count",
+    "roles_required_before_any_fit": true,
+    "role_algorithm": "extension_first_assignment: frozen source-order purge / group-bound IID / official development-only split",
+    "train_cap": 2000,
+    "evaluation_cap": 1000,
+    "cap_seed": 20261029,
+    "required_roles": [
+      "train",
+      "tune",
+      "evaluation",
+      "final_test"
+    ],
+    "selection_definition": {
+      "training": "freeze extension roles once; cap train at 2000 using seed 20261029",
+      "evaluation": "freeze extension evaluation once; cap at 1000 using seed 20261029; exploratory",
+      "tune": "not passed to generator, learner, or evaluation",
+      "final_test": "never selected, scored, or passed to a model",
+      "seed_policy": "analysis seeds never change outer roles or capped row IDs",
+      "training_cap": 2000,
+      "evaluation_cap": 1000,
+      "cap_seed": 20261029
+    },
+    "role_seed": 20261029
+  },
+  "datasets": [
+    {
+      "dataset_id": "rice_cammeo_osmancik",
+      "task": "binary",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "bank_marketing",
+      "task": "binary",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "online_shoppers",
+      "task": "binary",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "magic_gamma",
+      "task": "binary",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "spambase",
+      "task": "binary",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "dry_bean",
+      "task": "multiclass",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "pendigits",
+      "task": "multiclass",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "letter_recognition",
+      "task": "multiclass",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "optdigits",
+      "task": "multiclass",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "wine_quality_white",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "energy_efficiency_y1",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "concrete_strength",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "airfoil_self_noise",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "bike_hourly",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    },
+    {
+      "dataset_id": "yacht_hydrodynamics",
+      "task": "regression",
+      "archive_sha256": null,
+      "role_assignment_sha256": null
+    }
+  ],
+  "seeds": [
+    204101,
+    204102,
+    204103,
+    204104,
+    204105
+  ],
+  "generators": {
+    "GaussianCopula": {
+      "enforce_min_max_values": true,
+      "enforce_rounding": true
+    },
+    "CTGAN": {
+      "epochs": 300,
+      "batch_size": 500,
+      "pac": 10,
+      "verbose": false,
+      "enable_gpu": false,
+      "embedding_dim": 128,
+      "generator_dim": [
+        256,
+        256
+      ],
+      "discriminator_dim": [
+        256,
+        256
+      ],
+      "generator_lr": 0.0002,
+      "generator_decay": 1e-06,
+      "discriminator_lr": 0.0002,
+      "discriminator_decay": 1e-06,
+      "discriminator_steps": 1,
+      "log_frequency": true,
+      "enforce_min_max_values": true,
+      "enforce_rounding": true,
+      "locales": [
+        "en_US"
+      ]
+    },
+    "TVAE": {
+      "epochs": 300,
+      "batch_size": 500,
+      "verbose": false,
+      "enable_gpu": false,
+      "embedding_dim": 128,
+      "compress_dims": [
+        128,
+        128
+      ],
+      "decompress_dims": [
+        128,
+        128
+      ],
+      "l2scale": 1e-05,
+      "loss_factor": 2,
+      "enforce_min_max_values": true,
+      "enforce_rounding": true
+    }
+  },
+  "learners": {
+    "linear": {
+      "classifier": "LogisticRegression",
+      "regressor": "Ridge",
+      "max_iter": 1000,
+      "C": 1,
+      "alpha": 1
+    },
+    "rf": {
+      "n_estimators": 100,
+      "min_samples_leaf": 2,
+      "n_jobs": 1
+    },
+    "histgb": {
+      "max_iter": 100,
+      "max_leaf_nodes": 15,
+      "early_stopping": false
+    },
+    "mlp": {
+      "hidden_layer_sizes": [
+        64,
+        32
+      ],
+      "max_iter": 200,
+      "early_stopping": false
+    }
+  },
+  "learner_names": [
+    "linear",
+    "rf",
+    "histgb",
+    "mlp"
+  ],
+  "preprocessing": {
+    "numeric": {
+      "imputer": "median",
+      "keep_empty_features": true,
+      "scaler": "StandardScaler"
+    },
+    "categorical": {
+      "imputer": "most_frequent",
+      "keep_empty_features": true,
+      "encoder": "OneHotEncoder",
+      "handle_unknown": "ignore",
+      "sparse_output": false,
+      "min_frequency": 2,
+      "max_categories": 64
+    }
+  },
+  "utility": {
+    "replacement_doses": [
+      0.25,
+      0.5
+    ],
+    "augmentation_doses": [
+      0.5,
+      1.0
+    ],
+    "paired_bootstrap_replicates": 2000,
+    "primary_metric": {
+      "binary": "log_loss",
+      "multiclass": "log_loss",
+      "regression": "rmse"
+    },
+    "fit_cache": "reuse six empirical controls across all three generator pools within each dataset-seed unit",
+    "dose_rounding": "floor"
+  },
+  "budget": {
+    "unit_count": 9,
+    "learned_generator_fits": 27,
+    "bootstrap_generator_fits": 0,
+    "downstream_fits": 756,
+    "downstream_formula": "9 dataset-seed units * (6 shared controls + 3 generators * 5 arms) * 4 learners",
+    "cpu_cores": 1,
+    "native_threads": 1,
+    "gpu": false,
+    "per_unit_wall_seconds": 2700,
+    "total_wall_seconds": 28800,
+    "address_space_bytes": 8589934592,
+    "aggregate_output_bytes": 67108864,
+    "resource_estimate_basis": "conservative planning estimate only: recovery02 1-GC 132-learner run took 130.7s; artificial real-adapter gate completed all 12 generator and 312 learner fits in 48.2s with only 2 epochs and 240 artificial rows. Full 300-epoch CPU fits require a separately bounded up-to-8h run; these smoke timings are not formal performance evidence."
+  },
+  "execution": {
+    "enabled": false,
+    "mode": "plan_only",
+    "authorization_required": true
+  },
+  "role_mode": "extension_first_assignment",
+  "role_algorithm_sha256": "57a2ea3b4578e980dce600d215c4b111dc980cf34538c96f3027aa6b189df1fc",
+  "invalid_arm_policy": "Report generator-induced missing training classes as explicit unavailable utility, never fabricate a metric or repair class quotas; all shared controls must remain valid; actual fits + unavailable synthetic fits must equal the fixed maximum."
+}

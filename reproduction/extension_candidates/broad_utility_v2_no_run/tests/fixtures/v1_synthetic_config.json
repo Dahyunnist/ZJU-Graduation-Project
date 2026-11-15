@@ -1,0 +1,426 @@
+{
+  "protocol_id": "broad-utility-v1-preparation",
+  "batch_id": "synthetic-v1-regression-fixture",
+  "phase": "exploratory_breadth_screen",
+  "status": "SYNTHETIC_FIXTURE_NO_RUN",
+  "source_cache": {
+    "input_root": "inputs/broad_utility_public_sources_extension_20261031",
+    "download": false,
+    "reader": "tabpollution.intake.read_allowlisted_table",
+    "record_id_rule": "public:{dataset_id}:{zero_based_source_row}",
+    "source_row_count_check": "exact approved development member count",
+    "roles_required_before_any_fit": true,
+    "role_algorithm": "extension_first_assignment: frozen source-order purge / group-bound IID / official development-only split",
+    "train_cap": 2000,
+    "evaluation_cap": 1000,
+    "cap_seed": 20261029,
+    "required_roles": [
+      "train",
+      "tune",
+      "evaluation",
+      "final_test"
+    ],
+    "selection_definition": {
+      "training": "freeze extension roles once; cap train at 2000 using seed 20261029",
+      "evaluation": "freeze extension evaluation once; cap at 1000 using seed 20261029; exploratory",
+      "tune": "not passed to generator, learner, or evaluation",
+      "final_test": "never selected, scored, or passed to a model",
+      "seed_policy": "analysis seeds never change outer roles or capped row IDs",
+      "training_cap": 2000,
+      "evaluation_cap": 1000,
+      "cap_seed": 20261029
+    },
+    "role_seed": 20261029
+  },
+  "datasets": [
+    {
+      "dataset_id": "synthetic_1",
+      "task": "binary",
+      "source_rows": 41188,
+      "source_row_range": "zero-based [0,41188) in verified source member order",
+      "archive_file": "bank_marketing.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_member": "bank-additional.zip!bank-additional/bank-additional-full.csv",
+      "features": [
+        "age",
+        "job",
+        "marital",
+        "education",
+        "default",
+        "housing",
+        "loan",
+        "contact",
+        "month",
+        "day_of_week",
+        "campaign",
+        "pdays",
+        "previous",
+        "poutcome",
+        "emp.var.rate",
+        "cons.price.idx",
+        "cons.conf.idx",
+        "euribor3m",
+        "nr.employed"
+      ],
+      "target": "y",
+      "excluded_columns": [
+        "duration",
+        "record_id",
+        "source_order",
+        "role"
+      ],
+      "role_adapter": "purged_contiguous_source_order_v1",
+      "role_fractions": {
+        "train": 0.5,
+        "tune": 0.15,
+        "evaluation": 0.15,
+        "final_test": 0.2
+      },
+      "role_counts_before_duplicate_purge": {
+        "train": 20594,
+        "tune": 6178,
+        "evaluation": 6178,
+        "final_test": 8238
+      },
+      "duplicate_grouping": "exact model-feature fingerprint; purge every row of any group crossing a role boundary; never move rows across cuts",
+      "max_absolute_role_fraction_error": 0.1,
+      "class_support_required_in_each_role": true,
+      "minimum_rows_per_role": 20,
+      "chronology_claim": "source row order only; no calendar forecast claim",
+      "numeric_features": [
+        "age",
+        "campaign",
+        "pdays",
+        "previous",
+        "emp.var.rate",
+        "cons.price.idx",
+        "cons.conf.idx",
+        "euribor3m",
+        "nr.employed"
+      ],
+      "categorical_features": [
+        "job",
+        "marital",
+        "education",
+        "default",
+        "housing",
+        "loan",
+        "contact",
+        "month",
+        "day_of_week",
+        "poutcome"
+      ],
+      "group_features": [
+        "age",
+        "month"
+      ],
+      "nested_archive_sha256": "a607b5edab6c6c75ce09c39142a77702c38123bd5aa7ae89a63503bbe17d65cd",
+      "role_assignment_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "dataset_id": "synthetic_2",
+      "task": "binary",
+      "source_rows": 12330,
+      "source_row_range": "zero-based [0,12330) in verified source member order",
+      "archive_file": "online_shoppers.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_member": "online_shoppers_intention.csv",
+      "features": [
+        "Administrative",
+        "Administrative_Duration",
+        "Informational",
+        "Informational_Duration",
+        "ProductRelated",
+        "ProductRelated_Duration",
+        "BounceRates",
+        "ExitRates",
+        "SpecialDay",
+        "Month",
+        "OperatingSystems",
+        "Browser",
+        "Region",
+        "TrafficType",
+        "VisitorType",
+        "Weekend"
+      ],
+      "target": "Revenue",
+      "excluded_columns": [
+        "PageValues",
+        "record_id",
+        "role"
+      ],
+      "feature_exclusion_rationale": {
+        "PageValues": "exclude by default due post-session/proxy leakage risk; record as an explicit feature-scope change"
+      },
+      "role_adapter": "group_bound_label_month_stratified_iid_v1",
+      "role_fractions": {
+        "train": 0.5,
+        "tune": 0.15,
+        "evaluation": 0.15,
+        "final_test": 0.2
+      },
+      "role_counts_expected_unpurged": {
+        "train": 6165,
+        "tune": 1850,
+        "evaluation": 1849,
+        "final_test": 2466
+      },
+      "duplicate_grouping": "exact retained-model-feature fingerprint; bind group to one role",
+      "strata": [
+        "Revenue",
+        "Month"
+      ],
+      "max_absolute_role_fraction_error": 0.1,
+      "class_support_required_in_each_role": true,
+      "month_policy": "Month is a category, not a strict time axis; no future-month generalization claim",
+      "numeric_features": [
+        "Administrative",
+        "Administrative_Duration",
+        "Informational",
+        "Informational_Duration",
+        "ProductRelated",
+        "ProductRelated_Duration",
+        "BounceRates",
+        "ExitRates",
+        "SpecialDay"
+      ],
+      "categorical_features": [
+        "Month",
+        "OperatingSystems",
+        "Browser",
+        "Region",
+        "TrafficType",
+        "VisitorType",
+        "Weekend"
+      ],
+      "group_features": [
+        "Administrative",
+        "VisitorType"
+      ],
+      "role_assignment_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "dataset_id": "synthetic_3",
+      "task": "multiclass",
+      "source_rows": 7494,
+      "archive_file": "pendigits.zip",
+      "archive_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "archive_members": {
+        "development": "pendigits.tra",
+        "sealed_final_test": "pendigits.tes"
+      },
+      "member_rows": {
+        "pendigits.tra": 7494,
+        "pendigits.tes": 3498
+      },
+      "development_row_range": "pendigits.tra zero-based [0,7494)",
+      "sealed_test_range": "pendigits.tes zero-based [0,3498); member not opened or parsed in next batch",
+      "features": [
+        "Attribute1",
+        "Attribute2",
+        "Attribute3",
+        "Attribute4",
+        "Attribute5",
+        "Attribute6",
+        "Attribute7",
+        "Attribute8",
+        "Attribute9",
+        "Attribute10",
+        "Attribute11",
+        "Attribute12",
+        "Attribute13",
+        "Attribute14",
+        "Attribute15",
+        "Attribute16"
+      ],
+      "target": "class",
+      "excluded_columns": [
+        "record_id",
+        "source_partition",
+        "role"
+      ],
+      "role_adapter": "existing_assign_official_holdout_roles_v1",
+      "role_counts_expected": {
+        "train": 4683,
+        "tune": 1405,
+        "evaluation": 1406,
+        "final_test": 3498
+      },
+      "official_holdout_rule": ".tes all final_test; split .tra only; no .tes row reaches any fit or evaluation call",
+      "class_support_required_in_each_development_role": true,
+      "numeric_features": [
+        "Attribute1",
+        "Attribute2",
+        "Attribute3",
+        "Attribute4",
+        "Attribute5",
+        "Attribute6",
+        "Attribute7",
+        "Attribute8",
+        "Attribute9",
+        "Attribute10",
+        "Attribute11",
+        "Attribute12",
+        "Attribute13",
+        "Attribute14",
+        "Attribute15",
+        "Attribute16"
+      ],
+      "categorical_features": [],
+      "group_features": [
+        "Attribute1"
+      ],
+      "archive_member": "pendigits.tra",
+      "role_assignment_sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+    }
+  ],
+  "seeds": [
+    203101,
+    203102,
+    203103
+  ],
+  "generators": {
+    "GaussianCopula": {
+      "enforce_min_max_values": true,
+      "enforce_rounding": true
+    },
+    "CTGAN": {
+      "epochs": 300,
+      "batch_size": 500,
+      "pac": 10,
+      "verbose": false,
+      "enable_gpu": false,
+      "embedding_dim": 128,
+      "generator_dim": [
+        256,
+        256
+      ],
+      "discriminator_dim": [
+        256,
+        256
+      ],
+      "generator_lr": 0.0002,
+      "generator_decay": 1e-06,
+      "discriminator_lr": 0.0002,
+      "discriminator_decay": 1e-06,
+      "discriminator_steps": 1,
+      "log_frequency": true,
+      "enforce_min_max_values": true,
+      "enforce_rounding": true,
+      "locales": [
+        "en_US"
+      ]
+    },
+    "TVAE": {
+      "epochs": 300,
+      "batch_size": 500,
+      "verbose": false,
+      "enable_gpu": false,
+      "embedding_dim": 128,
+      "compress_dims": [
+        128,
+        128
+      ],
+      "decompress_dims": [
+        128,
+        128
+      ],
+      "l2scale": 1e-05,
+      "loss_factor": 2,
+      "enforce_min_max_values": true,
+      "enforce_rounding": true
+    }
+  },
+  "learners": {
+    "linear": {
+      "classifier": "LogisticRegression",
+      "regressor": "Ridge",
+      "max_iter": 1000,
+      "C": 1,
+      "alpha": 1
+    },
+    "rf": {
+      "n_estimators": 100,
+      "min_samples_leaf": 2,
+      "n_jobs": 1
+    },
+    "histgb": {
+      "max_iter": 100,
+      "max_leaf_nodes": 15,
+      "early_stopping": false
+    },
+    "mlp": {
+      "hidden_layer_sizes": [
+        64,
+        32
+      ],
+      "max_iter": 200,
+      "early_stopping": false
+    }
+  },
+  "learner_names": [
+    "linear",
+    "rf",
+    "histgb",
+    "mlp"
+  ],
+  "preprocessing": {
+    "numeric": {
+      "imputer": "median",
+      "keep_empty_features": true,
+      "scaler": "StandardScaler"
+    },
+    "categorical": {
+      "imputer": "most_frequent",
+      "keep_empty_features": true,
+      "encoder": "OneHotEncoder",
+      "handle_unknown": "ignore",
+      "sparse_output": false,
+      "min_frequency": 2,
+      "max_categories": 64
+    }
+  },
+  "utility": {
+    "replacement_doses": [
+      0.25,
+      0.5
+    ],
+    "augmentation_doses": [
+      0.5,
+      1.0
+    ],
+    "paired_bootstrap_replicates": 2000,
+    "primary_metric": {
+      "binary": "log_loss",
+      "multiclass": "log_loss",
+      "regression": "rmse"
+    },
+    "fit_cache": "reuse six empirical controls across all three generator pools within each dataset-seed unit"
+  },
+  "budget": {
+    "unit_count": 9,
+    "learned_generator_fits": 27,
+    "bootstrap_generator_fits": 0,
+    "downstream_fits": 756,
+    "downstream_formula": "9 dataset-seed units * (6 shared controls + 3 generators * 5 arms) * 4 learners",
+    "cpu_cores": 1,
+    "native_threads": 1,
+    "gpu": false,
+    "per_unit_wall_seconds": 2700,
+    "total_wall_seconds": 28800,
+    "address_space_bytes": 8589934592,
+    "aggregate_output_bytes": 67108864,
+    "resource_estimate_basis": "conservative planning estimate only: recovery02 1-GC 132-learner run took 130.7s; artificial real-adapter gate completed all 12 generator and 312 learner fits in 48.2s with only 2 epochs and 240 artificial rows. Full 300-epoch CPU fits require a separately bounded up-to-8h run; these smoke timings are not formal performance evidence."
+  },
+  "execution": {
+    "default": "NO-RUN",
+    "auto_download": false,
+    "auto_retry": false,
+    "skip_only_after": "full identity match plus aggregate and independently passing audit file hash verification",
+    "unverifiable_source_or_roles": "block before first generator fit",
+    "output": "new output directory only; resume requires explicit --resume and exact identity registry"
+  },
+  "role_mode": "extension_first_assignment",
+  "role_algorithm_sha256": "57a2ea3b4578e980dce600d215c4b111dc980cf34538c96f3027aa6b189df1fc",
+  "invalid_arm_policy": "Report generator-induced missing training classes as explicit unavailable utility, never fabricate a metric or repair class quotas; all shared controls must remain valid; actual fits + unavailable synthetic fits must equal the fixed maximum."
+}
