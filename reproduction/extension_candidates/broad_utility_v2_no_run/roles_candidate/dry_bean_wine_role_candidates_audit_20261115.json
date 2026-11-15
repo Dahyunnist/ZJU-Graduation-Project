@@ -1,0 +1,237 @@
+{
+  "review_id": "dry-bean-wine-white-grouped-role-candidates-20261115",
+  "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED",
+  "execution_enabled": false,
+  "training_or_experiment_run": false,
+  "seed": 20261029,
+  "roles": [
+    "train",
+    "tune",
+    "evaluation",
+    "final_test"
+  ],
+  "fractions": [
+    0.5,
+    0.15,
+    0.15,
+    0.2
+  ],
+  "algorithm_note": "Group by exact parsed predictor tuples and sort keys. Dry Bean uses stratified group labels after verifying one class per duplicate-feature group. Wine is regression: allocate groups without forced categorical stratification; inspect target range, moments, and score counts per role.",
+  "runtime": {
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scipy": "1.17.1",
+    "scikit_learn": "1.9.0"
+  },
+  "datasets": [
+    {
+      "dataset_id": "dry_bean",
+      "candidate_role_file": "roles_candidate/dry_bean_roles_candidate_20261115.csv",
+      "source_archive_sha256": "0a64eff5be87f48c3dbbfc0a12a56c5d5b5167ef8e61cd45d69b3e7c7130c06f",
+      "source_member": "DryBeanDataset/Dry_Bean_Dataset.arff",
+      "source_member_sha256": "b2a4a76a2aedfb8ed415adfc1bfc70b5f202cb00cb72e500766e364c14834014",
+      "rows": 13611,
+      "feature_mapping": [
+        "Area",
+        "Perimeter",
+        "MajorAxisLength",
+        "MinorAxisLength",
+        "AspectRatio",
+        "Eccentricity",
+        "ConvexArea",
+        "EquivDiameter",
+        "Extent",
+        "Solidity",
+        "roundness",
+        "Compactness",
+        "ShapeFactor1",
+        "ShapeFactor2",
+        "ShapeFactor3",
+        "ShapeFactor4"
+      ],
+      "target": "Class",
+      "source_to_canonical_rename": {
+        "AspectRation": "AspectRatio"
+      },
+      "record_id_rule": "public:dry_bean:{zero_based_source_row}",
+      "group_key": "sorted exact Python tuple of parsed predictor values; target excluded",
+      "assignment_method": "aggregate exact predictor groups; stratify group labels; seed=20261029; fractions=0.50/0.15/0.15/0.20",
+      "role_assignment_sha256": "595bbeacb4643c641443277a2fb8278dca5c115f2c6c20e1e25dbad30771c90d",
+      "role_counts": {
+        "train": 6798,
+        "tune": 2045,
+        "evaluation": 2045,
+        "final_test": 2723
+      },
+      "role_fractions": {
+        "train": 0.49944897509367425,
+        "tune": 0.15024612445815885,
+        "evaluation": 0.15024612445815885,
+        "final_test": 0.20005877599000807
+      },
+      "unique_record_ids": 13611,
+      "exact_feature_groups": 13543,
+      "duplicate_feature_groups": 68,
+      "rows_in_duplicate_feature_groups": 136,
+      "cross_role_exact_feature_groups": 0,
+      "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED",
+      "class_support_by_role": {
+        "train": {
+          "BARBUNYA": 661,
+          "BOMBAY": 261,
+          "CALI": 815,
+          "DERMASON": 1773,
+          "HOROZ": 957,
+          "SEKER": 1013,
+          "SIRA": 1318
+        },
+        "tune": {
+          "BARBUNYA": 198,
+          "BOMBAY": 78,
+          "CALI": 245,
+          "DERMASON": 532,
+          "HOROZ": 293,
+          "SEKER": 304,
+          "SIRA": 395
+        },
+        "evaluation": {
+          "BARBUNYA": 198,
+          "BOMBAY": 78,
+          "CALI": 244,
+          "DERMASON": 532,
+          "HOROZ": 293,
+          "SEKER": 304,
+          "SIRA": 396
+        },
+        "final_test": {
+          "BARBUNYA": 265,
+          "BOMBAY": 105,
+          "CALI": 326,
+          "DERMASON": 709,
+          "HOROZ": 385,
+          "SEKER": 406,
+          "SIRA": 527
+        }
+      },
+      "class_support_pass": {
+        "train": true,
+        "tune": true,
+        "evaluation": true,
+        "final_test": true
+      }
+    },
+    {
+      "dataset_id": "wine_quality_white",
+      "candidate_role_file": "roles_candidate/wine_quality_white_roles_candidate_20261115.csv",
+      "source_archive_sha256": "3ed56667f4b828242bd732d7d1dd7f2861e54432239d7fa63877014cbb0304d4",
+      "source_member": "winequality-white.csv",
+      "source_member_sha256": "76c3f809815c17c07212622f776311faeb31e87610d52c26d87d6e361b169836",
+      "rows": 4898,
+      "feature_mapping": [
+        "fixed acidity",
+        "volatile acidity",
+        "citric acid",
+        "residual sugar",
+        "chlorides",
+        "free sulfur dioxide",
+        "total sulfur dioxide",
+        "density",
+        "pH",
+        "sulphates",
+        "alcohol"
+      ],
+      "target": "quality",
+      "source_to_canonical_rename": {},
+      "record_id_rule": "public:wine_quality_white:{zero_based_source_row}",
+      "group_key": "sorted exact Python tuple of parsed predictor values; target excluded",
+      "assignment_method": "aggregate exact predictor groups; random group allocation without categorical target stratification; seed=20261029; fractions=0.50/0.15/0.15/0.20",
+      "role_assignment_sha256": "f0a4d994de64dcc8dd2489bf3149ced0aa5d579ed75acadb8dd2208df8a503ef",
+      "role_counts": {
+        "train": 2445,
+        "tune": 739,
+        "evaluation": 738,
+        "final_test": 976
+      },
+      "role_fractions": {
+        "train": 0.4991833401388322,
+        "tune": 0.1508779093507554,
+        "evaluation": 0.15067374438546347,
+        "final_test": 0.19926500612494896
+      },
+      "unique_record_ids": 4898,
+      "exact_feature_groups": 3961,
+      "duplicate_feature_groups": 772,
+      "rows_in_duplicate_feature_groups": 1709,
+      "cross_role_exact_feature_groups": 0,
+      "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED",
+      "target_coverage_by_role": {
+        "train": {
+          "min": 3.0,
+          "max": 9.0,
+          "mean": 5.875664621676892,
+          "median": 6.0,
+          "quality_value_counts": {
+            "3.0": 8,
+            "4.0": 78,
+            "5.0": 732,
+            "6.0": 1122,
+            "7.0": 405,
+            "8.0": 97,
+            "9.0": 3
+          }
+        },
+        "tune": {
+          "min": 3.0,
+          "max": 8.0,
+          "mean": 5.901217861975643,
+          "median": 6.0,
+          "quality_value_counts": {
+            "3.0": 2,
+            "4.0": 34,
+            "5.0": 198,
+            "6.0": 333,
+            "7.0": 145,
+            "8.0": 27
+          }
+        },
+        "evaluation": {
+          "min": 3.0,
+          "max": 8.0,
+          "mean": 5.869918699186992,
+          "median": 6.0,
+          "quality_value_counts": {
+            "3.0": 4,
+            "4.0": 18,
+            "5.0": 241,
+            "6.0": 303,
+            "7.0": 151,
+            "8.0": 21
+          }
+        },
+        "final_test": {
+          "min": 3.0,
+          "max": 9.0,
+          "mean": 5.871926229508197,
+          "median": 6.0,
+          "quality_value_counts": {
+            "3.0": 6,
+            "4.0": 33,
+            "5.0": 286,
+            "6.0": 440,
+            "7.0": 179,
+            "8.0": 30,
+            "9.0": 2
+          }
+        }
+      },
+      "overall_target_range": [
+        3.0,
+        9.0
+      ],
+      "predictor_groups_with_multiple_quality_values": 0,
+      "rows_in_mixed_target_predictor_groups": 0,
+      "target_coverage_note": "No forced categorical stratification. Quality 9 appears only in train/final_test in this deterministic split; tune/evaluation range is 3-8. Coverage recorded, no seed reroll."
+    }
+  ]
+}

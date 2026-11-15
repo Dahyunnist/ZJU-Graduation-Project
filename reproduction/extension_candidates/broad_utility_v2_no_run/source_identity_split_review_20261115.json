@@ -105,9 +105,11 @@
         "DryBeanDataset/Dry_Bean_Dataset.arff": "b2a4a76a2aedfb8ed415adfc1bfc70b5f202cb00cb72e500766e364c14834014"
       },
       "processing_mapping": "ARFF; target Class; map source AspectRation to canonical AspectRatio; 16 predictors.",
-      "anti_leak_split_review": "Candidate class-stratified split; keep exact feature duplicates together. Image/batch identity unavailable; no role hash.",
+      "anti_leak_split_review": "Candidate class-stratified roles; exact feature tuples grouped; source AspectRation renamed AspectRatio. No bean/image batch ID, so only exact duplicates are controlled. Not frozen.",
       "role_assignment_sha256_verified": null,
-      "historical_unverified_identity": null
+      "historical_unverified_identity": null,
+      "candidate_role_assignment_sha256": "595bbeacb4643c641443277a2fb8278dca5c115f2c6c20e1e25dbad30771c90d",
+      "candidate_role_file": "roles_candidate/dry_bean_roles_candidate_20261115.csv"
     },
     {
       "dataset_id": "pendigits",
@@ -167,9 +169,11 @@
         "winequality-white.csv": "76c3f809815c17c07212622f776311faeb31e87610d52c26d87d6e361b169836"
       },
       "processing_mapping": "Semicolon CSV; use white member only; 11 physicochemical features; target quality.",
-      "anti_leak_split_review": "Candidate regression split; keep exact predictor duplicates together and balance quality bins. No sample identity or role hash.",
+      "anti_leak_split_review": "Candidate grouped random roles; exact predictor tuples stay together; regression target is not categorical-stratified. Quality 9 absent tune/evaluation in this fixed split. No wine/batch identity. Not frozen.",
       "role_assignment_sha256_verified": null,
-      "historical_unverified_identity": null
+      "historical_unverified_identity": null,
+      "candidate_role_assignment_sha256": "f0a4d994de64dcc8dd2489bf3149ced0aa5d579ed75acadb8dd2208df8a503ef",
+      "candidate_role_file": "roles_candidate/wine_quality_white_roles_candidate_20261115.csv"
     },
     {
       "dataset_id": "energy_efficiency_y1",
