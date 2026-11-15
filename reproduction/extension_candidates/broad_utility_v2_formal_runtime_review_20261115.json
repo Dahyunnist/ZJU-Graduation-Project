@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-15",
+  "status": "evidence_review_no_formal_run",
+  "resource_budget": {
+    "datasets": 15,
+    "seeds": 5,
+    "units": 75,
+    "cpu_cores": 1,
+    "parallel_units": 1,
+    "per_unit_wall_seconds": 2700,
+    "serial_batch_wall_cap_seconds": 202500,
+    "serial_batch_wall_hours": 56.25,
+    "address_space_bytes": 8589934592,
+    "aggregate_output_bytes": 67108864,
+    "budget_repair": "replaced stale 8-hour total cap in v2 candidate with 75 x 2700 seconds; cap is not a runtime measurement"
+  },
+  "measured_artificial_smoke": {
+    "status": "artificial_real_adapter_smoke_accepted",
+    "elapsed_seconds": 49.045269842,
+    "peak_combined_rss_bytes": 1062969344,
+    "child_cpu_seconds": 44.75246,
+    "generator_fit_calls": 12,
+    "downstream_fit_calls": 312,
+    "real_data_reads": 0,
+    "gpu": false,
+    "cpu_threads": 1,
+    "aggregate_sha256": "a80fc7bf0e6e9cffa31f6d8e7b6452ee77bc6892720d66c49145d85ea4d9e3a6",
+    "independent_audit_sha256": "403d59b9326ba1610b1294cf2b7f71810c8822db34992b41d860d33fbf337f8f",
+    "limitations": [
+      "240 artificial rows per task",
+      "one seed",
+      "CTGAN/TVAE use two epochs",
+      "100 paired-bootstrap replicates",
+      "not representative of 15 real tables or 300-epoch candidate fits"
+    ]
+  },
+  "runtime": {
+    "python": "3.11.15",
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.9.0",
+    "sdv": "1.37.3",
+    "runtime_sha256": "275182e41993a96d9c6a5b3d5c8e7cf1ff06046c63e40bece9fa5d452a695ef8",
+    "runtime_is_frozen_for_candidate": true
+  },
+  "formal_runner_gap": {
+    "existing_runner": "run_broad_formal_batch.py and run_broad_formal_worker.py are fixed to v1 config naming, three-table preflight and 8-hour total cap",
+    "v2_runner_ready": false,
+    "required_before_formal_execution": [
+      "v2 config binding",
+      "15-table preflight and accepted role identities",
+      "resource cap enforcement aligned with candidate budget",
+      "formal-scale runtime/storage measurement",
+      "external package/runtime commitments and approval"
+    ]
+  },
+  "evaluation_and_budget": {
+    "paired_evaluation": "same fixed evaluation rows across arms; paired intervals; candidate setting 2000 replicates",
+    "focused_validation": "14 passed; invalid synthetic arms and shared-control accounting included",
+    "planned_generator_fits": 225,
+    "planned_downstream_fits": 6300,
+    "planned_outcomes": 9900
+  },
+  "remote_backup": {
+    "successful_gate_package_sha256": "8f4b39c9dfd0bc97f2ebb36d3645ca974c03d3f0ba378f5fe30a1d88a8c7e933",
+    "successful_gate_manifest_at_run": "40 files; run-specific hash recorded above",
+    "note": "Current package manifest is refreshed to include concurrently added Optdigits and Spambase role artifacts; no role file was edited."
+  }
+}

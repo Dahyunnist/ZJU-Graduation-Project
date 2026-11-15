@@ -260,10 +260,10 @@
     "native_threads": 1,
     "gpu": false,
     "per_unit_wall_seconds": 2700,
-    "total_wall_seconds": 28800,
+    "total_wall_seconds": 202500,
     "address_space_bytes": 8589934592,
     "aggregate_output_bytes": 67108864,
-    "resource_estimate_basis": "conservative planning estimate only: recovery02 1-GC 132-learner run took 130.7s; artificial real-adapter gate completed all 12 generator and 312 learner fits in 48.2s with only 2 epochs and 240 artificial rows. Full 300-epoch CPU fits require a separately bounded up-to-8h run; these smoke timings are not formal performance evidence.",
+    "resource_estimate_basis": "Planning cap, not a measured runtime: 75 sequential dataset-seed units at 2700 seconds each (202500 seconds; 56.25 hours), one CPU core, 8 GiB address-space cap, 64 MiB aggregate-output cap. Historical 130.7-second run and 49.0-second artificial smoke do not validate full 300-epoch, 15-table runtime. The earlier 8-hour cap came from the three-table v1 protocol and is not applicable to this 15-table candidate.",
     "planned_outcomes": 9900
   },
   "execution": {
