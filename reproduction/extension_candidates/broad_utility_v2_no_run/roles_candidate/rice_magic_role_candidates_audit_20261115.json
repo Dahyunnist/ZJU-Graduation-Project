@@ -1,0 +1,153 @@
+{
+  "review_id": "rice-magic-group-stratified-role-candidates-20261115",
+  "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED",
+  "execution_enabled": false,
+  "training_or_experiment_run": false,
+  "seed": 20261029,
+  "roles": [
+    "train",
+    "tune",
+    "evaluation",
+    "final_test"
+  ],
+  "fractions": [
+    0.5,
+    0.15,
+    0.15,
+    0.2
+  ],
+  "algorithm_note": "Sort exact parsed feature tuples; stratify group labels into roles; map every source row in each group to one role. Fail on mixed labels within group, missing fields, absent class support, duplicate IDs, cross-role groups, or row fraction error > 0.10.",
+  "datasets": [
+    {
+      "dataset_id": "rice_cammeo_osmancik",
+      "candidate_role_file": "roles_candidate/rice_cammeo_osmancik_roles_candidate_20261115.csv",
+      "source_archive_sha256": "fe94e42046b829de21b92b0ffb6a22774fde021328cae799faa802a14e8dbed9",
+      "source_member": "Rice_Cammeo_Osmancik.arff",
+      "source_member_sha256": "1af97883100c89de2ea2972f7a28d428f4f1c14711a61defc0b0569e9eb65665",
+      "rows": 3810,
+      "feature_mapping": [
+        "Area",
+        "Perimeter",
+        "Major_Axis_Length",
+        "Minor_Axis_Length",
+        "Eccentricity",
+        "Convex_Area",
+        "Extent"
+      ],
+      "target": "Class",
+      "record_id_rule": "public:rice_cammeo_osmancik:{zero_based_source_row}",
+      "group_key": "sorted Python tuple of parsed feature values; equality-checked, no target in key",
+      "assignment_method": "aggregate exact feature groups; require one label per group; sequential stratified train_test_split over group labels; seed=20261029; fractions=0.50/0.15/0.15/0.20",
+      "role_assignment_sha256": "897d39bd87f4a435f0adec28f8dea4f45d577ea2a9f3ba5ed43625f5e263b09c",
+      "role_counts": {
+        "train": 1905,
+        "tune": 571,
+        "evaluation": 571,
+        "final_test": 763
+      },
+      "role_fractions": {
+        "train": 0.5,
+        "tune": 0.14986876640419947,
+        "evaluation": 0.14986876640419947,
+        "final_test": 0.20026246719160104
+      },
+      "class_support_by_role": {
+        "train": {
+          "Cammeo": 815,
+          "Osmancik": 1090
+        },
+        "tune": {
+          "Cammeo": 244,
+          "Osmancik": 327
+        },
+        "evaluation": {
+          "Cammeo": 244,
+          "Osmancik": 327
+        },
+        "final_test": {
+          "Cammeo": 327,
+          "Osmancik": 436
+        }
+      },
+      "class_support_pass": {
+        "train": true,
+        "tune": true,
+        "evaluation": true,
+        "final_test": true
+      },
+      "unique_record_ids": 3810,
+      "exact_feature_groups": 3810,
+      "duplicate_feature_groups": 0,
+      "rows_in_duplicate_feature_groups": 0,
+      "cross_role_exact_feature_groups": 0,
+      "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED"
+    },
+    {
+      "dataset_id": "magic_gamma",
+      "candidate_role_file": "roles_candidate/magic_gamma_roles_candidate_20261115.csv",
+      "source_archive_sha256": "252e0a78333c108d0ea54537b61154aa781e95a15675e65ddf9b76993617191d",
+      "source_member": "magic04.data",
+      "source_member_sha256": "e9314b7ebd4b4b59a3b3d65f7316663963777b16a46786877651dbbaa640b36a",
+      "rows": 19020,
+      "feature_mapping": [
+        "fLength",
+        "fWidth",
+        "fSize",
+        "fConc",
+        "fConc1",
+        "fAsym",
+        "fM3Long",
+        "fM3Trans",
+        "fAlpha",
+        "fDist"
+      ],
+      "target": "class",
+      "record_id_rule": "public:magic_gamma:{zero_based_source_row}",
+      "group_key": "sorted Python tuple of parsed feature values; equality-checked, no target in key",
+      "assignment_method": "aggregate exact feature groups; require one label per group; sequential stratified train_test_split over group labels; seed=20261029; fractions=0.50/0.15/0.15/0.20",
+      "role_assignment_sha256": "44b6a9236a86db2d6393e51b09221dc0e39b3e273c8a7d4494855228778bb7fb",
+      "role_counts": {
+        "train": 9496,
+        "tune": 2855,
+        "evaluation": 2858,
+        "final_test": 3811
+      },
+      "role_fractions": {
+        "train": 0.49926393270241853,
+        "tune": 0.15010515247108308,
+        "evaluation": 0.15026288117770767,
+        "final_test": 0.20036803364879074
+      },
+      "class_support_by_role": {
+        "train": {
+          "g": 6166,
+          "h": 3330
+        },
+        "tune": {
+          "g": 1849,
+          "h": 1006
+        },
+        "evaluation": {
+          "g": 1850,
+          "h": 1008
+        },
+        "final_test": {
+          "g": 2467,
+          "h": 1344
+        }
+      },
+      "class_support_pass": {
+        "train": true,
+        "tune": true,
+        "evaluation": true,
+        "final_test": true
+      },
+      "unique_record_ids": 19020,
+      "exact_feature_groups": 18905,
+      "duplicate_feature_groups": 115,
+      "rows_in_duplicate_feature_groups": 230,
+      "cross_role_exact_feature_groups": 0,
+      "status": "CANDIDATE_NOT_FROZEN_NOT_AUTHORIZED"
+    }
+  ],
+  "runt

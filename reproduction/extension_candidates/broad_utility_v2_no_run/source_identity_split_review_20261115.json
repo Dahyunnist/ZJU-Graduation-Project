@@ -27,9 +27,11 @@
         "Rice_Cammeo_Osmancik.arff": "1af97883100c89de2ea2972f7a28d428f4f1c14711a61defc0b0569e9eb65665"
       },
       "processing_mapping": "ARFF; features Area, Perimeter, Major_Axis_Length, Minor_Axis_Length, Eccentricity, Convex_Area, Extent; target Class.",
-      "anti_leak_split_review": "Candidate class-stratified roles; keep exact duplicate feature rows together. No role file/hash.",
+      "anti_leak_split_review": "Candidate roles generated; see roles_candidate/rice_magic_role_candidates_audit_20261115.json. Not frozen or authorized.",
       "role_assignment_sha256_verified": null,
-      "historical_unverified_identity": null
+      "historical_unverified_identity": null,
+      "candidate_role_assignment_sha256": "897d39bd87f4a435f0adec28f8dea4f45d577ea2a9f3ba5ed43625f5e263b09c",
+      "candidate_role_file": "roles_candidate/rice_cammeo_osmancik_roles_candidate_20261115.csv"
     },
     {
       "dataset_id": "bank_marketing",
@@ -72,9 +74,11 @@
         "magic04.names": "6b74a329008ea6d062d0c0acf34f0a4aa0e7ce7d1aaeebce4ae5995c06a7abc2"
       },
       "processing_mapping": "Headerless 10 numeric fields; class is final field; names from magic04.names.",
-      "anti_leak_split_review": "Candidate label-stratified IID roles with exact duplicate rows grouped. No role file/hash; grouping semantics not otherwise identified.",
+      "anti_leak_split_review": "Candidate roles generated; see roles_candidate/rice_magic_role_candidates_audit_20261115.json. Not frozen or authorized.",
       "role_assignment_sha256_verified": null,
-      "historical_unverified_identity": null
+      "historical_unverified_identity": null,
+      "candidate_role_assignment_sha256": "44b6a9236a86db2d6393e51b09221dc0e39b3e273c8a7d4494855228778bb7fb",
+      "candidate_role_file": "roles_candidate/magic_gamma_roles_candidate_20261115.csv"
     },
     {
       "dataset_id": "spambase",
@@ -231,12 +235,4 @@
       "official_archive_url": "https://archive.ics.uci.edu/static/public/243/yacht%2Bhydrodynamics.zip",
       "archive_sha256_verified_this_pass": "aa52b68f88c4bb552187a53ef4c5753fa178f6a36035a3771c5bc04e078487ac",
       "source_members": {
-        "yacht_hydrodynamics.data": "00dfecc0fc01ddd4c90b558a3ac11b246df8ebcfea130724223475a9a67f0ea1"
-      },
-      "processing_mapping": "Headerless 6 predictors: five hull geometry measures plus Froude number; seventh field residuary resistance target.",
-      "anti_leak_split_review": "Blocked pending hull grouping. UCI reports 22 hull forms; keep conditions for a hull together, but no explicit hull ID or role hash.",
-      "role_assignment_sha256_verified": null,
-      "historical_unverified_identity": null
-    }
-  ]
-}
+        "yacht_hydrodyna
